@@ -1,0 +1,48 @@
+@import "../../stylus/foundation/*"
+
+.rules
+    display flex
+    flex-wrap wrap
+    gap 24px
+.rules__item
+    width calc((100% / 3) - 16px)
+    padding 24px
+    background: $white
+    border-radius: 8px
+    box-sizing border-box
+    shadow()
+
+.rules__title
+    font-size 1.6rem
+    font-weight 700
+
+.rules__tag
+    display flex
+    align-items center
+    gap 8px
+    margin-top 10px
+    li 
+        display inline-flex
+        align-items center
+        justify-content center
+        border-radius 8px
+        border 1px solid $gray-400
+        padding 8px 14px
+        font-size 1.4rem
+        line-height 1
+
+.check-list
+    margin-top 10px
+.check-list__item
+    display flex
+    align-items center
+
+.check-list__desc
+    margin-left 8px
+    font-size 1.4rem
+
+.check-list__checkbox
+    width 16px
+    height 16px
+    border-radius 4px
+    border 1px solid $gray-200

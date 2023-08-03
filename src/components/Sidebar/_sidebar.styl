@@ -1,0 +1,73 @@
+@import "../../stylus/foundation/*"
+
+.sidebar
+    width 300px
+    height 100vh
+    display flex
+    flex-direction column
+    padding 32px 24px
+    position relative
+    border-right 1px solid $brand-300
+    flex-shrink 0
+    transition: .3s ease 
+    position fixed
+    left 0
+    top 0
+    z-index 1
+    background: $white
+    transition: .3s ease
+
+    a
+        color $gray-800
+    
+    &.close
+        width auto
+        padding-left 16px
+        padding-right 16px
+        .sidebar__logo, .navigation__title
+            display none
+        .sidebar__back
+            position relative
+            right 0
+            transform: rotate(180deg)
+            margin 0 auto
+        .navigation__link
+            padding-left 16px
+            padding-right 16px
+
+.sidebar__logo
+    width 155px
+
+.sidebar__nav
+    margin-top 67px
+    flex 1
+    display flex
+    flex-direction column
+    justify-content space-between
+
+.navigation__link
+    display flex
+    align-items center
+    padding 16px 24px
+    border-radius 16px
+
+.navigation__title
+    margin-left 8px
+    font-size 1.6rem
+
+.navigation__item
+    &:nth-child(n+2)
+        margin-top 8px
+
+    &.active
+        .navigation__link
+            background $brand-300
+            font-weight 700
+        .navigation__icon
+            color $brand-800
+
+.sidebar__back
+    position absolute
+    right 14px
+    top 16px
+    cursor pointer

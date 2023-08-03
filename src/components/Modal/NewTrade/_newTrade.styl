@@ -1,0 +1,270 @@
+@import "../../../stylus/foundation/*"
+
+.newTrade
+    width 52%
+    height 100vh
+    background-color: $white
+    position fixed
+    right -100%
+    top 0
+    z-index 1
+    overflow-y: scroll
+    shadow()
+    transition: .3s linear
+    &.visible
+        right 0
+    
+.newTrade__title, .noteContent__text
+    cursor text
+    
+
+.newTrade__title, .tradeInfo
+    padding 0 24px
+
+[contenteditable]:empty::before 
+  content attr(placeholder)
+  color $gray-400
+
+.newTrade__nav
+    display flex
+    align-items center
+    color $gray-600
+    padding 24px 0 0 24px
+
+    > div
+        cursor pointer
+        &:nth-child(n+2)
+            margin-left 18px
+
+.newTrade__title
+    font-size 2.4rem
+    margin-top 24px
+    font-en()
+    
+.tradeInfo
+    margin-top 32px
+
+.tradeInfo__row, .tradeInfo__title, .tradeInfo__date
+    display flex
+    align-items center
+    
+.tradeInfo__name, .note-select__placeholder, .tradeInfo .react-datepicker__input-container input, .tradeInfo__input, .noteContent__text, .note-select__single-value
+    font-size 1.4rem!important
+    font-en()
+
+.tradeInfo__row
+    padding 14px 0
+
+.tradeInfo__title
+    width 132px
+    color $gray-400
+    flex-shrink: 0
+
+.tradeInfo__name
+    margin-left 8px
+    font-en()
+
+.tradeInfo__right
+    padding-left 14px
+    flex 1
+
+.tradeInfo__file
+    button
+        padding 0
+        color $gray-400
+        font-size 1.4rem
+        &:focus
+            outline none
+
+    input
+        display none
+
+.newTrade
+    .css-t3ipsp-control:hover
+        box-shadow none!important
+
+    .note-select__control, .note-select , .css-t3ipsp-control
+        box-shadow: none!important
+        border none!important
+        cursor pointer!important
+
+    .note-select__control--is-focus
+        border none!important
+
+    .note-select__value-container, .note-select__placeholder, .note-select__input-container
+        padding 0!important
+        margin 0!important
+
+    .note-select__indicator, .note-select__indicator-separator
+        display none!important
+
+    .note-select__placeholder
+        color $gray-400!important
+
+.tradeInfo__date
+    div
+        flex 1  
+        span
+            display block
+
+.react-datepicker-wrapper
+    margin-top 8px
+    input
+        border none
+        color $gray-400
+        font-weight 400
+        font-en()
+        
+.noteContent
+    border-top 1px solid $gray-50
+    padding 32px 40px
+    position relative
+
+
+
+.textEditor
+    overflow hidden
+
+.textEditor__edit, .textEditor__item
+    display inline-flex
+    align-items center
+
+.textEditor__edit
+    border-radius 8px
+    shadow-200()
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+
+
+.textEditor__tilte, .textEditor__icon
+    font-size 1.4rem
+    font-en()
+
+.textEditor__item
+    padding 8px 16px
+
+.textEditor__tilte
+    font-en()
+    margin-right 8px
+
+.textEditor__item:not(:last-child)
+    border-right 1px solid $gray-50
+    height 100%
+
+.ternInto, .paletteNav
+    background-color: $white
+    border-radius 8px
+    padding 16px
+    shadow-200()
+    visibility: hidden;
+    opacity: 0;
+    position: absolute;
+    z-index: -1;
+
+.ternInto
+    max-width 150px
+
+.ternInto__title, .paletteNav__title
+    font-size 1.2rem
+    color $gray-600
+    font-weigt 400
+    font-en()
+
+.ternInto__list
+    margin-top 16px
+
+.ternInto__item, .paletteNav__item
+    display flex
+    align-items center
+    margin-top 8px
+
+.ternInto__icon, .paletteNav__icon
+    width 32px
+    height 32px
+    display flex
+    align-items center
+    justify-content center
+    border-radius 8px
+    border 1px solid $gray-200
+
+.ternInto__desc, .paletteNav__desc
+    margin-left 8px
+    font-size 1.6rem
+    font-en()
+    font-weight: 100
+
+.paletteNav
+    display inline-flex
+    gap 24px
+    
+.paletteNav__icon--gray
+    color $gray-600
+
+.paletteNav__icon--Orange
+    color $color-orange
+
+.paletteNav__icon--Yellow
+    color $color-yellow
+
+.paletteNav__icon--Green
+    color $color-green
+
+.paletteNav__icon--Blue
+    color $color-blue
+
+.paletteNav__icon--Purple
+    color $color-purple
+
+.paletteNav__icon--Pink
+    color $color-pink
+
+.paletteNav__icon--Red
+    color $color-red
+
+.paletteNav__list--bg
+    .paletteNav__icon
+        color $color-base
+    .paletteNav__icon--gray
+        background $background-gray
+
+    .paletteNav__icon--Orange
+        background $background-orange
+
+    .paletteNav__icon--Yellow
+        background $background-yellow
+
+    .paletteNav__icon--Green
+        background $background-green
+
+    .paletteNav__icon--Blue
+        background $background-blue
+
+    .paletteNav__icon--Purple
+        background $background-purple
+
+    .paletteNav__icon--Pink
+        background $background-pink
+
+    .paletteNav__icon--Red
+        background $background-red
+
+.textEditor__nav, .textEditor__drag
+    display inline-flex
+    align-items center
+    justify-content center
+
+.textEditor__nav
+    position absolute
+    left 20px
+    opacity 0
+    visibility: none
+
+// .note-select__menu
+
+.note-select__input-container
+    font-size 1.4rem
+
+.note-select__valuet-container
+    display inherit

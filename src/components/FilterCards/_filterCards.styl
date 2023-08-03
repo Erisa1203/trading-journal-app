@@ -1,0 +1,85 @@
+@import "../../stylus/foundation/*"
+
+.filterCards
+    display flex
+    align-items center
+    overflow-x scroll
+    padding 1px
+
+.filterCards__item
+    padding 24px
+    border-radius 8px
+    background $white
+    display flex
+    align-items center
+    justify-content center
+    cursor pointer
+    &:nth-child(n+2)
+        margin-left 16px
+    &.active
+        border-width: 1px
+        border-style: solid
+    &:hover:not(.filterCards__summary)
+        outline-width: 1px
+        outline-style: solid
+
+.filterCards__summary
+    display flex
+    align-items center
+    span
+        margin-right 16px
+    &:hover
+        color: $white
+        background-color: $brand-800
+        transition: .3s ease
+        
+
+.filterCards__bullet
+    width 12px
+    height 12px
+    display block
+    border-radius 50%
+    margin-right 8px
+
+
+.filterCards__EURUSD
+    outline-color $color-blue
+    border-color $color-blue
+    .filterCards__bullet
+        background-color $color-blue 
+
+.filterCards__USDJPY
+    outline-color $color-red
+    border-color $color-red
+    .filterCards__bullet
+        background-color $color-red
+
+.filterCards__GBPJPY
+    outline-color $color-green
+    border-color $color-green
+    .filterCards__bullet
+        background-color $color-green
+
+.filterCards__AUDUSD
+    outline-color $color-yellow
+    border-color $color-yellow
+    .filterCards__bullet
+        background-color $color-yellow
+
+.filterCards__AUDGBP
+    outline-color $color-purple
+    border-color $color-purple 
+    .filterCards__bullet
+        background-color $color-purple 
+
+.filterCards__EURJPY
+    outline-color $color-pink
+    border-color $color-pink 
+    .filterCards__bullet
+        background-color $color-pink 
+
+.filterCards__GBPUSD
+    outline-color $color-orange
+    border-color $color-orange
+    .filterCards__bullet
+        background-color $color-orange 

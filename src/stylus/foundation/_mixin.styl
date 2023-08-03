@@ -1,0 +1,55 @@
+// ====================================
+// mixin
+// ====================================
+mq() 
+  @media screen and (min-width: 835px) 
+    { block }
+
+// 835~1023
+mq-pc-s()
+  @media screen and (min-width: 835px) and (max-width:1023px)
+    {block}
+  
+mq-pc-l()
+  @media screen and (min-width: 1445px) 
+    {block}
+
+mq-sp-l()
+  @media screen and (min-width: 500px) and (max-width: 834px)
+    {block}
+
+// ~370
+mq-sp-s()
+  @media screen and (max-width: 375px)
+    {block}
+
+hover()
+  transition: all .3s
+  cursor pointer
+  &:hover
+    opacity: 0.7
+    transition: all .3s
+
+shadow()
+  box-shadow: 3px 3px 24px 0px rgba(135, 102, 224, 0.10);
+
+shadow-200()
+  box-shadow: 3px 3px 18px 0px rgba(135,102,224,0.15)
+
+form-input()
+  border: 1px solid $gray-400
+  border-radius: 8px
+  width: 100%
+  padding: 16px
+  +mq() 
+    padding: 20px;
+
+font-en()
+  font-family: "stevie-sans", sans-serif
+
+form-style()
+    border-radius 8px
+    border 1px solid $gray-200
+    padding 14px 16px  
+    font-size: 1.4rem
+

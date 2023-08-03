@@ -1,0 +1,54 @@
+@import "../../stylus/foundation/*"
+
+.filterUI
+    display flex
+    align-items center
+    margin-top 32px
+    font-en()
+    overflow-y scroll
+
+.filteredItems
+    display flex
+    align-items center
+    flex-shrink 0
+
+.filterBtn, .filteredItems__item
+    padding 8px 14px
+    border-radius 58px
+    flex-shrink 0
+    font-size 1.4rem
+    line-height 1
+
+.filterBtn
+    display flex
+    align-items center
+    cursor pointer
+    background $white
+    border: 1px solid $gray-50
+    span 
+        font-size 1.4rem
+        font-weight 500
+        user-select none
+    &.active
+        background $brand-800
+        color $white
+
+.filterBtn__icon, .filteredItems__remove
+    margin-left 14px
+
+.filteredItems__remove
+    cursor pointer
+
+.filteredItems__item
+    background $white
+    margin-left 8px
+    border: 1px solid $gray-50
+    user-select none
+
+.clearFilters
+    color $gray-600
+    font-size 1.4rem
+    margin-left 8px
+    cursor pointer
+    flex-shrink 0
+

@@ -1,24 +1,29 @@
-import logo from './logo.svg';
-import './App.css';
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
+import Backtest from "./pages/Backtest/Backtest";
+import Home from "./pages/Home/Home";
+import Rules from "./pages/Rules/Rules";
+import TradingJournal from "./pages/TradingJournal/TradingJournal";
+import Setting from './pages/Setting/Setting';
+import { Check } from 'phosphor-react';
+import "./stylus/App.styl"
+import { FilterProvider } from './contexts/FilterContext';
+import AppProvider from './Provider/AppProvider';
 
 function App() {
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <AppProvider>
+      <FilterProvider>
+        <Router>
+          <Routes>
+            <Route path="/" element={<Home />} />
+            <Route path="/trading-journal" element={<TradingJournal />} />
+            <Route path="/backtest" element={<Backtest />} />
+            <Route path="/rules" element={<Rules />} />
+            <Route path="/setting" element={<Setting />} />
+          </Routes>
+        </Router>
+      </FilterProvider>
+    </AppProvider>
   );
 }
 

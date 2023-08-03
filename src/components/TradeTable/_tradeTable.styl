@@ -1,0 +1,27 @@
+@import "../../stylus/foundation/*"
+
+.tradeTable 
+    width 100%
+    border-radius 8px
+    overflow: hidden
+    margin-top 16px
+
+    th, td
+        padding 16px
+
+    th
+        font-size 1.2rem
+        text-align: left
+    td
+        font-size 1.3rem
+        
+.tradeTable__head
+    background-color: $brand-400
+
+.tradeTable__row
+    background: $white
+    &:not(:last-child)
+        border-bottom: 1px solid $gray-50
+    &:hover
+        background-color: $brand-300
+        cursor pointer
