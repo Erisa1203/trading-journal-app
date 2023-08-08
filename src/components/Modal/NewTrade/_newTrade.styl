@@ -52,8 +52,10 @@
     font-size 1.4rem!important
     font-en()
 
-.tradeInfo__row
-    padding 14px 0
+.tradeInfo__input
+    border none
+    &:focus
+        outline: none
 
 .tradeInfo__title
     width 132px
@@ -65,9 +67,19 @@
     font-en()
 
 .tradeInfo__right
-    padding-left 14px
-    flex 1
+    padding 14px
+    border-radius 4px
 
+    flex 1
+    &:hover
+        background: $gray-50
+    
+    .tradeInfo__input, .note-select__control, .note-select, .css-t3ipsp-control,  .react-datepicker-wrapper input
+        background transparent
+
+    .css-13cymwt-control, .css-t3ipsp-control
+        min-height auto!important
+   
 .tradeInfo__file
     button
         padding 0
@@ -106,6 +118,7 @@
         flex 1  
         span
             display block
+            color $gray-400
 
 .react-datepicker-wrapper
     margin-top 8px
@@ -266,5 +279,56 @@
 .note-select__input-container
     font-size 1.4rem
 
-.note-select__valuet-container
-    display inherit
+.css-1fdsijx-ValueContainer
+    display inherit!important
+
+
+
+.react-datepicker-ignore-onclickoutside:focus-visible
+    outline none!important
+
+.react-datepicker__week, .react-datepicker__day-names
+    display flex
+
+.react-datepicker__day-name, .react-datepicker__day, .react-datepicker__time-name
+    padding: 1.5em 2.166rem;
+    display flex
+    justify-content center
+    align-items center
+
+.react-datepicker__header
+    background: $brand-300
+
+.react-datepicker__day--selected, .react-datepicker__day--in-selecting-range, .react-datepicker__day--in-range, .react-datepicker__month-text--selected, .react-datepicker__month-text--in-selecting-range, .react-datepicker__month-text--in-range, .react-datepicker__quarter-text--selected, .react-datepicker__quarter-text--in-selecting-range, .react-datepicker__quarter-text--in-range, .react-datepicker__year-text--selected, .react-datepicker__year-text--in-selecting-range, .react-datepicker__year-text--in-range, .react-datepicker__day--selected:hover, .react-datepicker__day--in-selecting-range:hover, .react-datepicker__day--in-range:hover, .react-datepicker__month-text--selected:hover, .react-datepicker__month-text--in-selecting-range:hover, .react-datepicker__month-text--in-range:hover, .react-datepicker__quarter-text--selected:hover, .react-datepicker__quarter-text--in-selecting-range:hover, .react-datepicker__quarter-text--in-range:hover, .react-datepicker__year-text--selected:hover, .react-datepicker__year-text--in-selecting-range:hover, .react-datepicker__year-text--in-range:hover, .react-datepicker__day--keyboard-selected, .react-datepicker__month-text--keyboard-selected, .react-datepicker__quarter-text--keyboard-selected, .react-datepicker__year-text--keyboard-selected
+    background: $brand-800
+    color $white
+
+.react-datepicker, .react-datepicker__header
+    border-color $gray-200
+
+.react-datepicker-wrapper input
+    color $color-base
+
+.newTrade
+    .react-datepicker
+        display flex
+        flex-direction column-reverse
+        border-radius 8px
+        overflow hidden
+    .react-datepicker__navigation--next, .react-datepicker__navigation--previous
+        top 60px
+    .react-datepicker-time__caption
+        display none
+    .react-datepicker__input-time-container, .react-datepicker-time__input
+        margin 0!important
+    .react-datepicker__input-time-container
+        background $brand-300
+    .react-datepicker-wrapper, .react-datepicker-wrapper input, .react-datepicker-time__input-container, .react-datepicker-time__input, .react-datepicker-time__input
+        width 100%!important
+    .react-datepicker-time__input
+        border none
+        border-radius 4px
+        font-size 1.4rem
+        padding 8px
+    
+        

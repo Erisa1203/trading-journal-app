@@ -1,99 +1,120 @@
 import { ArrowRight, Article, Calendar, CaretDoubleRight, CaretDown, CaretUp, ChartLineUp, Coin, Crosshair, DotsSixVertical, ListBullets, Palette, Percent, Tag, TextAa, TextHOne, TextHThree, TextHTwo } from 'phosphor-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import "./_newTrade.styl"
-import Select from "react-select";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
 import { TextB } from '@phosphor-icons/react';
-import CreatableSelect from 'react-select/creatable';
-
-const colors = {
-    default: "#343330",
-    gray: "#7C7C7C",
-    orange: "#E0A166",
-    yellow: "#E0D466",
-    green: "#66E081",
-    blue: "#6681E0",
-    purple: "#8D66E0",
-    pink: "#CF66E0",
-    red: "#E06666"
-};
-
-const backgrounds = {
-    gray: "#EFEFEF",
-    orange: "#FBF4ED",
-    yellow: "#FBFAED",
-    green: "#EDFBF0",
-    blue: "#EDF0FB",
-    purple: "#F1EDFB",
-    pink: "#F9EDFB",
-    red: "#FBEDED"
-};
+import { CustomCreatableSelect } from '../../Select/CustomCreatableSelect';
+import { doc, getFirestore, onSnapshot } from 'firebase/firestore';
+import { getAuth, onAuthStateChanged } from 'firebase/auth';
+import { useCustomOptionCreation } from '../../../hooks/useCustomOptionCreation';
+import { ShortLongSelect } from '../../Select/ShortLongSelect';
+import { useCustomSetupCreation } from '../../../hooks/useCustomSetupCreation';
+import { useCustomPatternCreation } from '../../../hooks/useCustomPatternCreation';
+import { getTagByLabel, shortLongOptions, updateDirInTrade, updateEntryDateInTrade, updateEntryPriceInTrade, updateExitDateInTrade, updateExitPriceInTrade, updateLotInTrade, updatePairsInTrade, updatePatternsInTrade, updateReturnInTrade, updateSetupInTrade } from '../../../services/trades';
 
 
-const NewTrade = ({ visible, onClose }) => {
-    const [startDate, setStartDate] = useState(new Date());
-    
-    const CustomOption = ({ innerProps, label, data }) => (
-        <div {...innerProps} style={{
-            padding: '8px 16px',
-            marginTop: '8px',
-            borderRadius: '4px',
-            backgroundColor: data.background,
-            display: 'inline-block',
-            width: 'auto',
-            whiteSpace: 'nowrap',
-            fontWeight: '700'
-        }}>
-            {label}
-        </div>
-    );
-    const styles = {
-        option: (provided, state) => ({
-            ...provided,
-            padding: '8px 16px',
-            marginTop: '8px',
-            display: 'inline-block',
-            width: 'auto',
-            whiteSpace: 'nowrap',
-            
-        }),
-        menuList: base => ({
-            ...base,
-            display: 'inline-flex',
-            flexDirection: 'column',
-            padding: '8px'
-        }),
-    }
-    const CustomSingleValue = ({ data }) => (
-        <div style={{
-            padding: '8px 16px',
-            borderRadius: '4px',
-            backgroundColor: data.background,
-            display: 'inline-block',
-            width: 'auto',
-            whiteSpace: 'nowrap',
-            fontWeight: '700'
-        }}>
-            {data.label}
-        </div>
-    );
-    const [currencyOptions, setCurrencyOptions] = useState([
-        { value: "EURUSD", label: "EURUSD", color: colors.blue, background: backgrounds.blue },
-        { value: "EURJPY", label: "EURJPY", color: colors.green, background: backgrounds.green },
-        { value: "EURGBP", label: "EURGBP", color: colors.red, background: backgrounds.red },
-        { value: "EURGBP", label: "EURGBP",  },
-        { value: "EURGBP", label: "EURGBP" },
-        { value: "EURGBP", label: "EURGBP" },
-    ]);
-    
-    const handleCreateNewOption = (inputValue) => {
-        const newOption = { value: inputValue, label: inputValue };
-        setCurrencyOptions((prevOptions) => [...prevOptions, newOption]);
-        // You can also store the new option to your database here.
+
+const NewTrade = ({ visible, trade, onClose, tradeId }) => {
+    console.log('tradeId', tradeId)
+    const auth = getAuth();
+    const [entryDate, setEntryDate] = useState(new Date());
+    const [exitDate, setExitDate] = useState(new Date());
+    const [dbCurrencyOptions, setDbCurrencyOptions] = useState([]);
+    const [selectedOption, setSelectedOption] = useState(null);
+    const [selectedDirOption, setSelectedDirOption] = useState(null);
+    const [returnValue, setReturnValue] = useState('');
+    const [lotValue, setLotValue] = useState('');
+    const [entryPrice, setEntryPrice] = useState('');
+    const [exitPrice, setExitPrice] = useState('');
+    const [dbSetupOptions, setDbSetupOptions] = useState([]);
+    const [selectedSetupOption, setSelectedSetupOption] = useState(null);
+    const [dbPatternOptions, setDbPatternOptions] = useState([]);
+    const [selectedPatternOption, setSelectedPatternOption] = useState(null);
+    const [setupOptions, handleCreateNewSetupOption] = useCustomSetupCreation([], setDbSetupOptions, setSelectedSetupOption);
+    const [currencyOptions, handleCreateNewOption, loading, setLoading] = useCustomOptionCreation([], setDbCurrencyOptions, setSelectedOption);
+    const [ handleCreateNewPatternOption ] = useCustomPatternCreation([], setDbPatternOptions, setSelectedPatternOption);
+
+
+    const createUpdateFunction = (setState, updateFunctionName) => {
+        return async (value, tradeId) => {
+            setState(value);
+            await updateFunctionName(value, tradeId);
+        };
     };
     
+    const updateSelectedOption = createUpdateFunction(setSelectedOption, updatePairsInTrade);
+    const updateDirOption = createUpdateFunction(setSelectedDirOption, updateDirInTrade);
+    const updateReturnValue = createUpdateFunction(setReturnValue, updateReturnInTrade);
+    const updateLotValue = createUpdateFunction(setLotValue, updateLotInTrade);
+    const updateEntryPrice = createUpdateFunction(setEntryPrice, updateEntryPriceInTrade);
+    const updateExitPrice = createUpdateFunction(setExitPrice, updateExitPriceInTrade);
+    const updateSetupOption = createUpdateFunction(setSelectedSetupOption, updateSetupInTrade);
+    const updatePatternOption = createUpdateFunction(setSelectedPatternOption, updatePatternsInTrade);
+    const updateEntryDate = createUpdateFunction(setEntryDate, updateEntryDateInTrade);
+    const updateExitDate = createUpdateFunction(setExitDate, updateExitDateInTrade);
 
+
+    useEffect(() => {
+        if (trade) {
+            const fetchTags = async () => {
+                const currencyTag = await getTagByLabel(trade.PAIRS, trade.USER_ID, 'customTags');
+                setSelectedOption(currencyTag);
+    
+                const setupTag = await getTagByLabel(trade.SETUP, trade.USER_ID, 'setup');
+                setSelectedSetupOption(setupTag);
+    
+                const patternTag = await getTagByLabel(trade.PATTERN, trade.USER_ID, 'patterns');
+                setSelectedPatternOption(patternTag);
+            };
+            fetchTags();
+    
+            const matchingDirOption = trade.DIR 
+            ? shortLongOptions.find(option => option.value === trade.DIR)
+            : null;
+            setSelectedDirOption(matchingDirOption ? matchingDirOption : "");
+    
+            setReturnValue(trade.RETURN);
+            setLotValue(trade.LOT);
+            setEntryPrice(trade.ENTRY_PRICE);
+            setExitPrice(trade.EXIT_PRICE);
+        }
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                const fetchData = async () => {
+                    const db = getFirestore();
+                    const docRef = doc(db, "users", user.uid);
+                    onSnapshot(docRef, (docSnap) => {
+                        if (docSnap.exists()) {
+                            const fetchedTags = docSnap.data().customTags;
+                            const newOptions = fetchedTags.map(tag => ({
+                                value: tag.value,
+                                label: tag.label,
+                                color: tag.color,
+                            }));
+                            setDbCurrencyOptions(newOptions);
+                            setLoading(false);
+                        } else {
+                            console.log("No such document!");
+                        }
+                    });
+                };
+                fetchData();
+            } else {
+                setLoading(false);
+            }
+        });
+    
+        // Unsubscribe on unmount
+        return () => unsubscribe();
+    }, [trade]); // <-- change to empty array
+    
+
+    if (loading) {  // <--- add this conditional rendering
+        return <div>Loading...</div>;  // or any other loading indicator you'd like to display
+    }
+    
+    
   return (
     <div className={`newTrade ${visible ? 'visible' : ''}`}>
         <div className="newTrade__nav">
@@ -115,23 +136,23 @@ const NewTrade = ({ visible, onClose }) => {
                     <span className="tradeInfo__name">PAIRS</span>
                 </div>
                 <div className="tradeInfo__right">
-                    <CreatableSelect
-                        // value={selectedCurrencyOption}
-                        // onChange={handleChangeCurrency}
-                        options={currencyOptions}
-                        onCreateOption={handleCreateNewOption}
-                        placeholder="Select or type to create..."
-                        className="note-select"
-                        classNamePrefix="note-select"
-                        components={{
-                            Option: CustomOption,
-                            SingleValue: CustomSingleValue,
-                        }}
-                        styles={styles}
-                        
-                      
-                    />
+                {
+                        loading ? 
+                        <div>Loading...</div> 
+                        : 
+                        <CustomCreatableSelect
+                            options={dbCurrencyOptions}
+                            handleCreateNewOption={async (inputValue) => {
+                                const newOption = await handleCreateNewOption(inputValue);
+                                setSelectedOption(newOption);
+                            }}
+                            
+                            selectedOption={selectedOption}
+                            setSelectedOption={(selectedOption) => updateSelectedOption(selectedOption, tradeId)}
+                        />
+                    }
                 </div>
+
             </div>
             <div className="tradeInfo__row">
                 <div className="tradeInfo__title">
@@ -139,12 +160,10 @@ const NewTrade = ({ visible, onClose }) => {
                     <span className="tradeInfo__name">DIRECTION</span>
                 </div>
                 <div className="tradeInfo__right">
-                    <Select
-                        // value={selectedCurrencyOption}
-                        // onChange={handleChangeCurrency}
-                        options={currencyOptions}
-                        className="note-select"
-                        classNamePrefix="note-select"
+                    <ShortLongSelect 
+                        selectedDirOption={selectedDirOption} 
+                        setSelectedDirOption={setSelectedDirOption}
+                        updateDirOption={(selectedDirOption) => updateDirOption(selectedDirOption, tradeId)}
                     />
                 </div>
             </div>
@@ -154,7 +173,12 @@ const NewTrade = ({ visible, onClose }) => {
                     <span className="tradeInfo__name">RETURN</span>
                 </div>
                 <div className="tradeInfo__right">
-                    <div className="tradeInfo__input"  placeholder='ENPTY'></div>
+                    <input 
+                        className="tradeInfo__input"  
+                        placeholder='EMPTY' 
+                        value={returnValue || ''}
+                        onChange={(e) => updateReturnValue(e.target.value, tradeId)}
+                    />
                 </div>
             </div>
             <div className="tradeInfo__row">
@@ -163,7 +187,12 @@ const NewTrade = ({ visible, onClose }) => {
                     <span className="tradeInfo__name">LOT</span>
                 </div>
                 <div className="tradeInfo__right">
-                    <div className="tradeInfo__input"  placeholder='ENPTY'></div>
+                    <input 
+                        className="tradeInfo__input"  
+                        placeholder='EMPTY' 
+                        value={lotValue || ''}
+                        onChange={(e) => updateLotValue(e.target.value, tradeId)}
+                    />
                 </div>
             </div>
             <div className="tradeInfo__row">
@@ -172,13 +201,17 @@ const NewTrade = ({ visible, onClose }) => {
                     <span className="tradeInfo__name">SETUPS</span>
                 </div>
                 <div className="tradeInfo__right">
-                    <Select
-                        // value={selectedCurrencyOption}
-                        // onChange={handleChangeCurrency}
-                        options={currencyOptions}
-                        className="note-select"
-                        classNamePrefix="note-select"
-                    />
+                <CustomCreatableSelect
+                    options={dbSetupOptions}
+                    handleCreateNewOption={async (inputValue) => {
+                        const newOption = await handleCreateNewSetupOption(inputValue);
+
+                        setSelectedSetupOption(newOption);
+                    }}
+                    selectedOption={selectedSetupOption}
+                    setSelectedOption={(selectedOption) => updateSetupOption(selectedOption, tradeId)}
+                />
+
                 </div>
             </div>
             <div className="tradeInfo__row">
@@ -187,13 +220,16 @@ const NewTrade = ({ visible, onClose }) => {
                     <span className="tradeInfo__name">PATTERN</span>
                 </div>
                 <div className="tradeInfo__right">
-                    <Select
-                        // value={selectedCurrencyOption}
-                        // onChange={handleChangeCurrency}
-                        options={currencyOptions}
-                        className="note-select"
-                        classNamePrefix="note-select"
-                    />
+                <CustomCreatableSelect
+                    options={dbPatternOptions}
+                    handleCreateNewOption={async (inputValue) => {
+                        const newOption = await handleCreateNewPatternOption(inputValue);
+                        setSelectedPatternOption(newOption);
+                    }}
+                    selectedOption={selectedPatternOption}
+                    setSelectedOption={(selectedOption) => updatePatternOption(selectedOption, tradeId)}
+
+                />
                 </div>
             </div>
             <div className="tradeInfo__row">
@@ -205,11 +241,21 @@ const NewTrade = ({ visible, onClose }) => {
                     <div className="tradeInfo__date">
                         <div>
                             <span>entry</span>
-                            <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} />
+                            <DatePicker 
+                                showTimeInput
+                                dateFormat="yyyy年M月d日 h:mm aa"
+                                selected={entryDate} 
+                                onChange={(date) => updateEntryDate(date, tradeId)} 
+                            />
                         </div>
                         <div>
                             <span>exit</span>
-                            <DatePicker selected={startDate} onChange={(date) => setStartDate(date)} />
+                            <DatePicker 
+                                showTimeInput
+                                dateFormat="yyyy年M月d日 h:mm aa"
+                                selected={exitDate} 
+                                onChange={(date) => updateExitDate(date, tradeId)} 
+                            />
                         </div>
                     </div>
                 </div>
@@ -223,11 +269,21 @@ const NewTrade = ({ visible, onClose }) => {
                     <div className="tradeInfo__date">
                         <div>
                             <span>entry</span>
-                            <div className="tradeInfo__input"  placeholder='ENPTY'></div>
+                            <input 
+                                className="tradeInfo__input"  
+                                placeholder='EMPTY' 
+                                value={entryPrice}
+                                onChange={(e) => updateEntryPrice(e.target.value, tradeId)}
+                            />
                         </div>
                         <div>
                             <span>exit</span>
-                            <div className="tradeInfo__input"  placeholder='ENPTY'></div>
+                            <input 
+                                className="tradeInfo__input"  
+                                placeholder='EMPTY' 
+                                value={exitPrice}
+                                onChange={(e) => updateExitPrice(e.target.value, tradeId)}
+                            />
                         </div>
                     </div>
                 </div>

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged, signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../services/firebase";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
+import { backgrounds, colors } from "../../constants/colors";
 
 const signInWithGoogle = () => {
   signInWithPopup(auth, provider)
@@ -13,7 +14,19 @@ const signInWithGoogle = () => {
       const firestore = getFirestore();
       const userDocRef = doc(firestore, "users", user.uid);
       return setDoc(userDocRef, {
-        customTags: ["USD/JPY", "USD/CAD", "EUR/USD", "EUR/GBP", "EUR/JPY", "EUR/CHF", "GBP/JPY", "GBP/USD", "GBP/CAD", "CAD/JPY"],
+        customTags: [
+            { value: "USD/JPY", label: "USD/JPY", color: backgrounds.red },
+            { value: "USD/CAD", label: "USD/CAD", color: backgrounds.red },
+            { value: "EUR/USD", label: "EUR/USD", color: backgrounds.purple },
+            { value: "EUR/GBP", label: "EUR/GBP", color: backgrounds.purple },
+            { value: "EUR/JPY", label: "EUR/JPY", color: backgrounds.purple },
+            { value: "EUR/CHF", label: "EUR/CHF", color: backgrounds.purple },
+            { value: "GBP/JPY", label: "GBP/JPY", color: backgrounds.yellow },
+            { value: "GBP/USD", label: "GBP/USD", color: backgrounds.yellow },
+            { value: "GBP/CAD", label: "GBP/CAD", color: backgrounds.yellow },
+            { value: "CAD/JPY", label: "CAD/JPY", color: backgrounds.pink },
+        ],
+        
         email: user.email,
         username: user.displayName,
       });

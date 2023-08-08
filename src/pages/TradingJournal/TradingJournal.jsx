@@ -15,6 +15,8 @@ const TradingJournal = () => {
   const { user } = useContext(UserContext)
   const [isVisible, setIsVisible] = useState(false)
   const [trades, setTradesToJournal] = useState([])
+  const [tradeId, setTradeId] = useState(null);
+  const [selectedTrade, setSelectedTrade] = useState(null);
 
   useEffect(() => {
 	if(!user) {
@@ -28,24 +30,38 @@ const TradingJournal = () => {
 
   }, [user]);
 
+  const onTradeRowClickHandle = (trade) => {
+    setSelectedTrade(trade)
+    setIsVisible(true)
+    setTradeId(trade.id)
+  }
+
   return (
 	<AppContainer>
         <Sidebar page="trading-journal"/>
         <div className="mainContent" style={!user ? { overflow: 'hidden' } : {}}>
             <Header 
 				title="トレード記録"
-				onAddTradeBtnClick={() => {
-					setIsVisible(true)
-				}}
+                setTradeId={setTradeId}
+                setSelectedTrade={setSelectedTrade}
+				onAddTradeBtnClick={(newTrade) => {  // 新しいトレード情報を引数として受け取る
+                    setSelectedTrade(newTrade);  // 新しい（空の）トレード情報をセット
+                    setIsVisible(true);
+                }}
 			/>
             <div className="inner" style={!user ? { filter: 'blur(3px)' } : {}}>
                 <FilterCards />
                 <FilterUI />
                 <Filter />
-                <TradeTable trades={trades}/>
+                <TradeTable 
+                    trades={trades}
+                    onTradeRowClick={(trade) => onTradeRowClickHandle(trade)}
+                />
                 <NewTrade 
 					visible={isVisible}
 					onClose={() => setIsVisible(false)}
+                    tradeId={tradeId}
+                    trade={selectedTrade}
 				/>
             </div>
             {!user && <HideContents />}
