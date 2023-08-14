@@ -21,6 +21,22 @@ const TradingJournal = () => {
   const [filteredTrades, setFilteredTrades] = useState([])
   const [dbSetupOptions, setDbSetupOptions] = useState([])
   const [dbPatternOptions, setDbPatternOptions] = useState([])
+  const [filteredOption, setFilteredOption] = useState({
+    WIN: '',
+    LOSS: '',
+    OVER_3: '',
+    ALL: '',
+    PAIRS: '',
+    DIR: '',
+    SETUPS: '',
+    PATTERN: '',
+    FROM: '',
+    TO: '',
+  })
+  const [clearFilterIsActive, setClearFilterIsActive] = useState(false)
+  const [filterUIClearClicked, setFilterUIClearClicked] = useState('')
+ 
+//   console.log('filterUIClearClicked', filterUIClearClicked)
 
   useEffect(() => {
     if(!user) {
@@ -64,13 +80,23 @@ const TradingJournal = () => {
                 />
                 <div className="inner" style={!user ? { filter: 'blur(3px)' } : {}}>
                     <FilterCards />
-                    <FilterUI />
+                    <FilterUI 
+                        filteredOption={filteredOption}
+                        setFilteredOption={setFilteredOption}
+                        setClearFilterIsActive={setClearFilterIsActive}
+                        setFilterUIClearClicked={setFilterUIClearClicked}
+                    />
                     <Filter 
                       trades={trades} 
                       dbSetupOptions={dbSetupOptions} 
                       setDbSetupOptions={setDbSetupOptions}
                       dbPatternOptions={dbPatternOptions} 
                       setDbPatternOptions={setDbPatternOptions}
+                      filteredOption={filteredOption}
+                      setFilteredOption={setFilteredOption}
+                      clearFilterIsActive={clearFilterIsActive}
+                      setClearFilterIsActive={setClearFilterIsActive}
+                      filterUIClearClicked={filterUIClearClicked}
                     />
                     <TradeTable 
                         trades={trades}

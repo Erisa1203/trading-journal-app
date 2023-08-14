@@ -6,7 +6,11 @@ import { TradesContext } from '../../contexts/TradesContext'
 
 const TradeTable = ({ trades, onTradeRowClick }) => {
     const { filteredTrades } = useContext(TradesContext);
-    console.log('filteredTrades', filteredTrades)
+
+    if (!filteredTrades || filteredTrades.length === 0) {
+        return <p className='noTrade'>表示できるトレードはありません。</p>;
+    }
+
     return (
         <table className="tradeTable">
             <thead className="tradeTable__head">

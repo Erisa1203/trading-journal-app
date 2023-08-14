@@ -2,9 +2,57 @@ import { CaretDown, X } from '@phosphor-icons/react'
 import React, { useContext } from 'react'
 import "./_filterUI.styl"
 import { FilterContext } from '../../contexts/FilterContext';
+import { INITIAL_FILTER_STATE } from '../../services/filter';
 
-const FilterUI = () => {
+const FilterUI = ({filteredOption, setClearFilterIsActive, setFilteredOption, setFilterUIClearClicked}) => {
   const { filterIsActive, filterHandleClick } = useContext(FilterContext);
+
+  
+    const getDisplayNameForKey = (key, value) => {
+        switch(key) {
+            case 'WIN':
+                return 'WIN';
+            case 'LOSS':
+                return 'LOSS';
+            case 'OVER_3':
+                return 'OVER 3%';
+            case 'FROM':
+                return `from: ${value}`;
+            case 'TO':
+                return `to: ${value}`;
+            default:
+                return value;
+        }
+    }
+
+    const clearFilters = () => {
+        setClearFilterIsActive(true)
+        setFilteredOption(INITIAL_FILTER_STATE);
+    }
+
+    const filterItems = Object.keys(filteredOption).map(key => {
+        const value = filteredOption[key];
+    
+        if (value !== false && value !== '') {            
+            return (
+                <li key={key} className="filteredItems__item">
+                    {getDisplayNameForKey(key, value)}
+                    <X 
+                        className='filteredItems__remove' 
+                        onClick={() => {
+                            setFilterUIClearClicked(key); // この行はそのまま残します
+                            setFilteredOption(prevOptions => ({
+                                ...prevOptions,
+                                [key]: '' // クリックされたアイテムに対応するキーの値を空に更新
+                            }));
+                        }}
+                    />
+                </li>
+            );
+        }
+        return null; // 値がfalseまたは空の場合、nullを返して表示しない
+    });
+    
 
   return (
     <div className="filterUI">
@@ -13,14 +61,9 @@ const FilterUI = () => {
             <CaretDown className='filterBtn__icon'/>
         </div>
         <ul className="filteredItems">
-            <li className="filteredItems__item">WIN<X className='filteredItems__remove'/></li>
-            <li className="filteredItems__item">EUR/USD<X className='filteredItems__remove'/></li>
-            <li className="filteredItems__item">SHORT<X className='filteredItems__remove'/></li>
-            <li className="filteredItems__item">DT RV<X className='filteredItems__remove'/></li>
-            <li className="filteredItems__item">FROM 2023/12/23<X className='filteredItems__remove'/></li>
-            <li className="filteredItems__item">TO 2023/12/30<X className='filteredItems__remove'/></li>
+          {filterItems}
         </ul>
-        <div className="clearFilters">clear filters</div>
+        <div className="clearFilters" onClick={clearFilters}>clear filters</div>
     </div>
   )
 }
