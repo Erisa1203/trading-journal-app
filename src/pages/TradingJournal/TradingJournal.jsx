@@ -10,25 +10,31 @@ import HideContents from '../../components/HideContents/HideContents'
 import { UserContext } from '../../contexts/UserContext'
 import AppContainer from '../../components/Container/AppContainer'
 import { subscribeToTradeJournal } from '../../services/trades.js';
+import { TradesContext } from '../../contexts/TradesContext'
 
 const TradingJournal = () => {
   const { user } = useContext(UserContext)
   const [isVisible, setIsVisible] = useState(false)
   const [trades, setTradesToJournal] = useState([])
-  const [tradeId, setTradeId] = useState(null);
-  const [selectedTrade, setSelectedTrade] = useState(null);
+  const [tradeId, setTradeId] = useState(null)
+  const [selectedTrade, setSelectedTrade] = useState(null)
+  const [filteredTrades, setFilteredTrades] = useState([])
+  const [dbSetupOptions, setDbSetupOptions] = useState([])
+  const [dbPatternOptions, setDbPatternOptions] = useState([])
 
   useEffect(() => {
-	if(!user) {
-		setTradesToJournal([])
-	} else {
-		const unsubscribe = subscribeToTradeJournal((newTrades) => {
-			setTradesToJournal(newTrades);
-		});
-		return unsubscribe;
-	}
+    if(!user) {
+        setTradesToJournal([])
+        setFilteredTrades([])  // ユーザーがいない場合にフィルタリングされたトレードも初期化します。
+    } else {
+        const unsubscribe = subscribeToTradeJournal((newTrades) => {
+            setTradesToJournal(newTrades)
+            setFilteredTrades(newTrades)  // 新しいトレードが取得されたら、それもフィルタリングされたトレードとして設定します。
+        })
+        return unsubscribe
+    }
 
-  }, [user]);
+  }, [user])
 
   const onTradeRowClickHandle = (trade) => {
     setSelectedTrade(trade)
@@ -37,36 +43,52 @@ const TradingJournal = () => {
   }
 
   return (
-	<AppContainer>
-        <Sidebar page="trading-journal"/>
-        <div className="mainContent" style={!user ? { overflow: 'hidden' } : {}}>
-            <Header 
-				title="トレード記録"
-                setTradeId={setTradeId}
-                setSelectedTrade={setSelectedTrade}
-				onAddTradeBtnClick={(newTrade) => {  // 新しいトレード情報を引数として受け取る
-                    setSelectedTrade(newTrade);  // 新しい（空の）トレード情報をセット
-                    setIsVisible(true);
-                }}
-			/>
-            <div className="inner" style={!user ? { filter: 'blur(3px)' } : {}}>
-                <FilterCards />
-                <FilterUI />
-                <Filter />
-                <TradeTable 
-                    trades={trades}
-                    onTradeRowClick={(trade) => onTradeRowClickHandle(trade)}
+    <TradesContext.Provider value={{
+      trades,
+      setTradesToJournal,
+      onTradeRowClickHandle,
+      filteredTrades,
+      setFilteredTrades
+    }}>
+        <AppContainer>
+            <Sidebar page="trading-journal"/>
+            <div className="mainContent" style={!user ? { overflow: 'hidden' } : {}}>
+                <Header 
+                    title="トレード記録"
+                    setTradeId={setTradeId}
+                    setSelectedTrade={setSelectedTrade}
+                    onAddTradeBtnClick={(newTrade) => {  // 新しいトレード情報を引数として受け取る
+                        setSelectedTrade(newTrade);  // 新しい（空の）トレード情報をセット
+                        setIsVisible(true);
+                    }}
                 />
-                <NewTrade 
-					visible={isVisible}
-					onClose={() => setIsVisible(false)}
-                    tradeId={tradeId}
-                    trade={selectedTrade}
-				/>
+                <div className="inner" style={!user ? { filter: 'blur(3px)' } : {}}>
+                    <FilterCards />
+                    <FilterUI />
+                    <Filter 
+                      trades={trades} 
+                      dbSetupOptions={dbSetupOptions} 
+                      setDbSetupOptions={setDbSetupOptions}
+                      dbPatternOptions={dbPatternOptions} 
+                      setDbPatternOptions={setDbPatternOptions}
+                    />
+                    <TradeTable 
+                        trades={trades}
+                        onTradeRowClick={(trade) => onTradeRowClickHandle(trade)}
+                    />
+                    <NewTrade 
+                      visible={isVisible}
+                      onClose={() => setIsVisible(false)}
+                      tradeId={tradeId}
+                      trade={selectedTrade}
+                      dbSetupOptions={dbSetupOptions} 
+                      setDbSetupOptions={setDbSetupOptions}
+                    />
+                </div>
+                {!user && <HideContents />}
             </div>
-            {!user && <HideContents />}
-        </div>
-	</AppContainer>
+        </AppContainer>
+    </TradesContext.Provider>
   )
 }
 

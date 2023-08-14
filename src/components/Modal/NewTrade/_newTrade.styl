@@ -8,13 +8,13 @@
     right -100%
     top 0
     z-index 1
-    overflow-y: scroll
+    overflow-y: auto
     shadow()
     transition: .3s linear
     &.visible
         right 0
     
-.newTrade__title, .noteContent__text
+.newTrade__title
     cursor text
     
 
@@ -48,7 +48,7 @@
     display flex
     align-items center
     
-.tradeInfo__name, .note-select__placeholder, .tradeInfo .react-datepicker__input-container input, .tradeInfo__input, .noteContent__text, .note-select__single-value
+.tradeInfo__name, .note-select__placeholder, .tradeInfo .react-datepicker__input-container input, .tradeInfo__input, .note-select__single-value
     font-size 1.4rem!important
     font-en()
 
@@ -137,6 +137,7 @@
 
 .textEditor
     overflow hidden
+    position: absolute;
 
 .textEditor__edit, .textEditor__item
     display inline-flex
@@ -331,4 +332,18 @@
         font-size 1.4rem
         padding 8px
     
-        
+.tag
+    padding: 8px 16px;
+    border-radius: 4px;
+    display: inline-block;
+    width: auto;
+    white-space: nowrap;
+    font-weight: 700;
+    flex inherit
+    margin 14px
+
+    &--red
+        background-color: $background-red
+    &--green
+        background-color: $background-green
+    

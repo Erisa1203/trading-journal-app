@@ -7,6 +7,47 @@ export const shortLongOptions = [
     { value: 'LONG', label: 'LONG', color: backgrounds.red }, // color を追加
 ];
 
+export const calculateStatus = (trade) => {
+    if (trade.ENTRY_PRICE && trade.EXIT_PRICE) {
+        if (trade.DIR === "SHORT") {
+            return trade.ENTRY_PRICE - trade.EXIT_PRICE > 0 ? "WIN" : "LOSS";
+        } else if (trade.DIR === "LONG") {
+            return trade.EXIT_PRICE - trade.ENTRY_PRICE > 0 ? "WIN" : "LOSS";
+        }
+    }
+    return null; 
+}
+
+export const getTradeById = async (tradeId) => {
+    try {
+        const tradeRef = doc(db, "journal", tradeId);
+        const tradeDoc = await getDoc(tradeRef);
+
+        if (tradeDoc.exists()) {
+            const data = tradeDoc.data();
+            
+            // Convert ENTRY_DATE and EXIT_DATE from Timestamp to Date
+            if (data.ENTRY_DATE && typeof data.ENTRY_DATE.toDate === 'function') {
+                data.ENTRY_DATE = data.ENTRY_DATE.toDate();
+            }
+            if (data.EXIT_DATE && typeof data.EXIT_DATE.toDate === 'function') {
+                data.EXIT_DATE = data.EXIT_DATE.toDate();
+            }
+            
+            return {
+                id: tradeDoc.id,
+                ...data
+            };
+        } else {
+            console.error("Trade not found with ID:", tradeId);
+            return null;
+        }
+    } catch (error) {
+        console.error(`Error fetching trade with ID ${tradeId}:`, error);
+        return null;
+    }
+};
+
 export function subscribeToTradeJournal(callback) {
     const journalRef = collection(db, "journal");
   
@@ -38,7 +79,7 @@ export const addTrade = async (trade) => {
     return docRef.id;
 };
 
-const updateFieldInTrade = async (fieldName, inputValue, tradeId) => {
+export const updateFieldInTrade = async (fieldName, inputValue, tradeId) => {
     if (inputValue === undefined) {
         console.error(`Undefined inputValue for ${fieldName} in trade ${tradeId}`);
         return;
@@ -71,7 +112,6 @@ const updateFieldInTrade = async (fieldName, inputValue, tradeId) => {
 
 export const updatePairsInTrade = (selectedOption, tradeId) => updateFieldInTrade('PAIRS', selectedOption, tradeId);
 
-export const updateDirInTrade = (selectedOption, tradeId) => updateFieldInTrade('DIR', selectedOption, tradeId);
 
 export const updateSetupInTrade = (selectedOption, tradeId) => updateFieldInTrade('SETUP', selectedOption, tradeId);
 
@@ -85,10 +125,25 @@ export const updateEntryDateInTrade = (inputValue, tradeId) => updateFieldInTrad
 
 export const updateExitDateInTrade = (inputValue, tradeId) => updateFieldInTrade('EXIT_DATE', inputValue, tradeId);
 
-export const updateEntryPriceInTrade = (inputValue, tradeId) => updateFieldInTrade('ENTRY_PRICE', inputValue, tradeId);
+export const updateDirInTrade = async (selectedOption, tradeId) => {
+    await updateFieldInTrade('DIR', selectedOption, tradeId);
 
-export const updateExitPriceInTrade = (inputValue, tradeId) => updateFieldInTrade('EXIT_PRICE', inputValue, tradeId);
+    const newStatus = await calculateStatus(tradeId);
+    await updateFieldInTrade('STATUS', newStatus, tradeId);
+};
+export const updateEntryPriceInTrade = async (inputValue, tradeId) => {
+    await updateFieldInTrade('ENTRY_PRICE', inputValue, tradeId);
+    const updatedTrade = await getTradeById(tradeId); // getTradeByIdはtradeIdに基づいてトレードの詳細を取得する関数
+    const status = calculateStatus(updatedTrade);
+    await updateFieldInTrade('STATUS', status, tradeId);
+};
 
+export const updateExitPriceInTrade = async (inputValue, tradeId) => {
+    await updateFieldInTrade('EXIT_PRICE', inputValue, tradeId);
+    const updatedTrade = await getTradeById(tradeId); // getTradeByIdはtradeIdに基づいてトレードの詳細を取得する関数
+    const status = calculateStatus(updatedTrade);
+    await updateFieldInTrade('STATUS', status, tradeId);
+};
 
 export const getTagByLabel = async (label, userId, path) => {
     try {

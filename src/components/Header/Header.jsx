@@ -17,10 +17,11 @@ const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade }) => 
             EXIT_PRICE: "",
             LOT: "",
             DIR: "",
-            PERCENT: "",
+            RETURN: "",
             SETUP: "",
             PATTERN: "",
-            USER_ID: userId // ここでログインしているユーザーのIDを設定
+            USER_ID: userId, // ここでログインしているユーザーのIDを設定
+            NOTE: "",
         };
         const id = await addTrade(trade);
         console.log("Added trade with ID: ", id);

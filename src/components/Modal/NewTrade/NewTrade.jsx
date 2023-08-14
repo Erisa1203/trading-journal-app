@@ -11,30 +11,31 @@ import { useCustomOptionCreation } from '../../../hooks/useCustomOptionCreation'
 import { ShortLongSelect } from '../../Select/ShortLongSelect';
 import { useCustomSetupCreation } from '../../../hooks/useCustomSetupCreation';
 import { useCustomPatternCreation } from '../../../hooks/useCustomPatternCreation';
-import { getTagByLabel, shortLongOptions, updateDirInTrade, updateEntryDateInTrade, updateEntryPriceInTrade, updateExitDateInTrade, updateExitPriceInTrade, updateLotInTrade, updatePairsInTrade, updatePatternsInTrade, updateReturnInTrade, updateSetupInTrade } from '../../../services/trades';
-
-
+import { getTagByLabel, shortLongOptions, updateDirInTrade, updateEntryDateInTrade, updateEntryPriceInTrade, updateExitDateInTrade, updateExitPriceInTrade, updateFieldInTrade, updateLotInTrade, updatePairsInTrade, updatePatternsInTrade, updateReturnInTrade, updateSetupInTrade } from '../../../services/trades';
+import MyEditor from '../../QuillEditor/QuillEditor';
 
 const NewTrade = ({ visible, trade, onClose, tradeId }) => {
-    console.log('tradeId', tradeId)
     const auth = getAuth();
     const [entryDate, setEntryDate] = useState(new Date());
     const [exitDate, setExitDate] = useState(new Date());
     const [dbCurrencyOptions, setDbCurrencyOptions] = useState([]);
     const [selectedOption, setSelectedOption] = useState(null);
     const [selectedDirOption, setSelectedDirOption] = useState(null);
-    const [returnValue, setReturnValue] = useState('');
     const [lotValue, setLotValue] = useState('');
     const [entryPrice, setEntryPrice] = useState('');
     const [exitPrice, setExitPrice] = useState('');
     const [dbSetupOptions, setDbSetupOptions] = useState([]);
-    const [selectedSetupOption, setSelectedSetupOption] = useState(null);
+    // console.log('dbCurrencyOptions', dbCurrencyOptions)
     const [dbPatternOptions, setDbPatternOptions] = useState([]);
     const [selectedPatternOption, setSelectedPatternOption] = useState(null);
+    const [selectedSetupOption, setSelectedSetupOption] = useState(null);
     const [setupOptions, handleCreateNewSetupOption] = useCustomSetupCreation([], setDbSetupOptions, setSelectedSetupOption);
     const [currencyOptions, handleCreateNewOption, loading, setLoading] = useCustomOptionCreation([], setDbCurrencyOptions, setSelectedOption);
     const [ handleCreateNewPatternOption ] = useCustomPatternCreation([], setDbPatternOptions, setSelectedPatternOption);
-
+    const [initialContentFromDatabase, setInitialContentFromDatabase] = useState("");
+    const [returnValue, setReturnValue] = useState('');
+    const [editorHtml, setEditorHtml] = useState('');
+    const [tradeStatus, setTradeStatus] = useState('');
 
     const createUpdateFunction = (setState, updateFunctionName) => {
         return async (value, tradeId) => {
@@ -53,7 +54,7 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
     const updatePatternOption = createUpdateFunction(setSelectedPatternOption, updatePatternsInTrade);
     const updateEntryDate = createUpdateFunction(setEntryDate, updateEntryDateInTrade);
     const updateExitDate = createUpdateFunction(setExitDate, updateExitDateInTrade);
-
+    // console.log('dbSetupOptions', dbSetupOptions)
 
     useEffect(() => {
         if (trade) {
@@ -73,11 +74,13 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
             ? shortLongOptions.find(option => option.value === trade.DIR)
             : null;
             setSelectedDirOption(matchingDirOption ? matchingDirOption : "");
-    
+            setInitialContentFromDatabase(trade.NOTE)
             setReturnValue(trade.RETURN);
             setLotValue(trade.LOT);
             setEntryPrice(trade.ENTRY_PRICE);
             setExitPrice(trade.EXIT_PRICE);
+            setTradeStatus(trade.STATUS)
+            
         }
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -104,16 +107,28 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
                 setLoading(false);
             }
         });
-    
-        // Unsubscribe on unmount
         return () => unsubscribe();
     }, [trade]); // <-- change to empty array
+    
+    useEffect(() => {
+        if (entryPrice && exitPrice) {
+            let status = "";
+    
+            if (trade && trade.DIR === 'SHORT') {
+                status = parseFloat(entryPrice) - parseFloat(exitPrice) > 0 ? 'WIN' : 'LOSS';
+            } else {
+                // Assuming any other case is 'LONG' or the default behavior you want
+                status = parseFloat(exitPrice) - parseFloat(entryPrice) > 0 ? 'WIN' : 'LOSS';
+            }
+    
+            setTradeStatus(status);
+        }
+    }, [entryPrice, exitPrice, trade]);  // Depend on entryPrice, exitPrice, and trade for re-run
     
 
     if (loading) {  // <--- add this conditional rendering
         return <div>Loading...</div>;  // or any other loading indicator you'd like to display
     }
-    
     
   return (
     <div className={`newTrade ${visible ? 'visible' : ''}`}>
@@ -130,6 +145,14 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
         </div>
         <h1 className="newTrade__title" placeholder='新しいトレードを追加'></h1>
         <div className="tradeInfo">
+            <div className="tradeInfo__row">
+                <div className="tradeInfo__title">
+                    <Coin className='icon-16'/>
+                    <span className="tradeInfo__name">STATUS</span>
+                </div>
+                {}
+                <div className={`tradeInfo__right tag ${tradeStatus === 'WIN' ? 'tag--green' : tradeStatus === 'LOSS' ? 'tag--red' : 'tag--pink'}`}>{ tradeStatus }</div>
+            </div>
             <div className="tradeInfo__row">
                 <div className="tradeInfo__title">
                     <Coin className='icon-16'/>
@@ -290,7 +313,11 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
             </div>
         </div>
         <div className="noteContent">
-            <div className="noteContent__text"  placeholder='type...'>テキスト</div>
+            <MyEditor 
+                tradeId={tradeId} 
+                content={initialContentFromDatabase}
+                onContentChange={(newContent) => setEditorHtml(newContent)} 
+            />            
             <div className="textEditor">
                 <div className="textEditor__edit">
                     <div className="textEditor__item js-text-select">

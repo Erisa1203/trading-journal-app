@@ -1,9 +1,12 @@
-import React from 'react'
+import React, { useContext } from 'react'
 import { Timestamp } from 'firebase/firestore';
 import "./_tradeTable.styl"
+import { sortByEntryDateAsc, sortByEntryDateDesc } from '../../services/filter';
+import { TradesContext } from '../../contexts/TradesContext'
 
 const TradeTable = ({ trades, onTradeRowClick }) => {
-    
+    const { filteredTrades } = useContext(TradesContext);
+    console.log('filteredTrades', filteredTrades)
     return (
         <table className="tradeTable">
             <thead className="tradeTable__head">
@@ -21,8 +24,8 @@ const TradeTable = ({ trades, onTradeRowClick }) => {
             </tr>
             </thead>
             <tbody>
-            {trades && trades.length > 0 ?
-                trades.map((trade, index) => (
+            {filteredTrades && filteredTrades.length > 0 ?
+                sortByEntryDateAsc(filteredTrades).map((trade, index) => (
                     <tr 
                         key={index} 
                         className="tradeTable__row" 

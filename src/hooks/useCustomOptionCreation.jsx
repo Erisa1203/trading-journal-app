@@ -20,7 +20,7 @@ export const useCustomOptionCreation = (initialOptions, onOptionsChange, setSele
                     const docRef = doc(db, "users", user.uid);
                     const docSnap = await getDoc(docRef);
                     if (docSnap.exists()) {
-                        const fetchedTags = docSnap.data().setups;
+                        const fetchedTags = docSnap.data().customTags;
                         const newOptions = sortOptionsAlphabetically(fetchedTags.map(tag => ({
                             value: tag.value,
                             label: tag.label,
@@ -102,6 +102,6 @@ export const useCustomOptionCreation = (initialOptions, onOptionsChange, setSele
     
     
     
-    // console.log(options)
+    // console.log('options', options)
     return [options, handleCreateNewOption, loading, setLoading];
 };
