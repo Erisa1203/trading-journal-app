@@ -41,7 +41,7 @@ const TradeTable = ({ trades, onTradeRowClick, filteredOption }) => {
             </thead>
             <tbody>
             {dataToDisplay && dataToDisplay.length > 0 ?
-                sortByEntryDateAsc(dataToDisplay).map((trade, index) => (
+                sortByEntryDateDesc(dataToDisplay).map((trade, index) => (
                     <tr 
                         key={index} 
                         className="tradeTable__row" 

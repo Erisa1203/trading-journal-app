@@ -30,10 +30,7 @@ const TradingJournal = () => {
     setIsVisible(true)
     setTradeId(trade.id)
   }
-//   console.log('trades', trades)
-//   console.log('filteredTrades', filteredTrades)
 
-//   console.log('filteredOption', filteredOption)
   return (
     <TradesContext.Provider value={{
       trades,
