@@ -1,13 +1,25 @@
-import React, { useContext } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { Timestamp } from 'firebase/firestore';
 import "./_tradeTable.styl"
-import { sortByEntryDateAsc, sortByEntryDateDesc } from '../../services/filter';
+import { handleSearch, sortByEntryDateAsc, sortByEntryDateDesc } from '../../services/filter';
 import { TradesContext } from '../../contexts/TradesContext'
 
-const TradeTable = ({ trades, onTradeRowClick }) => {
-    const { filteredTrades } = useContext(TradesContext);
+const TradeTable = ({ trades, onTradeRowClick, filteredOption }) => {
+    const { filteredTrades, setFilteredTrade } = useContext(TradesContext);
+    const [isInitialRender, setIsInitialRender] = useState(true); 
+    const [dataToDisplay, setDataToDisplay] = useState(trades);  
 
-    if (!filteredTrades || filteredTrades.length === 0) {
+    
+    useEffect(() => {
+        if (filteredTrades.length === 0) {
+            setIsInitialRender(false);
+            setDataToDisplay(trades); 
+        } else {
+            setDataToDisplay(filteredTrades); 
+        }
+    }, [filteredTrades, trades]);
+     
+    if (!dataToDisplay || dataToDisplay.length === 0) {
         return <p className='noTrade'>表示できるトレードはありません。</p>;
     }
 
@@ -28,8 +40,8 @@ const TradeTable = ({ trades, onTradeRowClick }) => {
             </tr>
             </thead>
             <tbody>
-            {filteredTrades && filteredTrades.length > 0 ?
-                sortByEntryDateAsc(filteredTrades).map((trade, index) => (
+            {dataToDisplay && dataToDisplay.length > 0 ?
+                sortByEntryDateAsc(dataToDisplay).map((trade, index) => (
                     <tr 
                         key={index} 
                         className="tradeTable__row" 

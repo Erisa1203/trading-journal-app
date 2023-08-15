@@ -4,60 +4,36 @@ import Header from '../../components/Header/Header'
 import FilterUI from '../../components/FilterUI/FilterUI'
 import Filter from '../../components/Filter/Filter'
 import FilterCards from '../../components/FilterCards/FilterCards'
-import TradeTable from '../../components/TradeTable/TradeTable'
 import NewTrade from '../../components/Modal/NewTrade/NewTrade'
 import HideContents from '../../components/HideContents/HideContents'
 import { UserContext } from '../../contexts/UserContext'
 import AppContainer from '../../components/Container/AppContainer'
-import { subscribeToTradeJournal } from '../../services/trades.js';
+import { subscribeToTradeJournal, useTrades } from '../../services/trades.js';
 import { TradesContext } from '../../contexts/TradesContext'
+import TradeTable from '../../components/TradeTable/TradeTable'
+import { INITIAL_FILTER_STATE } from '../../services/filter'
 
 const TradingJournal = () => {
   const { user } = useContext(UserContext)
   const [isVisible, setIsVisible] = useState(false)
-  const [trades, setTradesToJournal] = useState([])
   const [tradeId, setTradeId] = useState(null)
   const [selectedTrade, setSelectedTrade] = useState(null)
-  const [filteredTrades, setFilteredTrades] = useState([])
   const [dbSetupOptions, setDbSetupOptions] = useState([])
   const [dbPatternOptions, setDbPatternOptions] = useState([])
-  const [filteredOption, setFilteredOption] = useState({
-    WIN: '',
-    LOSS: '',
-    OVER_3: '',
-    ALL: '',
-    PAIRS: '',
-    DIR: '',
-    SETUPS: '',
-    PATTERN: '',
-    FROM: '',
-    TO: '',
-  })
+  const [filteredOption, setFilteredOption] = useState(INITIAL_FILTER_STATE)
   const [clearFilterIsActive, setClearFilterIsActive] = useState(false)
   const [filterUIClearClicked, setFilterUIClearClicked] = useState('')
- 
-//   console.log('filterUIClearClicked', filterUIClearClicked)
-
-  useEffect(() => {
-    if(!user) {
-        setTradesToJournal([])
-        setFilteredTrades([])  // ユーザーがいない場合にフィルタリングされたトレードも初期化します。
-    } else {
-        const unsubscribe = subscribeToTradeJournal((newTrades) => {
-            setTradesToJournal(newTrades)
-            setFilteredTrades(newTrades)  // 新しいトレードが取得されたら、それもフィルタリングされたトレードとして設定します。
-        })
-        return unsubscribe
-    }
-
-  }, [user])
+  const { trades, setTradesToJournal, filteredTrades, setFilteredTrades } = useTrades(user);
 
   const onTradeRowClickHandle = (trade) => {
     setSelectedTrade(trade)
     setIsVisible(true)
     setTradeId(trade.id)
   }
+//   console.log('trades', trades)
+//   console.log('filteredTrades', filteredTrades)
 
+//   console.log('filteredOption', filteredOption)
   return (
     <TradesContext.Provider value={{
       trades,
@@ -98,9 +74,10 @@ const TradingJournal = () => {
                       setClearFilterIsActive={setClearFilterIsActive}
                       filterUIClearClicked={filterUIClearClicked}
                     />
-                    <TradeTable 
+                    <TradeTable
                         trades={trades}
                         onTradeRowClick={(trade) => onTradeRowClickHandle(trade)}
+                        filteredOption={filteredOption}
                     />
                     <NewTrade 
                       visible={isVisible}

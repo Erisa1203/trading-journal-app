@@ -1,11 +1,11 @@
 import React, { useContext } from 'react'
 import Sidebar from '../../components/Sidebar/Sidebar'
 import Header from '../../components/Header/Header'
-import TradeTable from '../../components/TradeTable/TradeTable'
 import { UserContext } from '../../contexts/UserContext'
 import HideContents from '../../components/HideContents/HideContents'
 import AppContainer from '../../components/Container/AppContainer'
 import MyEditor from '../../components/QuillEditor/QuillEditor'
+import TradeTable from '../../components/TradeTable/TradeTable'
 
 const Home = () => {
   const { user } = useContext(UserContext);

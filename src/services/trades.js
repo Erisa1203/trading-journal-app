@@ -1,6 +1,7 @@
 import { addDoc, collection, doc, getDoc, onSnapshot, setDoc, updateDoc, Timestamp, getFirestore } from "firebase/firestore";
 import { db } from "./firebase";
 import { backgrounds } from "../constants/colors";
+import { useEffect, useState } from "react";
 
 export const shortLongOptions = [
     { value: 'SHORT', label: 'SHORT', color: backgrounds.blue }, // color を追加
@@ -168,3 +169,21 @@ export const getTagByLabel = async (label, userId, path) => {
         return null;
     }
 };
+
+export const useTrades = (user) => {
+    const [trades, setTradesToJournal] = useState([]);
+    const [filteredTrades, setFilteredTrades] = useState([]);
+  
+    useEffect(() => {
+      if(!user) {
+          setTradesToJournal([]);
+          setFilteredTrades([]);
+      } else {
+          const unsubscribe = subscribeToTradeJournal((newTrades) => {
+              setTradesToJournal(newTrades);
+          });
+          return unsubscribe;
+      }
+    }, [user]);
+    return { trades, setTradesToJournal, filteredTrades, setFilteredTrades };
+  }

@@ -18,7 +18,7 @@ const dirOptions = [
 ];
 
 const Filter = ({ isActive, dbSetupOptions, setDbSetupOptions, dbPatternOptions, setDbPatternOptions, filteredOption, setFilteredOption, clearFilterIsActive, setClearFilterIsActive, filterUIClearClicked  }) => {
-    const { trades, setFilteredTrades } = useContext(TradesContext);
+    const { trades, filteredTrades, setFilteredTrades } = useContext(TradesContext);
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndtDate] = useState('')
 
@@ -127,10 +127,10 @@ const Filter = ({ isActive, dbSetupOptions, setDbSetupOptions, dbPatternOptions,
                 OVER_3: status.OVER_3,
             }));
         }
-        
-        // フィルタリングされたトレードをセット
+                
         setFilteredTrades(currentFilteredTrades);
     }
+
 
     useEffect(() => {
         if (!filterUIClearClicked) return; // filterUIClearClickedが空またはfalseなら、何もしない
@@ -198,7 +198,6 @@ const Filter = ({ isActive, dbSetupOptions, setDbSetupOptions, dbPatternOptions,
             setSelectedSetupOption(null);
             setSelectedPatternOption(null);
             setFilteredTrades(trades); // tradesをフィルター前の状態に戻す
-    
             // clearFilterIsActiveをfalseにリセットして再度の処理を防ぐ
             setClearFilterIsActive(false);
         }
