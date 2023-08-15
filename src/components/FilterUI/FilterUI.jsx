@@ -8,21 +8,16 @@ const FilterUI = ({filteredOption, setClearFilterIsActive, setFilteredOption, se
   const { filterIsActive, filterHandleClick } = useContext(FilterContext);
 
   
-    const getDisplayNameForKey = (key, value) => {
-        switch(key) {
-            case 'WIN':
-                return 'WIN';
-            case 'LOSS':
-                return 'LOSS';
-            case 'OVER_3':
-                return 'OVER 3%';
-            case 'FROM':
-                return `from: ${value}`;
-            case 'TO':
-                return `to: ${value}`;
-            default:
-                return value;
-        }
+  const getDisplayNameForKey = (key, value) => {
+    const displayNames = {
+        'WIN': 'WIN',
+        'LOSS': 'LOSS',
+        'OVER_3': 'OVER 3%',
+        'FROM': `from: ${value}`,
+        'TO': `to: ${value}`
+    };
+
+        return displayNames[key] || value;
     }
 
     const clearFilters = () => {
