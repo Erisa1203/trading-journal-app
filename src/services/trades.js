@@ -3,6 +3,25 @@ import { db } from "./firebase";
 import { backgrounds } from "../constants/colors";
 import { useEffect, useState } from "react";
 
+export const INITIAL_TRADE_STATE = ( userId ) =>  {
+    const trade = {
+        STATUS: "",
+        PAIRS: "",
+        ENTRY_DATE: "",
+        EXIT_DATE: "",
+        ENTRY_PRICE: "",
+        EXIT_PRICE: "",
+        LOT: "",
+        DIR: "",
+        RETURN: "",
+        SETUP: "",
+        PATTERN: "",
+        USER_ID: userId,
+        NOTE: "",
+    }
+    return trade
+  };
+
 export const shortLongOptions = [
     { value: 'SHORT', label: 'SHORT', color: backgrounds.blue }, // color を追加
     { value: 'LONG', label: 'LONG', color: backgrounds.red }, // color を追加
@@ -150,7 +169,8 @@ export const getTagByLabel = async (label, userId, path) => {
     try {
         const userDocRef = doc(db, "users", userId);
         const userDocSnap = await getDoc(userDocRef);
-        
+        console.log('label', label)
+
         if (!userDocSnap.exists()) {
             console.error("User document not found!");
             return null;

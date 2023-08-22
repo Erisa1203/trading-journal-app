@@ -1,41 +1,46 @@
 import { Bell, Moon, Plus } from '@phosphor-icons/react'
 import "./_header.styl"
 import React from 'react'
-import { addTrade } from '../../services/trades';
+import { INITIAL_TRADE_STATE, addTrade } from '../../services/trades';
 import { auth } from '../../services/firebase';
 
-const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade }) => {
+const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page, createNewRuleHandle }) => {
     const handleAddTradeBtnClick = async () => {
         const userId = auth.currentUser ? auth.currentUser.uid : null;
     
-        const trade = {
-            STATUS: "",
-            PAIRS: "",
-            ENTRY_DATE: "",
-            EXIT_DATE: "",
-            ENTRY_PRICE: "",
-            EXIT_PRICE: "",
-            LOT: "",
-            DIR: "",
-            RETURN: "",
-            SETUP: "",
-            PATTERN: "",
-            USER_ID: userId, // ここでログインしているユーザーのIDを設定
-            NOTE: "",
-        };
+        const trade = INITIAL_TRADE_STATE(userId);
+
         const id = await addTrade(trade);
         console.log("Added trade with ID: ", id);
         setTradeId(id)
         setSelectedTrade(trade);
         onAddTradeBtnClick(trade)  // 追加したトレードのIDを引数として渡す
-      };
+    };
+
+    const buttonConfigs = {
+        'TradingJournal': {
+            className: "addTradeBtn",
+            onClick: handleAddTradeBtnClick
+        },
+        'Backtest': {
+            className: "addNewBacktestBtn"
+        },
+        'Rules': {
+            className: "addNewRulesBtn",
+            onClick: createNewRuleHandle
+        }
+    };
+    const config = buttonConfigs[page];
+
     return (
         <div className='header'>
             <div className="header__left">
                 <h1 className='header__title'>{title}</h1>
-                <div className="addTradeBtn" onClick={handleAddTradeBtnClick}>
-                    <Plus className='icon-16' />
-                </div>
+                {config && (
+                    <div className={`addBtn ${config.className}`} onClick={config.onClick}>
+                        <Plus className='icon-16' />
+                    </div>
+                )}
             </div>
             <div className="header__right">
                 <div className="darkModeBtn">

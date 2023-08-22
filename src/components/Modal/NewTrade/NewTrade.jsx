@@ -31,7 +31,7 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
     const [selectedSetupOption, setSelectedSetupOption] = useState(null);
     const [setupOptions, handleCreateNewSetupOption] = useCustomSetupCreation([], setDbSetupOptions, setSelectedSetupOption);
     const [currencyOptions, handleCreateNewOption, loading, setLoading] = useCustomOptionCreation([], setDbCurrencyOptions, setSelectedOption);
-    const [ handleCreateNewPatternOption ] = useCustomPatternCreation([], setDbPatternOptions, setSelectedPatternOption);
+    const [patternOptions, handleCreateNewPatternOption ] = useCustomPatternCreation([], setDbPatternOptions, setSelectedPatternOption);
     const [initialContentFromDatabase, setInitialContentFromDatabase] = useState("");
     const [returnValue, setReturnValue] = useState('');
     const [editorHtml, setEditorHtml] = useState('');

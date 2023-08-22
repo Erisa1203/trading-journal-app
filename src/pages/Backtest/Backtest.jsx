@@ -16,17 +16,16 @@ const Backtest = () => {
     <AppContainer>
         <Sidebar page="backtest"/>
         <div className="mainContent" style={!user ? { overflow: 'hidden' } : {}}>
-            <Header title="トレード検証"/>
+            <Header title="トレード検証" page="Backtest"/>
             <div className="inner" style={!user ? { filter: 'blur(3px)' } : {}}>
-                <FilterCards />
+                {/* <FilterCards />
                 <Filter />
-                <FilterUI />
-                <TradeTable />
+                <FilterUI /> */}
+
             </div>
             {!user && <HideContents />}
       </div>
     </AppContainer>
   )
 }
-
 export default Backtest

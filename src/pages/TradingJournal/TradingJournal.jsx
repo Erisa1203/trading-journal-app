@@ -44,6 +44,7 @@ const TradingJournal = () => {
             <div className="mainContent" style={!user ? { overflow: 'hidden' } : {}}>
                 <Header 
                     title="トレード記録"
+                    page="TradingJournal"
                     setTradeId={setTradeId}
                     setSelectedTrade={setSelectedTrade}
                     onAddTradeBtnClick={(newTrade) => {  // 新しいトレード情報を引数として受け取る

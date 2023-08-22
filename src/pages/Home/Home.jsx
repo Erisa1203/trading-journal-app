@@ -35,7 +35,7 @@ const Home = () => {
         <AppContainer>
             <Sidebar page="home"/>
             <div className="mainContent" style={!user ? { overflow: 'hidden' } : {}}>
-                <Header title="ホーム"/>
+                <Header title="ホーム" page="Home"/>
                 <div className="inner" style={!user ? { filter: 'blur(3px)' } : {}}>
                 <TradeTable
                     trades={trades}

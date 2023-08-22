@@ -1,9 +1,14 @@
 import { ArrowRight, Article, Calendar, Camera, CaretDoubleRight, CaretDown, CaretUp, ChartLineUp, CheckSquare, Coin, Crosshair, DotsSixVertical, ListBullets, Palette, Percent, Tag, TextAa, TextHOne, TextHThree, TextHTwo } from 'phosphor-react'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
 import { TextB } from '@phosphor-icons/react';
+import { fetchPatternByLabel, saveRuleUpdateToDb, updatePatternsInRule } from '../../../services/rules';
+import { CustomCreatableSelect } from '../../Select/CustomCreatableSelect';
+import { useCustomPatternCreation } from '../../../hooks/useCustomPatternCreation';
+import { updatePatternsInTrade } from '../../../services/trades';
+import { auth } from '../../../services/firebase';
 
 const currencyOptions = [
     { value: "EURUSD", label: "EURUSD" },
@@ -14,15 +19,67 @@ const currencyOptions = [
     { value: "EURGBP", label: "EURGBP" },
 ];
 
-const NewRule = () => {
+const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId, setRules, ruleId, selectedRule}) => {
     const [startDate, setStartDate] = useState(new Date());
+    const [name, setName] = useState("");
+    const [rule1, setRule1] = useState("");
+    const [rule2, setRule2] = useState("");
+    const [rule3, setRule3] = useState("");
+    const [dbPatternOptions, setDbPatternOptions] = useState([]);
+    const [selectedPatternOption, setSelectedPatternOption] = useState(null);
+    const [patternOptions, handleCreateNewPatternOption ] = useCustomPatternCreation([], setDbPatternOptions, setSelectedPatternOption);
+    
+    const updatePatternOption = async (selectedOption, ruleId) => {
+        setSelectedPatternOption(selectedOption);
+        await updatePatternsInRule(selectedOption, ruleId);
+    };
 
+    const handleInputChange = (e, dbField, localField, setStateFunction) => {
+        const updatedValue = e.target.value;
+    
+        setStateFunction(updatedValue);  // ステートを更新
+    
+        // データベースに更新を保存
+        saveRuleUpdateToDb(dbField, updatedValue, currentDocId);
+    
+        // ローカルのrulesを更新
+        setRules(prevRules => {
+            return prevRules.map(rule => {
+                if (rule.id === currentDocId) {
+                    return { ...rule, [localField]: updatedValue };
+                }
+                return rule;
+            });
+        });
+    };
 
+    const fetchRuleById = async (id) => {
+        return selectedRule;
+    };
+
+    useEffect(() => {
+        const loadRuleData = async () => {
+          if (selectedRule) { // ruleIdがnullやundefinedでない場合のみ実行
+            const ruleData = await fetchRuleById(selectedRule.id);
+            setName(ruleData.name);
+            setRule1(ruleData.rule_1);
+            setRule2(ruleData.rule_2);
+            setRule3(ruleData.rule_3);
+            // pattern を取得
+            const patternTag = await fetchPatternByLabel(ruleData.pattern, auth.currentUser.uid); // 仮定していますが、ruleDataにPATTERNがある場合
+            setSelectedPatternOption(patternTag);
+          }
+        };
+    
+        loadRuleData();
+      }, [selectedRule]); // ruleIdの変更を監視
+
+    // console.log()
   return (
-    <div className='newTrade'>
+    <div className={`newTrade ruleModal ${isNewRuleModalVisible ? 'visible' : ''}`}>
         <div className="newTrade__nav">
-                <div className="newTrade__close">
-                    <CaretDoubleRight className='icon-16' />
+                <div className="newTrade__close" onClick={() => setIsNewRuleModalVisible(false)}>
+                    <CaretDoubleRight className='icon-16'/>
                 </div>
                 <div className="newTrade__next">
                     <CaretDown className='icon-16' />
@@ -35,12 +92,15 @@ const NewRule = () => {
         <div className="tradeInfo">
             <div className="tradeInfo__row">
                 <div className="tradeInfo__title">
-                    <Camera className='icon-16'/>
-                    <span className="tradeInfo__name">THUMBNAIL</span>
+                    <TextHOne className='icon-16'/>
+                    <span className="tradeInfo__name">Name</span>
                 </div>
-                <div className="tradeInfo__right tradeInfo__file">
-                    <button>ファイルを選択</button>
-                    <input type="file" />
+                <div className="tradeInfo__right">
+                    <input 
+                        type="text" 
+                        value={name}
+                        onChange={(e) => handleInputChange(e, "name", "name", setName)}
+                    />
                 </div>
             </div>
             <div className="tradeInfo__row">
@@ -49,12 +109,14 @@ const NewRule = () => {
                     <span className="tradeInfo__name">PATTERN</span>
                 </div>
                 <div className="tradeInfo__right">
-                    <Select
-                        // value={selectedCurrencyOption}
-                        // onChange={handleChangeCurrency}
-                        options={currencyOptions}
-                        className="note-select"
-                        classNamePrefix="note-select"
+                    <CustomCreatableSelect
+                        options={dbPatternOptions}
+                        handleCreateNewOption={async (inputValue) => {
+                            const newOption = await handleCreateNewPatternOption(inputValue);
+                            setSelectedPatternOption(newOption);
+                        }}
+                        selectedOption={selectedPatternOption}
+                        setSelectedOption={(selectedOption) => updatePatternOption(selectedOption, ruleId)}
                     />
                 </div>
             </div>
@@ -64,222 +126,42 @@ const NewRule = () => {
                     <span className="tradeInfo__name">Rule1</span>
                 </div>
                 <div className="tradeInfo__right">
-                    <Select
-                        // value={selectedCurrencyOption}
-                        // onChange={handleChangeCurrency}
-                        options={currencyOptions}
-                        className="note-select"
-                        classNamePrefix="note-select"
+                    <input 
+                        type="text" 
+                        value={rule1}
+                        onChange={(e) => handleInputChange(e, "rule_1", "rule_1", setRule1)}
                     />
                 </div>
             </div>
             <div className="tradeInfo__row">
                 <div className="tradeInfo__title">
                     <CheckSquare className='icon-16'/>
-                    <span className="tradeInfo__name">Rule1</span>
+                    <span className="tradeInfo__name">Rule2</span>
                 </div>
                 <div className="tradeInfo__right">
-                    <Select
-                        // value={selectedCurrencyOption}
-                        // onChange={handleChangeCurrency}
-                        options={currencyOptions}
-                        className="note-select"
-                        classNamePrefix="note-select"
+                    <input 
+                        type="text"
+                        value={rule2}
+                        onChange={(e) => handleInputChange(e, "rule_2", "rule_2", setRule2)}
                     />
                 </div>
             </div>
             <div className="tradeInfo__row">
                 <div className="tradeInfo__title">
                     <CheckSquare className='icon-16'/>
-                    <span className="tradeInfo__name">Rule1</span>
+                    <span className="tradeInfo__name">Rule3</span>
                 </div>
                 <div className="tradeInfo__right">
-                    <Select
-                        // value={selectedCurrencyOption}
-                        // onChange={handleChangeCurrency}
-                        options={currencyOptions}
-                        className="note-select"
-                        classNamePrefix="note-select"
+                    <input 
+                        type="text"
+                        value={rule3}
+                        onChange={(e) => handleInputChange(e, "rule_3", "rule_3", setRule3)}
                     />
                 </div>
             </div>
         </div>
         <div className="noteContent">
             <div className="noteContent__text"  placeholder='type...'>テキスト</div>
-            <div className="textEditor">
-                <div className="textEditor__edit">
-                    <div className="textEditor__item js-text-select">
-                        <span className='textEditor__tilte'>text</span>
-                        <CaretDown className='textEditor__icon'/>
-                    </div>
-                    <div className="textEditor__item js-text-bold">
-                        <TextB className='textEditor__icon'/>
-                    </div>
-                    <div className="textEditor__item js-palette">
-                        <Palette className='textEditor__icon'/>
-                    </div>
-                </div>
-                <div className="ternInto">
-                    <div className="ternInto__title">tern into</div>
-                    <ul className="ternInto__list">
-                        <li className="ternInto__item">
-                            <div className="ternInto__icon">
-                                <TextAa className='icon-16'/>
-                            </div>
-                            <div className="ternInto__desc">text</div>
-                        </li>
-                        <li className="ternInto__item">
-                            <div className="ternInto__icon">
-                                <TextHOne className='icon-16'/>
-                            </div>
-                            <div className="ternInto__desc">Heading 1</div>
-                        </li>
-                        <li className="ternInto__item">
-                            <div className="ternInto__icon">
-                                <TextHTwo className='icon-16'/>
-                            </div>
-                            <div className="ternInto__desc">Heading 2</div>
-                        </li>
-                        <li className="ternInto__item">
-                            <div className="ternInto__icon">
-                                <TextHThree className='icon-16'/>
-                            </div>
-                            <div className="ternInto__desc">Heading 3</div>
-                        </li>
-                        <li className="ternInto__item">
-                            <div className="ternInto__icon">
-                                <ListBullets className='icon-16'/>
-                            </div>
-                            <div className="ternInto__desc">Bullet</div>
-                        </li>
-                    </ul>
-                </div>
-                <div className="paletteNav">
-                    <div className="paletteNav__block">
-                        <div className="paletteNav__title">color</div>
-                        <ul className="paletteNav__list">
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Default</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--gray">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Gray</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--Orange ">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Orange</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--Yellow">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Yellow</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--Green">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Green</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--Blue">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Blue</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--Purple">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Purple</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--Pink">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Pink</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--Red">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Red</div>
-                            </li>
-                        </ul>
-                    </div>
-                    <div className="paletteNav__block">
-                        <div className="paletteNav__title">background</div>
-                        <ul className="paletteNav__list paletteNav__list--bg">
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Default</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--gray">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Gray</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--Orange ">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Orange</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--Yellow">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Yellow</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--Green">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Green</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--Blue">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Blue</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--Purple">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Purple</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--Pink">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Pink</div>
-                            </li>
-                            <li className="paletteNav__item">
-                                <div className="paletteNav__icon paletteNav__icon--Red">
-                                    <TextAa className='icon-16'/>
-                                </div>
-                                <div className="paletteNav__desc">Red</div>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div className="textEditor__nav">
-                    <div className="textEditor__drag">
-                        <DotsSixVertical className='icon-16 textEditor__icon'/>
-                    </div>
-                </div>
-            </div>
         </div>
     </div>
   )

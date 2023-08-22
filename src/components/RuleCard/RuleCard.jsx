@@ -1,27 +1,29 @@
 import React from 'react'
 import "./_ruleCard.styl"
 
-const RuleCard = () => {
-  return (
-    <li className="rules__item">
+const RuleCard = ({ rule, onClick }) => {
+    // console.log(rule)
+
+    return (
+    <li className="rules__item" onClick={onClick}>
         <img src="/img/chart.png" alt="" />
-        <div className="rules__title">DOUBLE TOP REVERSAL</div>
+        <div className="rules__title">{rule.name}</div>
         <ul className="rules__tag">
-        <li>reversal</li>
+            <li>reversal</li>
         </ul>
         <ul className="check-list">
-        <li className='check-list__item'>
-            <span className='check-list__checkbox'></span>
-            <div className="check-list__desc">break out of previous high</div>
-        </li>
-        <li className='check-list__item'>
-            <span className='check-list__checkbox'></span>
-            <div className="check-list__desc">break out of previous high</div>
-        </li>
-        <li className='check-list__item'>
-            <span className='check-list__checkbox'></span>
-            <div className="check-list__desc">break out of previous high</div>
-        </li>
+            <li className='check-list__item'>
+                <span className='check-list__checkbox'></span>
+                <div className="check-list__desc">{rule.rule_1}</div>
+            </li>
+            <li className='check-list__item'>
+                <span className='check-list__checkbox'></span>
+                <div className="check-list__desc">{rule.rule_2}</div>
+            </li>
+            <li className='check-list__item'>
+                <span className='check-list__checkbox'></span>
+                <div className="check-list__desc">{rule.rule_3}</div>
+            </li>
         </ul>
     </li>
   )
