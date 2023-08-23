@@ -7,8 +7,9 @@ import { TextB } from '@phosphor-icons/react';
 import { fetchPatternByLabel, saveRuleUpdateToDb, updatePatternsInRule } from '../../../services/rules';
 import { CustomCreatableSelect } from '../../Select/CustomCreatableSelect';
 import { useCustomPatternCreation } from '../../../hooks/useCustomPatternCreation';
-import { updatePatternsInTrade } from '../../../services/trades';
+import { patternOption, updatePatternsInTrade } from '../../../services/trades';
 import { auth } from '../../../services/firebase';
+import { PatternSelect } from '../../Select/PatternSelect';
 
 const currencyOptions = [
     { value: "EURUSD", label: "EURUSD" },
@@ -27,7 +28,7 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
     const [rule3, setRule3] = useState("");
     const [dbPatternOptions, setDbPatternOptions] = useState([]);
     const [selectedPatternOption, setSelectedPatternOption] = useState(null);
-    const [patternOptions, handleCreateNewPatternOption ] = useCustomPatternCreation([], setDbPatternOptions, setSelectedPatternOption);
+    // const [patternOptions, handleCreateNewPatternOption ] = useCustomPatternCreation([], setDbPatternOptions, setSelectedPatternOption);
     
     const updatePatternOption = async (selectedOption, ruleId) => {
         setSelectedPatternOption(selectedOption);
@@ -66,15 +67,16 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
             setRule2(ruleData.rule_2);
             setRule3(ruleData.rule_3);
             // pattern を取得
-            const patternTag = await fetchPatternByLabel(ruleData.pattern, auth.currentUser.uid); // 仮定していますが、ruleDataにPATTERNがある場合
-            setSelectedPatternOption(patternTag);
+            const matchingPatternOption = ruleData.pattern 
+            ? patternOption.find(option => option.value === ruleData.pattern)
+            : null;
+            setSelectedPatternOption(matchingPatternOption ? matchingPatternOption : "");
           }
         };
     
         loadRuleData();
       }, [selectedRule]); // ruleIdの変更を監視
 
-    // console.log()
   return (
     <div className={`newTrade ruleModal ${isNewRuleModalVisible ? 'visible' : ''}`}>
         <div className="newTrade__nav">
@@ -106,27 +108,23 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
             <div className="tradeInfo__row">
                 <div className="tradeInfo__title">
                     <ChartLineUp className='icon-16'/>
-                    <span className="tradeInfo__name">DIR</span>
+                    <span className="tradeInfo__name">PATTERN</span>
                 </div>
                 <div className="tradeInfo__right">
-                    <CustomCreatableSelect
-                        options={dbPatternOptions}
-                        handleCreateNewOption={async (inputValue) => {
-                            const newOption = await handleCreateNewPatternOption(inputValue);
-                            setSelectedPatternOption(newOption);
-                        }}
-                        selectedOption={selectedPatternOption}
-                        setSelectedOption={(selectedOption) => updatePatternOption(selectedOption, ruleId)}
+                    <PatternSelect 
+                        selectedPatternOption={selectedPatternOption} 
+                        setSelectedPatternOption={setSelectedPatternOption}
+                        updatePatternOption={(selectedPatternOption) => updatePatternOption(selectedPatternOption, ruleId)}
                     />
                 </div>
             </div>
             <div className="tradeInfo__row">
                 <div className="tradeInfo__title">
                     <ChartLineUp className='icon-16'/>
-                    <span className="tradeInfo__name">PATTERN</span>
+                    <span className="tradeInfo__name">SETUP</span>
                 </div>
                 <div className="tradeInfo__right">
-                    <CustomCreatableSelect
+                    {/* <CustomCreatableSelect
                         options={dbPatternOptions}
                         handleCreateNewOption={async (inputValue) => {
                             const newOption = await handleCreateNewPatternOption(inputValue);
@@ -134,7 +132,7 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
                         }}
                         selectedOption={selectedPatternOption}
                         setSelectedOption={(selectedOption) => updatePatternOption(selectedOption, ruleId)}
-                    />
+                    /> */}
                 </div>
             </div>
             <div className="tradeInfo__row">
