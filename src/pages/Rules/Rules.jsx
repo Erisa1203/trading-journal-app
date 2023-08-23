@@ -7,7 +7,7 @@ import NewRule from '../../components/Modal/NewRule/NewRule'
 import HideContents from '../../components/HideContents/HideContents'
 import { UserContext } from '../../contexts/UserContext'
 import AppContainer from '../../components/Container/AppContainer'
-import { addNewRule } from "../../services/rules";
+import { addNewRule, fetchRuleById } from "../../services/rules";
 
 const Rules = () => {
     const { user } = useContext(UserContext);
@@ -21,8 +21,8 @@ const Rules = () => {
     const handleRuleCardClick = (rule) => {
         setSelectedRule(rule);
         setIsNewRuleModalVisible(true);
-        setRuleId(rule.id)
-        setCurrentDocId(rule.id)
+        setRuleId(rule.ID)
+        setCurrentDocId(rule.ID)
     }
     
     
@@ -30,7 +30,7 @@ const Rules = () => {
       const db = getFirestore();
       const rulesCollection = collection(db, "rules");
       const ruleSnapshot = await getDocs(rulesCollection);
-      const ruleList = ruleSnapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      const ruleList = ruleSnapshot.docs.map(doc => ({ ID: doc.ID, ...doc.data() }));
       return ruleList;
     }
 
@@ -51,15 +51,15 @@ const Rules = () => {
             const updatedRules = await fetchRules(); // 新しいルールを取得します
             setRuleId(newDocId)
             setRules(updatedRules); // 最新のルールのリストでstateを更新します
+            const newRuleDetails = await fetchRuleById(newDocId);
+            setSelectedRule(newRuleDetails);
         } catch (e) {
             console.error("エラーが発生しました:", e);
         }
+        setIsNewRuleModalVisible(true);
 
-        setIsNewRuleModalVisible(true)
     }
     
-
-    // console.log('rules', rules)
     return (
         <AppContainer>
         <Sidebar page="rules"/>
@@ -75,7 +75,7 @@ const Rules = () => {
                         {rules.length > 0 ? (
                             rules.map((rule, index) => (
                                 <RuleCard 
-                                    key={rule.id} 
+                                    key={rule.ID} 
                                     rule={rule}
                                     onClick={() => handleRuleCardClick(rule)}
                                 />

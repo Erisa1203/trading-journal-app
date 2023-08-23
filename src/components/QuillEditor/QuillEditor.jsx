@@ -20,7 +20,7 @@ const modules = {
 const DEBOUNCE_DURATION = 2000; // 例: 2秒
 
 
-function MyEditor({ tradeId, content, onContentChange }) { // <-- contentをpropsとして受け取る
+function MyEditor({ id, content, onContentChange, collectionName }) { // <-- contentをpropsとして受け取る
   const [editorHtml, setEditorHtml] = useState(content || ""); // <-- 初期値としてcontentを使用
 
   useEffect(() => {
@@ -29,14 +29,14 @@ function MyEditor({ tradeId, content, onContentChange }) { // <-- contentをprop
 
   const debouncedAutoSave = debounce(async (html) => { // <-- htmlを引数として受け取る
     try {
-      if (tradeId) {
-        const tradeRef = doc(db, "journal", tradeId);
+      if (id) {
+        const tradeRef = doc(db, collectionName, id);
         await updateDoc(tradeRef, {
           NOTE: html, // <-- 引数として渡されたhtmlを使用
           timestamp: Timestamp.fromDate(new Date()),
         });
       } else {
-        console.error("No tradeId provided!"); 
+        console.error("No id provided!"); 
       }
     } catch (error) {
       console.error("Error auto-saving the note:", error);
@@ -45,7 +45,6 @@ function MyEditor({ tradeId, content, onContentChange }) { // <-- contentをprop
   
   function handleChange(html) {
     setEditorHtml(html);
-    console.log('editorHtml', editorHtml)
     debouncedAutoSave(html); // <-- htmlをdebouncedAutoSaveへ渡す
     if (onContentChange) {
       onContentChange(html);  // 親コンポーネントに変更を伝える

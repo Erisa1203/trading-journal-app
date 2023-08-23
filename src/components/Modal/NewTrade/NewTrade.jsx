@@ -307,9 +307,10 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
         </div>
         <div className="noteContent">
             <MyEditor 
-                tradeId={tradeId} 
+                id={tradeId} 
                 content={initialContentFromDatabase}
                 onContentChange={(newContent) => setEditorHtml(newContent)} 
+                collectionName="journal"
             />            
             <div className="textEditor">
                 <div className="textEditor__edit">

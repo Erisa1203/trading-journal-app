@@ -7,19 +7,22 @@ export async function addNewRule() {
     const userId = auth.currentUser ? auth.currentUser.uid : null;
 
     const newRule = {
-        name: "",
-        rule_1: "",
-        rule_2: "",
-        rule_3: "",
-        notes: "",
-        pattern: "",
-        setup: "",
-        user_id: userId
+        NAME: "",
+        RULE_1: "",
+        RULE_2: "",
+        RULE_3: "",
+        NOTES: "",
+        PATTERN: "",
+        SETUP: "",
+        USER_ID: userId,
+        ID: ""
     };
 
     try {
         const docRef = await addDoc(rulesCollection, newRule);
-        newRule.id = docRef.id;
+        newRule.ID = docRef.id;
+        await updateDoc(docRef, { ID: docRef.id }); // IDを更新
+
         console.log("新しいルールが追加されました。ドキュメントID:", docRef.id);
         return docRef.id;
     } catch (e) {
@@ -40,6 +43,21 @@ export const saveRuleUpdateToDb = async (fieldName, value, docId) => {
     }
 }
 
+export const fetchRuleById = async (id) => {
+    try {
+        const docRef = doc(collection(db, "rules"), id);
+        const docSnapshot = await getDoc(docRef);
+        if (docSnapshot.exists()) {
+            return docSnapshot.data();
+        } else {
+            console.error("ドキュメントが存在しません");
+            return null;
+        }
+    } catch (error) {
+        console.error("ドキュメントの取得中にエラーが発生しました:", error);
+        return null;
+    }
+}
 
 export const updateFieldInRule = async (fieldName, inputValue, ruleId) => {
     if (inputValue === undefined) {
@@ -72,8 +90,8 @@ export const updateFieldInRule = async (fieldName, inputValue, ruleId) => {
     }
 };
 
-export const updatePatternsInRule = (selectedOption, ruleId) => updateFieldInRule('pattern', selectedOption, ruleId);
-export const updateSetupInRule = (selectedOption, ruleId) => updateFieldInRule('setup', selectedOption, ruleId);
+export const updatePatternsInRule = (selectedOption, ruleId) => updateFieldInRule('PATTERN', selectedOption, ruleId);
+export const updateSetupInRule = (selectedOption, ruleId) => updateFieldInRule('SETUP', selectedOption, ruleId);
 
 export const fetchPatternByLabel = async (label, userId) => {
     try {

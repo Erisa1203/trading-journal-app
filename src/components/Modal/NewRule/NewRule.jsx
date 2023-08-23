@@ -11,6 +11,7 @@ import { getTagByLabel, patternOption, updatePatternsInTrade } from '../../../se
 import { auth } from '../../../services/firebase';
 import { PatternSelect } from '../../Select/PatternSelect';
 import { useCustomSetupCreation } from '../../../hooks/useCustomSetupCreation';
+import MyEditor from '../../QuillEditor/QuillEditor';
 
 const currencyOptions = [
     { value: "EURUSD", label: "EURUSD" },
@@ -30,7 +31,8 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
     const [dbSetupOptions, setDbSetupOptions] = useState([]);
     const [selectedPatternOption, setSelectedPatternOption] = useState(null);
     const [selectedSetupOption, setSelectedSetupOption] = useState(null);
-
+    const [noteContentFromDb, setNoteContentFromDb] = useState("");
+    const [editorHtml, setEditorHtml] = useState('');
     const [setupOptions, handleCreateNewSetupOption] = useCustomSetupCreation([], setDbSetupOptions, setSelectedSetupOption);
 
     const updateSetupOption = async (selectedOption, ruleId) => {
@@ -64,18 +66,19 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
     useEffect(() => {
         const loadrule = async () => {
           if (selectedRule) { // ruleIdがnullやundefinedでない場合のみ実行
-            const rule = await fetchRuleById(selectedRule.id);
-            setName(rule.name);
-            setRule1(rule.rule_1);
-            setRule2(rule.rule_2);
-            setRule3(rule.rule_3);
+            const rule = await fetchRuleById(selectedRule.ID);
+            setName(rule.NAME);
+            setRule1(rule.RULE_1);
+            setRule2(rule.RULE_2);
+            setRule3(rule.RULE_3);
+            setNoteContentFromDb(rule.NOTE)
 
-            const setupTag = await getTagByLabel(rule.setup, rule.user_id, 'setup');
+            const setupTag = await getTagByLabel(rule.SETUP, rule.USER_ID, 'setup');
             setSelectedSetupOption(setupTag);
 
             // pattern を取得
-            const matchingPatternOption = rule.pattern 
-            ? patternOption.find(option => option.value === rule.pattern)
+            const matchingPatternOption = rule.PATTERN 
+            ? patternOption.find(option => option.value === rule.PATTERN)
             : null;
             setSelectedPatternOption(matchingPatternOption ? matchingPatternOption : "");
           }
@@ -91,7 +94,7 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
             if (rule.id === ruleId) {
                 return {
                     ...rule,
-                    pattern: value.value
+                    PATTERN: value.value
                 };
             }
             return rule;
@@ -124,7 +127,7 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
                     <input 
                         type="text" 
                         value={name}
-                        onChange={(e) => handleInputChange(e, "name", "name", setName)}
+                        onChange={(e) => handleInputChange(e, "NAME", "NAME", setName)}
                     />
                 </div>
             </div>
@@ -167,7 +170,7 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
                     <input 
                         type="text" 
                         value={rule1}
-                        onChange={(e) => handleInputChange(e, "rule_1", "rule_1", setRule1)}
+                        onChange={(e) => handleInputChange(e, "RULE_1", "RULE_1", setRule1)}
                     />
                 </div>
             </div>
@@ -180,7 +183,7 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
                     <input 
                         type="text"
                         value={rule2}
-                        onChange={(e) => handleInputChange(e, "rule_2", "rule_2", setRule2)}
+                        onChange={(e) => handleInputChange(e, "RULE_2", "RULE_2", setRule2)}
                     />
                 </div>
             </div>
@@ -193,13 +196,18 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
                     <input 
                         type="text"
                         value={rule3}
-                        onChange={(e) => handleInputChange(e, "rule_3", "rule_3", setRule3)}
+                        onChange={(e) => handleInputChange(e, "RULE_3", "RULE_3", setRule3)}
                     />
                 </div>
             </div>
         </div>
         <div className="noteContent">
-            <div className="noteContent__text"  placeholder='type...'>テキスト</div>
+            <MyEditor 
+                id={ruleId} 
+                content={noteContentFromDb}
+                onContentChange={(newContent) => setEditorHtml(newContent)} 
+                collectionName="rules"
+            />  
         </div>
     </div>
   )

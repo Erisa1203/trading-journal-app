@@ -188,6 +188,7 @@ export const getTagByLabel = async (label, userId, path) => {
         }
         
         const matchingTag = tags.find(tag => tag.label === label);
+
         return matchingTag || null;
     } catch (error) {
         console.error(`Error fetching ${path} by label:`, error);
