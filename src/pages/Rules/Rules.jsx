@@ -60,6 +60,7 @@ const Rules = () => {
 
     }
     
+    console.log('rules', rules)
     return (
         <AppContainer>
         <Sidebar page="rules"/>

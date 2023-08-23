@@ -51,7 +51,7 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
         // ローカルのrulesを更新
         setRules(prevRules => {
             return prevRules.map(rule => {
-                if (rule.id === currentDocId) {
+                if (rule.ID === currentDocId) {
                     return { ...rule, [localField]: updatedValue };
                 }
                 return rule;
@@ -91,7 +91,7 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
         setSelectedPatternOption(value);
         await updatePatternsInRule(value, ruleId);
         const updatedRules = rules.map(rule => {
-            if (rule.id === ruleId) {
+            if (rule.ID === ruleId) {
                 return {
                     ...rule,
                     PATTERN: value.value
