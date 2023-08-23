@@ -12,18 +12,24 @@ const RuleCard = ({ rule, onClick }) => {
             <li>reversal</li>
         </ul>
         <ul className="check-list">
-            <li className='check-list__item'>
-                <span className='check-list__checkbox'></span>
-                <div className="check-list__desc">{rule.rule_1}</div>
-            </li>
-            <li className='check-list__item'>
-                <span className='check-list__checkbox'></span>
-                <div className="check-list__desc">{rule.rule_2}</div>
-            </li>
-            <li className='check-list__item'>
-                <span className='check-list__checkbox'></span>
-                <div className="check-list__desc">{rule.rule_3}</div>
-            </li>
+            {rule.rule_1 && (
+                <li className='check-list__item'>
+                    <span className='check-list__checkbox'></span>
+                    <div className="check-list__desc">{rule.rule_1}</div>
+                </li>
+            )}
+            {rule.rule_2 && (
+                <li className='check-list__item'>
+                    <span className='check-list__checkbox'></span>
+                    <div className="check-list__desc">{rule.rule_2}</div>
+                </li>
+            )}
+            {rule.rule_3 && (
+                <li className='check-list__item'>
+                    <span className='check-list__checkbox'></span>
+                    <div className="check-list__desc">{rule.rule_3}</div>
+                </li>
+            )}
         </ul>
     </li>
   )
