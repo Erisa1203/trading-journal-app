@@ -171,10 +171,11 @@ export const updateExitPriceInTrade = async (inputValue, tradeId) => {
 };
 
 export const getTagByLabel = async (label, userId, path) => {
+    
     try {
         const userDocRef = doc(db, "users", userId);
         const userDocSnap = await getDoc(userDocRef);
-
+        
         if (!userDocSnap.exists()) {
             console.error("User document not found!");
             return null;

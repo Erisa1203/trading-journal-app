@@ -1,9 +1,10 @@
 import { getFirestore, collection, addDoc, doc, setDoc, getDoc, Timestamp, updateDoc } from "firebase/firestore";
-import { db } from "./firebase";
+import { auth, db } from "./firebase";
 
 export async function addNewRule() {
     const db = getFirestore();
     const rulesCollection = collection(db, "rules");
+    const userId = auth.currentUser ? auth.currentUser.uid : null;
 
     const newRule = {
         name: "",
@@ -12,6 +13,8 @@ export async function addNewRule() {
         rule_3: "",
         notes: "",
         pattern: "",
+        setup: "",
+        user_id: userId
     };
 
     try {
@@ -70,6 +73,7 @@ export const updateFieldInRule = async (fieldName, inputValue, ruleId) => {
 };
 
 export const updatePatternsInRule = (selectedOption, ruleId) => updateFieldInRule('pattern', selectedOption, ruleId);
+export const updateSetupInRule = (selectedOption, ruleId) => updateFieldInRule('setup', selectedOption, ruleId);
 
 export const fetchPatternByLabel = async (label, userId) => {
     try {

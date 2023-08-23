@@ -4,12 +4,13 @@ import Select from "react-select";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
 import { TextB } from '@phosphor-icons/react';
-import { fetchPatternByLabel, saveRuleUpdateToDb, updatePatternsInRule } from '../../../services/rules';
+import { fetchPatternByLabel, saveRuleUpdateToDb, updatePatternsInRule, updateSetupInRule } from '../../../services/rules';
 import { CustomCreatableSelect } from '../../Select/CustomCreatableSelect';
 import { useCustomPatternCreation } from '../../../hooks/useCustomPatternCreation';
-import { patternOption, updatePatternsInTrade } from '../../../services/trades';
+import { getTagByLabel, patternOption, updatePatternsInTrade } from '../../../services/trades';
 import { auth } from '../../../services/firebase';
 import { PatternSelect } from '../../Select/PatternSelect';
+import { useCustomSetupCreation } from '../../../hooks/useCustomSetupCreation';
 
 const currencyOptions = [
     { value: "EURUSD", label: "EURUSD" },
@@ -26,13 +27,15 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
     const [rule1, setRule1] = useState("");
     const [rule2, setRule2] = useState("");
     const [rule3, setRule3] = useState("");
-    const [dbPatternOptions, setDbPatternOptions] = useState([]);
+    const [dbSetupOptions, setDbSetupOptions] = useState([]);
     const [selectedPatternOption, setSelectedPatternOption] = useState(null);
-    // const [patternOptions, handleCreateNewPatternOption ] = useCustomPatternCreation([], setDbPatternOptions, setSelectedPatternOption);
-    
-    const updatePatternOption = async (selectedOption, ruleId) => {
-        setSelectedPatternOption(selectedOption);
-        await updatePatternsInRule(selectedOption, ruleId);
+    const [selectedSetupOption, setSelectedSetupOption] = useState(null);
+
+    const [setupOptions, handleCreateNewSetupOption] = useCustomSetupCreation([], setDbSetupOptions, setSelectedSetupOption);
+
+    const updateSetupOption = async (selectedOption, ruleId) => {
+        setSelectedSetupOption(selectedOption);
+        await updateSetupInRule(selectedOption, ruleId);
     };
 
     const handleInputChange = (e, dbField, localField, setStateFunction) => {
@@ -59,23 +62,35 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
     };
 
     useEffect(() => {
-        const loadRuleData = async () => {
+        const loadrule = async () => {
           if (selectedRule) { // ruleIdがnullやundefinedでない場合のみ実行
-            const ruleData = await fetchRuleById(selectedRule.id);
-            setName(ruleData.name);
-            setRule1(ruleData.rule_1);
-            setRule2(ruleData.rule_2);
-            setRule3(ruleData.rule_3);
+            const rule = await fetchRuleById(selectedRule.id);
+            setName(rule.name);
+            setRule1(rule.rule_1);
+            setRule2(rule.rule_2);
+            setRule3(rule.rule_3);
+
+            const setupTag = await getTagByLabel(rule.setup, rule.user_id, 'setup');
+            setSelectedSetupOption(setupTag);
+
             // pattern を取得
-            const matchingPatternOption = ruleData.pattern 
-            ? patternOption.find(option => option.value === ruleData.pattern)
+            const matchingPatternOption = rule.pattern 
+            ? patternOption.find(option => option.value === rule.pattern)
             : null;
             setSelectedPatternOption(matchingPatternOption ? matchingPatternOption : "");
           }
         };
     
-        loadRuleData();
-      }, [selectedRule]); // ruleIdの変更を監視
+    loadrule();
+    }, [selectedRule]); // ruleIdの変更を監視
+
+    const createUpdateFunction = (setState, updateFunctionName) => {
+        return async (value, tradeId) => {
+            setState(value);
+            await updateFunctionName(value, tradeId);
+        };
+    };
+    const updatePatternOption = createUpdateFunction(setSelectedPatternOption, updatePatternsInRule);
 
   return (
     <div className={`newTrade ruleModal ${isNewRuleModalVisible ? 'visible' : ''}`}>
@@ -124,15 +139,15 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
                     <span className="tradeInfo__name">SETUP</span>
                 </div>
                 <div className="tradeInfo__right">
-                    {/* <CustomCreatableSelect
-                        options={dbPatternOptions}
+                    <CustomCreatableSelect
+                        options={dbSetupOptions}
                         handleCreateNewOption={async (inputValue) => {
-                            const newOption = await handleCreateNewPatternOption(inputValue);
-                            setSelectedPatternOption(newOption);
+                            const newOption = await handleCreateNewSetupOption(inputValue);
+                            setSelectedSetupOption(newOption);
                         }}
-                        selectedOption={selectedPatternOption}
-                        setSelectedOption={(selectedOption) => updatePatternOption(selectedOption, ruleId)}
-                    /> */}
+                        selectedOption={selectedSetupOption}
+                        setSelectedOption={(selectedOption) => updateSetupOption(selectedOption, ruleId)}
+                    />
                 </div>
             </div>
             <div className="tradeInfo__row">
