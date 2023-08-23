@@ -71,13 +71,17 @@ const Rules = () => {
                 />
                 <div className="inner" style={!user ? { filter: 'blur(3px)' } : {}}>
                     <ul className="rules">
-                        {rules.map((rule, index) => (
-                            <RuleCard 
-                                key={rule.id} 
-                                rule={rule}
-                                onClick={() => handleRuleCardClick(rule)}
-                            />
-                        ))}
+                        {rules.length > 0 ? (
+                            rules.map((rule, index) => (
+                                <RuleCard 
+                                    key={rule.id} 
+                                    rule={rule}
+                                    onClick={() => handleRuleCardClick(rule)}
+                                />
+                            ))
+                        ) : (
+                            <p>表示できるルールはありません。</p>
+                        )}
                     </ul>
                 </div>
                 <NewRule 
