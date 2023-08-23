@@ -27,6 +27,11 @@ export const shortLongOptions = [
     { value: 'LONG', label: 'LONG', color: backgrounds.red }, // color を追加
 ];
 
+export const patternOption = [
+    { value: 'REVERSAL', label: 'REVERSAL', color: backgrounds.pink }, // color を追加
+    { value: 'CONTINUATION', label: 'CONTINUATION', color: backgrounds.yellow }, // color を追加
+];
+
 export const calculateStatus = (trade) => {
     if (trade.ENTRY_PRICE && trade.EXIT_PRICE) {
         if (trade.DIR === "SHORT") {
@@ -169,7 +174,6 @@ export const getTagByLabel = async (label, userId, path) => {
     try {
         const userDocRef = doc(db, "users", userId);
         const userDocSnap = await getDoc(userDocRef);
-        console.log('label', label)
 
         if (!userDocSnap.exists()) {
             console.error("User document not found!");

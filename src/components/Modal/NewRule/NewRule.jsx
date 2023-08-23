@@ -106,6 +106,23 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
             <div className="tradeInfo__row">
                 <div className="tradeInfo__title">
                     <ChartLineUp className='icon-16'/>
+                    <span className="tradeInfo__name">DIR</span>
+                </div>
+                <div className="tradeInfo__right">
+                    <CustomCreatableSelect
+                        options={dbPatternOptions}
+                        handleCreateNewOption={async (inputValue) => {
+                            const newOption = await handleCreateNewPatternOption(inputValue);
+                            setSelectedPatternOption(newOption);
+                        }}
+                        selectedOption={selectedPatternOption}
+                        setSelectedOption={(selectedOption) => updatePatternOption(selectedOption, ruleId)}
+                    />
+                </div>
+            </div>
+            <div className="tradeInfo__row">
+                <div className="tradeInfo__title">
+                    <ChartLineUp className='icon-16'/>
                     <span className="tradeInfo__name">PATTERN</span>
                 </div>
                 <div className="tradeInfo__right">

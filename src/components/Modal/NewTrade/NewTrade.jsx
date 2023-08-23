@@ -10,9 +10,9 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useCustomOptionCreation } from '../../../hooks/useCustomOptionCreation';
 import { ShortLongSelect } from '../../Select/ShortLongSelect';
 import { useCustomSetupCreation } from '../../../hooks/useCustomSetupCreation';
-import { useCustomPatternCreation } from '../../../hooks/useCustomPatternCreation';
-import { getTagByLabel, shortLongOptions, updateDirInTrade, updateEntryDateInTrade, updateEntryPriceInTrade, updateExitDateInTrade, updateExitPriceInTrade, updateFieldInTrade, updateLotInTrade, updatePairsInTrade, updatePatternsInTrade, updateReturnInTrade, updateSetupInTrade } from '../../../services/trades';
+import { getTagByLabel, patternOption, shortLongOptions, updateDirInTrade, updateEntryDateInTrade, updateEntryPriceInTrade, updateExitDateInTrade, updateExitPriceInTrade, updateFieldInTrade, updateLotInTrade, updatePairsInTrade, updatePatternsInTrade, updateReturnInTrade, updateSetupInTrade } from '../../../services/trades';
 import MyEditor from '../../QuillEditor/QuillEditor';
+import { PatternSelect } from '../../Select/PatternSelect';
 
 const NewTrade = ({ visible, trade, onClose, tradeId }) => {
     const auth = getAuth();
@@ -25,13 +25,10 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
     const [entryPrice, setEntryPrice] = useState('');
     const [exitPrice, setExitPrice] = useState('');
     const [dbSetupOptions, setDbSetupOptions] = useState([]);
-    // console.log('dbCurrencyOptions', dbCurrencyOptions)
-    const [dbPatternOptions, setDbPatternOptions] = useState([]);
     const [selectedPatternOption, setSelectedPatternOption] = useState(null);
     const [selectedSetupOption, setSelectedSetupOption] = useState(null);
     const [setupOptions, handleCreateNewSetupOption] = useCustomSetupCreation([], setDbSetupOptions, setSelectedSetupOption);
     const [currencyOptions, handleCreateNewOption, loading, setLoading] = useCustomOptionCreation([], setDbCurrencyOptions, setSelectedOption);
-    const [patternOptions, handleCreateNewPatternOption ] = useCustomPatternCreation([], setDbPatternOptions, setSelectedPatternOption);
     const [initialContentFromDatabase, setInitialContentFromDatabase] = useState("");
     const [returnValue, setReturnValue] = useState('');
     const [editorHtml, setEditorHtml] = useState('');
@@ -54,7 +51,6 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
     const updatePatternOption = createUpdateFunction(setSelectedPatternOption, updatePatternsInTrade);
     const updateEntryDate = createUpdateFunction(setEntryDate, updateEntryDateInTrade);
     const updateExitDate = createUpdateFunction(setExitDate, updateExitDateInTrade);
-    // console.log('dbSetupOptions', dbSetupOptions)
 
     useEffect(() => {
         if (trade) {
@@ -64,9 +60,6 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
     
                 const setupTag = await getTagByLabel(trade.SETUP, trade.USER_ID, 'setup');
                 setSelectedSetupOption(setupTag);
-    
-                const patternTag = await getTagByLabel(trade.PATTERN, trade.USER_ID, 'patterns');
-                setSelectedPatternOption(patternTag);
             };
             fetchTags();
     
@@ -74,13 +67,18 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
             ? shortLongOptions.find(option => option.value === trade.DIR)
             : null;
             setSelectedDirOption(matchingDirOption ? matchingDirOption : "");
+
+            const matchingPatternOption = trade.PATTERN 
+            ? patternOption.find(option => option.value === trade.PATTERN)
+            : null;
+            
+            setSelectedPatternOption(matchingPatternOption ? matchingPatternOption : "");
             setInitialContentFromDatabase(trade.NOTE)
             setReturnValue(trade.RETURN);
             setLotValue(trade.LOT);
             setEntryPrice(trade.ENTRY_PRICE);
             setExitPrice(trade.EXIT_PRICE);
             setTradeStatus(trade.STATUS)
-            
         }
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -243,16 +241,11 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
                     <span className="tradeInfo__name">PATTERN</span>
                 </div>
                 <div className="tradeInfo__right">
-                <CustomCreatableSelect
-                    options={dbPatternOptions}
-                    handleCreateNewOption={async (inputValue) => {
-                        const newOption = await handleCreateNewPatternOption(inputValue);
-                        setSelectedPatternOption(newOption);
-                    }}
-                    selectedOption={selectedPatternOption}
-                    setSelectedOption={(selectedOption) => updatePatternOption(selectedOption, tradeId)}
-
-                />
+                    <PatternSelect 
+                        selectedPatternOption={selectedPatternOption} 
+                        setSelectedPatternOption={setSelectedPatternOption}
+                        updatePatternOption={(selectedPatternOption) => updatePatternOption(selectedPatternOption, tradeId)}
+                    />
                 </div>
             </div>
             <div className="tradeInfo__row">
