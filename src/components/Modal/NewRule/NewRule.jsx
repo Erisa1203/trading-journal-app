@@ -21,7 +21,7 @@ const currencyOptions = [
     { value: "EURGBP", label: "EURGBP" },
 ];
 
-const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId, setRules, ruleId, selectedRule}) => {
+const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId, setRules, ruleId, selectedRule, rules}) => {
     const [startDate, setStartDate] = useState(new Date());
     const [name, setName] = useState("");
     const [rule1, setRule1] = useState("");
@@ -84,13 +84,21 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
     loadrule();
     }, [selectedRule]); // ruleIdの変更を監視
 
-    const createUpdateFunction = (setState, updateFunctionName) => {
-        return async (value, tradeId) => {
-            setState(value);
-            await updateFunctionName(value, tradeId);
-        };
+    const updatePatternOption = async (value, ruleId) => {
+        setSelectedPatternOption(value);
+        await updatePatternsInRule(value, ruleId);
+        const updatedRules = rules.map(rule => {
+            if (rule.id === ruleId) {
+                return {
+                    ...rule,
+                    pattern: value.value
+                };
+            }
+            return rule;
+        });
+        
+        setRules(updatedRules);
     };
-    const updatePatternOption = createUpdateFunction(setSelectedPatternOption, updatePatternsInRule);
 
   return (
     <div className={`newTrade ruleModal ${isNewRuleModalVisible ? 'visible' : ''}`}>

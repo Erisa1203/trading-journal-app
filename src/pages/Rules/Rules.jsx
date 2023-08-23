@@ -22,6 +22,7 @@ const Rules = () => {
         setSelectedRule(rule);
         setIsNewRuleModalVisible(true);
         setRuleId(rule.id)
+        setCurrentDocId(rule.id)
     }
     
     
@@ -58,7 +59,7 @@ const Rules = () => {
     }
     
 
-    // console.log('ruleId', ruleId)
+    // console.log('rules', rules)
     return (
         <AppContainer>
         <Sidebar page="rules"/>
@@ -91,6 +92,7 @@ const Rules = () => {
                     setRules={setRules}
                     ruleId={ruleId}
                     selectedRule={selectedRule}
+                    rules={rules}
                     
                 />
                 {!user && <HideContents />}
