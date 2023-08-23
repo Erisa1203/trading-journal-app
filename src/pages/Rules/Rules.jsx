@@ -7,7 +7,7 @@ import NewRule from '../../components/Modal/NewRule/NewRule'
 import HideContents from '../../components/HideContents/HideContents'
 import { UserContext } from '../../contexts/UserContext'
 import AppContainer from '../../components/Container/AppContainer'
-import { addNewRule, fetchRuleById } from "../../services/rules";
+import { addNewRule, fetchRuleById, sortRulesByDate } from "../../services/rules";
 
 const Rules = () => {
     const { user } = useContext(UserContext);
@@ -31,7 +31,8 @@ const Rules = () => {
       const rulesCollection = collection(db, "rules");
       const ruleSnapshot = await getDocs(rulesCollection);
       const ruleList = ruleSnapshot.docs.map(doc => ({ ID: doc.ID, ...doc.data() }));
-      return ruleList;
+      return sortRulesByDate(ruleList); // ソート関数を使用
+
     }
 
     useEffect(() => {
@@ -60,7 +61,6 @@ const Rules = () => {
 
     }
     
-    console.log('rules', rules)
     return (
         <AppContainer>
         <Sidebar page="rules"/>

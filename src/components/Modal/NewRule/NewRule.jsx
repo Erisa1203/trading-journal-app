@@ -1,10 +1,10 @@
-import { ArrowRight, Article, Calendar, Camera, CaretDoubleRight, CaretDown, CaretUp, ChartLineUp, CheckSquare, Coin, Crosshair, DotsSixVertical, ListBullets, Palette, Percent, Tag, TextAa, TextHOne, TextHThree, TextHTwo } from 'phosphor-react'
+import { ArrowRight, Article, Calendar, Camera, CaretDoubleRight, CaretDown, CaretUp, ChartLineUp, CheckSquare, Coin, Crosshair, DotsSixVertical, ListBullets, Palette, Percent, Tag, TextAa, TextHOne, TextHThree, TextHTwo, Trash } from 'phosphor-react'
 import React, { useEffect, useState } from 'react'
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
 import { TextB } from '@phosphor-icons/react';
-import { fetchPatternByLabel, saveRuleUpdateToDb, updatePatternsInRule, updateSetupInRule } from '../../../services/rules';
+import { deleteRuleById, fetchPatternByLabel, handleDeleteRule, saveRuleUpdateToDb, updatePatternsInRule, updateSetupInRule } from '../../../services/rules';
 import { CustomCreatableSelect } from '../../Select/CustomCreatableSelect';
 import { useCustomPatternCreation } from '../../../hooks/useCustomPatternCreation';
 import { getTagByLabel, patternOption, updatePatternsInTrade } from '../../../services/trades';
@@ -103,18 +103,34 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
         setRules(updatedRules);
     };
 
+    const handleDeleteRule = async () => {
+        if (!selectedRule) return; // 選択されているルールがない場合は何もしない
+    
+        // Firestoreからドキュメントを削除
+        await deleteRuleById(selectedRule.ID);
+    
+        // ローカルステートからデータを削除
+        const updatedRules = rules.filter(rule => rule.ID !== selectedRule.ID);
+        setRules(updatedRules);
+    
+        // モーダルを閉じる
+        setIsNewRuleModalVisible(false);
+    }
   return (
     <div className={`newTrade ruleModal ${isNewRuleModalVisible ? 'visible' : ''}`}>
         <div className="newTrade__nav">
-                <div className="newTrade__close" onClick={() => setIsNewRuleModalVisible(false)}>
-                    <CaretDoubleRight className='icon-16'/>
-                </div>
-                <div className="newTrade__next">
-                    <CaretDown className='icon-16' />
-                </div>
-                <div className="newTrade__before">
-                    <CaretUp className='icon-16' />
-                </div>
+            <div className="newTrade__close" onClick={() => setIsNewRuleModalVisible(false)}>
+                <CaretDoubleRight className='icon-16'/>
+            </div>
+            <div className="newTrade__next">
+                <CaretDown className='icon-16' />
+            </div>
+            <div className="newTrade__before">
+                <CaretUp className='icon-16' />
+            </div>
+            <div className="newTrade__delete" onClick={handleDeleteRule}>
+                <Trash className='icon-16' />
+            </div>
         </div>
         <h1 className="newTrade__title"  placeholder='名前を追加'></h1>
         <div className="tradeInfo">
