@@ -1,29 +1,17 @@
-import { ArrowRight, Article, Calendar, Camera, CaretDoubleRight, CaretDown, CaretUp, ChartLineUp, CheckSquare, Coin, Crosshair, DotsSixVertical, ListBullets, MagnifyingGlassPlus, Palette, Paperclip, Percent, Tag, TextAa, TextHOne, TextHThree, TextHTwo, Trash } from 'phosphor-react'
+import {  CaretDoubleRight, CaretDown, CaretUp, ChartLineUp, CheckSquare,  TextHOne, Trash } from 'phosphor-react'
 import React, { useEffect, useRef, useState } from 'react'
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
-import { TextB } from '@phosphor-icons/react';
 import { deleteRuleById, fetchPatternByLabel, handleDeleteRule, saveRuleUpdateToDb, updatePatternsInRule, updateSetupInRule } from '../../../services/rules';
 import { CustomCreatableSelect } from '../../Select/CustomCreatableSelect';
-import { useCustomPatternCreation } from '../../../hooks/useCustomPatternCreation';
 import { getTagByLabel, patternOption, updatePatternsInTrade } from '../../../services/trades';
-import { auth } from '../../../services/firebase';
 import { PatternSelect } from '../../Select/PatternSelect';
 import { useCustomSetupCreation } from '../../../hooks/useCustomSetupCreation';
 import MyEditor from '../../QuillEditor/QuillEditor';
 import ImageNav from '../../EditorNav/ImageNav';
 import NavLayer from '../NavLayer/NavLayer'
 import { ImageWrapperContext } from '../../../contexts/ImageWrapperContext';
-
-const currencyOptions = [
-    { value: "EURUSD", label: "EURUSD" },
-    { value: "EURJPY", label: "EURJPY" },
-    { value: "EURGBP", label: "EURGBP" },
-    { value: "EURGBP", label: "EURGBP" },
-    { value: "EURGBP", label: "EURGBP" },
-    { value: "EURGBP", label: "EURGBP" },
-];
 
 const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId, setRules, ruleId, selectedRule, rules, setSelectedRule}) => {
     const [startDate, setStartDate] = useState(new Date());
@@ -54,14 +42,12 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
         saveRuleUpdateToDb(dbField, updatedValue, currentDocId);
     
         // ローカルのrulesを更新
-        setRules(prevRules => {
-            return prevRules.map(rule => {
-                if (rule.ID === currentDocId) {
-                    return { ...rule, [localField]: updatedValue };
-                }
-                return rule;
-            });
-        });
+        setRules(prevRules => 
+            prevRules.map(rule => 
+                rule.ID === currentDocId ? { ...rule, [localField]: updatedValue } : rule
+            )
+        );
+        
     };
 
     const fetchRuleById = async (id) => {
@@ -70,23 +56,23 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
 
     useEffect(() => {
         const loadrule = async () => {
-          if (selectedRule) { // ruleIdがnullやundefinedでない場合のみ実行
-            const rule = await fetchRuleById(selectedRule.ID);
-            setName(rule.NAME);
-            setRule1(rule.RULE_1);
-            setRule2(rule.RULE_2);
-            setRule3(rule.RULE_3);
-            setNoteContentFromDb(rule.NOTE)
+            if (selectedRule) { // ruleIdがnullやundefinedでない場合のみ実行
+                const rule = await fetchRuleById(selectedRule.ID);
+                setName(rule.NAME);
+                setRule1(rule.RULE_1);
+                setRule2(rule.RULE_2);
+                setRule3(rule.RULE_3);
+                setNoteContentFromDb(rule.NOTE)
 
-            const setupTag = await getTagByLabel(rule.SETUP, rule.USER_ID, 'setup');
-            setSelectedSetupOption(setupTag);
+                const setupTag = await getTagByLabel(rule.SETUP, rule.USER_ID, 'setup');
+                setSelectedSetupOption(setupTag);
 
-            // pattern を取得
-            const matchingPatternOption = rule.PATTERN 
-            ? patternOption.find(option => option.value === rule.PATTERN)
-            : null;
-            setSelectedPatternOption(matchingPatternOption ? matchingPatternOption : "");
-          }
+                // pattern を取得
+                const matchingPatternOption = rule.PATTERN 
+                ? patternOption.find(option => option.value === rule.PATTERN)
+                : null;
+                setSelectedPatternOption(matchingPatternOption ? matchingPatternOption : "");
+            }
         };
     
     loadrule();
@@ -95,18 +81,9 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
     const updatePatternOption = async (value, ruleId) => {
         setSelectedPatternOption(value);
         await updatePatternsInRule(value, ruleId);
-        const updatedRules = rules.map(rule => {
-            if (rule.ID === ruleId) {
-                return {
-                    ...rule,
-                    PATTERN: value.value
-                };
-            }
-            return rule;
-        });
-        
-        setRules(updatedRules);
+        setRules(rules.map(rule => rule.ID === ruleId ? { ...rule, PATTERN: value.value } : rule));
     };
+    
 
     const handleDeleteRule = async () => {
         if (!selectedRule) return; // 選択されているルールがない場合は何もしない
@@ -121,8 +98,6 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
         // モーダルを閉じる
         setIsNewRuleModalVisible(false);
     }
-
-    console.log('rules', rules)
 
     return (
         <ImageWrapperContext.Provider value={{ currentImageWrapper, setCurrentImageWrapper }}>
