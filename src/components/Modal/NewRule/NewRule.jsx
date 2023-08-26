@@ -122,6 +122,7 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
         setIsNewRuleModalVisible(false);
     }
 
+    console.log('rules', rules)
 
     return (
         <ImageWrapperContext.Provider value={{ currentImageWrapper, setCurrentImageWrapper }}>
@@ -182,6 +183,9 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
                                 }}
                                 selectedOption={selectedSetupOption}
                                 setSelectedOption={(selectedOption) => updateSetupOption(selectedOption, ruleId)}
+                                rules={rules}
+                                setRules={setRules}
+                                ruleId={ruleId}
                             />
                         </div>
                     </div>
