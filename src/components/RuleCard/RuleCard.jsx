@@ -3,9 +3,12 @@ import "./_ruleCard.styl"
 
 const RuleCard = ({ rule, onClick }) => {
 
+
     return (
     <li className="rules__item" onClick={onClick}>
-        <img src="/img/chart.png" alt="" />
+        <div className="rules__thumbnail">
+            <img src={rule.THUMBNAIL || '/img/no-image.png'} alt="" />
+        </div>
         <div className="rules__title">{rule.NAME}</div>
         <ul className="rules__tag">
             {rule.PATTERN && (

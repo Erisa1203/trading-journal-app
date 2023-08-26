@@ -168,34 +168,34 @@
     border-right 1px solid $gray-50
     height 100%
 
-.ternInto, .paletteNav
+.editorNav, .paletteNav
     background-color: $white
     border-radius 8px
     padding 16px
     shadow-200()
-    visibility: hidden;
-    opacity: 0;
     position: absolute;
-    z-index: -1;
+    display none
+    z-index 1
 
-.ternInto
-    max-width 150px
+    &.active 
+        display block
 
-.ternInto__title, .paletteNav__title
+.editorNav__title, .paletteNav__title
     font-size 1.2rem
     color $gray-600
     font-weigt 400
     font-en()
 
-.ternInto__list
+.editorNav__list
     margin-top 16px
 
-.ternInto__item, .paletteNav__item
+.editorNav__item, .paletteNav__item
     display flex
     align-items center
     margin-top 8px
+    cursor pointer
 
-.ternInto__icon, .paletteNav__icon
+.editorNav__icon, .paletteNav__icon
     width 32px
     height 32px
     display flex
@@ -204,7 +204,7 @@
     border-radius 8px
     border 1px solid $gray-200
 
-.ternInto__desc, .paletteNav__desc
+.editorNav__desc, .paletteNav__desc
     margin-left 8px
     font-size 1.6rem
     font-en()

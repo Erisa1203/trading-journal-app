@@ -10,6 +10,7 @@ import AppContainer from '../../components/Container/AppContainer'
 import { addNewRule, fetchRuleById, sortRulesByDate } from "../../services/rules";
 
 const Rules = () => {
+
     const { user } = useContext(UserContext);
     const [rules, setRules] = useState([]);
     const [loading, setLoading] = useState(true);
@@ -24,8 +25,7 @@ const Rules = () => {
         setRuleId(rule.ID)
         setCurrentDocId(rule.ID)
     }
-    
-    
+        
     async function fetchRules() {
       const db = getFirestore();
       const rulesCollection = collection(db, "rules");
@@ -79,6 +79,7 @@ const Rules = () => {
                                     key={rule.ID} 
                                     rule={rule}
                                     onClick={() => handleRuleCardClick(rule)}
+                                    selectedRule={selectedRule}
                                 />
                             ))
                         ) : (
@@ -93,6 +94,7 @@ const Rules = () => {
                     setRules={setRules}
                     ruleId={ruleId}
                     selectedRule={selectedRule}
+                    setSelectedRule={setSelectedRule}
                     rules={rules}
                     
                 />

@@ -1,129 +1,163 @@
 import React, { useEffect, useRef, useState } from 'react';
-
+import ReactDOM from 'react-dom';
 import 'react-quill/dist/quill.bubble.css';
-import './QuillEditor.styl'
+import './QuillEditor.styl';
 import { debounce } from 'lodash';
-import { Timestamp, addDoc, collection, doc, updateDoc } from 'firebase/firestore';
+import { Timestamp, doc, getDoc, updateDoc } from 'firebase/firestore';
 import { db } from '../../services/firebase';
 import ReactQuill, { Quill } from 'react-quill';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from '@firebase/storage';
+import { ImageDrop } from 'quill-image-drop-module';
 
+async function fetchNotesFromFirestore(collectionName, id) {
+    if (!id) {
+      console.error("No id provided for fetching notes!");
+      return "";
+    }
+  
+    try {
+      const docRef = doc(db, collectionName, id);
+      const docData = await getDoc(docRef);
+  
+      if (docData.exists()) {
+        return docData.data().NOTES || "";
+      } else {
+        console.error("No document found with given id:", id);
+        return "";
+      }
+    } catch (error) {
+      console.error("Error fetching the note:", error);
+      return "";
+    }
+}
+
+function dataURLtoBlob(dataurl) {
+    let arr = dataurl.split(','), mime = arr[0].match(/:(.*?);/)[1],
+        bstr = atob(arr[1]);
+    let n = bstr.length;
+    let u8arr = new Uint8Array(n);
+    while(n--){
+        u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], {type:mime});
+}
+
+  
+const DEBOUNCE_DURATION = 2000; 
+
+Quill.register('modules/imageDrop', ImageDrop);
 
 const modules = {
-  toolbar: [
-    [{ 'header': '1'}, {'header': '2'}, { 'font': [] }],
-    [{size: []}],
-    ['bold', 'italic', 'underline', 'strike', 'blockquote'],
-    [{'list': 'ordered'}, {'list': 'bullet'}, 
-     {'indent': '-1'}, {'indent': '+1'}],
-    ['link', 'image', 'video'],
-    ['clean']
-  ],
-  dropModule: true,
+    toolbar: [
+        ['link', 'image', 'video'],
+        ['clean']
+    ],
+    imageDrop: true,
 };
 
-class DropModule {
-  constructor(quill, options) {
-    this.quill = quill;
-    this.quill.root.addEventListener('drop', this.handleDrop.bind(this));
-  }
-
-  handleDrop(e) {
-    console.log("DropModule handleDrop triggered"); // このログを追加
-
-    e.preventDefault(); // これがデフォルトのドロップ動作をキャンセルします。
-  }
-}
-
-Quill.register('modules/dropModule', DropModule);
-
-const DEBOUNCE_DURATION = 2000; // 例: 2秒
-
-const storage = getStorage(); // Firebase Storageへの参照
-
+const storage = getStorage();
 async function uploadImage(file) {
-  const storageRef = ref(storage, 'gs://trading-journal-app-c4fa8.appspot.com/' + file.name);
-  const uploadTask = uploadBytesResumable(storageRef, file);
+    // ファイル名を生成する。ここでは簡単のためにタイムスタンプを使用していますが、
+    // 実際の用途に応じて適切な名前付け戦略を選択してください。
+    const timestamp = Date.now();
+    const fileName = `images/${timestamp}.png`; // 例: 'images/1629354820123.png'
 
-  return new Promise((resolve, reject) => {
-    uploadTask.on('state_changed', 
-      (snapshot) => {},
-      (error) => {
-        reject(error);
-      }, 
-      async () => {
-        const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
-        resolve(downloadURL);
-      }
-    );
-  });
+    const storageRef = ref(storage, fileName); // これで子の参照を作成しています。
+    const uploadTask = uploadBytesResumable(storageRef, file);
+
+    return new Promise((resolve, reject) => {
+        uploadTask.on('state_changed',
+            (snapshot) => {},
+            (error) => {
+                reject(error);
+            },
+            async () => {
+                const downloadURL = await getDownloadURL(uploadTask.snapshot.ref);
+                resolve(downloadURL);
+            }
+        );
+    });
 }
 
-function MyEditor({ id, content, onContentChange, collectionName }) { // <-- contentをpropsとして受け取る
-    const [editorHtml, setEditorHtml] = useState(content || ""); // <-- 初期値としてcontentを使用
+
+function MyEditor({ id, content, onContentChange, collectionName }) {
+    const [editorHtml, setEditorHtml] = useState(content || "");
     const quillRef = useRef(null);
 
     useEffect(() => {
         setEditorHtml(content || "");
     }, [content]);
 
+    const handleImageInsertion = async (imageUrl, placeholderIndex, editor) => {
+        editor.deleteText(placeholderIndex, 'アップロード中...'.length);
+        editor.insertEmbed(placeholderIndex, 'image', imageUrl);
+    };
+
+    const handleImageUpload = async (file, editor) => {
+        try {
+            const imageUrl = await uploadImage(file);
+            if (imageUrl) {
+                const range = editor.getSelection(true);
+                editor.insertEmbed(range.index, 'image', imageUrl);
+            }
+        } catch (error) {
+            console.error("Error uploading image:", error);
+        }
+    };
+    
     useEffect(() => {
         if (quillRef.current) {
-        const editor = quillRef.current.getEditor();
-        const container = editor.container;
+            const editor = quillRef.current.getEditor();
     
-        const dropEventListener = async (e) => {
-            e.preventDefault();
-            const files = e.dataTransfer.files;
-            if (files && files.length) {
-              const file = files[0];
-              if (/^image\//.test(file.type)) {
-                try {
-                  const imageUrl = await uploadImage(file);
-                  const range = editor.getSelection();
-                  if (range) {
-                    editor.insertEmbed(range.index, 'image', imageUrl);
-                  } else {
-                    editor.insertEmbed(editor.getLength(), 'image', imageUrl);
-                  }
-                } catch (error) {
-                  console.error("Error uploading image:", error);
-                }
-              }
-            }
-        };
-
-        container.addEventListener('drop', dropEventListener, false);
-
-        // ここでイベントリスナーを削除する
-        return () => {
-            container.removeEventListener('drop', dropEventListener, false);
-        };
+            const handleTextChange = async (delta, oldDelta, source) => {
+                if (source !== 'user') return;
+    
+                delta.ops.forEach(async (op) => {
+                    if (op.insert && op.insert.image && op.insert.image.startsWith('data:image/')) {
+                        const file = dataURLtoBlob(op.insert.image);
+                        handleImageUpload(file, editor);
+                    }
+                });
+            };
+    
+            return () => {
+                editor.off('text-change', handleTextChange);
+            };
         }
     }, []);
 
-  
-  
-
-  
-
+    useEffect(() => {
+        // FirestoreからNOTESを取得
+        async function fetchAndSetNotes() {
+            const notes = await fetchNotesFromFirestore(collectionName, id);
+            setEditorHtml(notes);
+        }
+    
+        if (id && !content) { // idが存在し、contentが空の場合、Firestoreからデータを取得
+            fetchAndSetNotes();
+        } else {
+            setEditorHtml(content || "");
+        }
+    }, [id, content, collectionName]);
+    
+    
 
     const debouncedAutoSave = debounce(async (html) => {
         try {
-          if (id) {
-            const tradeRef = doc(db, collectionName, id);
-            await updateDoc(tradeRef, {
-              NOTE: html,
-              timestamp: Timestamp.fromDate(new Date()),
-            });
-          } else {
-            console.error("No id provided!"); 
-          }
+            if (id) {
+                const tradeRef = doc(db, collectionName, id);
+                await updateDoc(tradeRef, {
+                    NOTES: html,
+                    timestamp: Timestamp.fromDate(new Date()),
+                });
+            } else {
+                console.error("No id provided!");
+            }
         } catch (error) {
-          console.error("Error auto-saving the note:", error);
+            console.error("Error auto-saving the note:", error);
         }
-      }, DEBOUNCE_DURATION);
-  
+    }, DEBOUNCE_DURATION);
+
     function handleChange(html) {
         setEditorHtml(html);
         debouncedAutoSave(html);
@@ -132,17 +166,15 @@ function MyEditor({ id, content, onContentChange, collectionName }) { // <-- con
         }
     }
 
-  return (
-    <ReactQuill 
-      theme="bubble"
-      value={editorHtml}
-      onChange={handleChange}
-      modules={modules}
-      ref={quillRef}
-    />
-  );
+    return (
+        <ReactQuill 
+            theme="bubble"
+            value={editorHtml}
+            onChange={handleChange}
+            modules={modules}
+            ref={quillRef}
+        />
+    );
 }
-
-
 
 export default MyEditor;

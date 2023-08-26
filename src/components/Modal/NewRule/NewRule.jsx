@@ -1,5 +1,5 @@
-import { ArrowRight, Article, Calendar, Camera, CaretDoubleRight, CaretDown, CaretUp, ChartLineUp, CheckSquare, Coin, Crosshair, DotsSixVertical, ListBullets, Palette, Percent, Tag, TextAa, TextHOne, TextHThree, TextHTwo, Trash } from 'phosphor-react'
-import React, { useEffect, useState } from 'react'
+import { ArrowRight, Article, Calendar, Camera, CaretDoubleRight, CaretDown, CaretUp, ChartLineUp, CheckSquare, Coin, Crosshair, DotsSixVertical, ListBullets, MagnifyingGlassPlus, Palette, Paperclip, Percent, Tag, TextAa, TextHOne, TextHThree, TextHTwo, Trash } from 'phosphor-react'
+import React, { useEffect, useRef, useState } from 'react'
 import Select from "react-select";
 import DatePicker from "react-datepicker";
 import 'react-datepicker/dist/react-datepicker.css';
@@ -12,6 +12,9 @@ import { auth } from '../../../services/firebase';
 import { PatternSelect } from '../../Select/PatternSelect';
 import { useCustomSetupCreation } from '../../../hooks/useCustomSetupCreation';
 import MyEditor from '../../QuillEditor/QuillEditor';
+import ImageNav from '../../EditorNav/ImageNav';
+import NavLayer from '../NavLayer/NavLayer'
+import { ImageWrapperContext } from '../../../contexts/ImageWrapperContext';
 
 const currencyOptions = [
     { value: "EURUSD", label: "EURUSD" },
@@ -22,7 +25,7 @@ const currencyOptions = [
     { value: "EURGBP", label: "EURGBP" },
 ];
 
-const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId, setRules, ruleId, selectedRule, rules}) => {
+const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId, setRules, ruleId, selectedRule, rules, setSelectedRule}) => {
     const [startDate, setStartDate] = useState(new Date());
     const [name, setName] = useState("");
     const [rule1, setRule1] = useState("");
@@ -34,6 +37,8 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
     const [noteContentFromDb, setNoteContentFromDb] = useState("");
     const [editorHtml, setEditorHtml] = useState('');
     const [setupOptions, handleCreateNewSetupOption] = useCustomSetupCreation([], setDbSetupOptions, setSelectedSetupOption);
+    const navRef = useRef(null);
+    const [currentImageWrapper, setCurrentImageWrapper] = useState(null);
 
     const updateSetupOption = async (selectedOption, ruleId) => {
         setSelectedSetupOption(selectedOption);
@@ -116,117 +121,131 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
         // モーダルを閉じる
         setIsNewRuleModalVisible(false);
     }
-  return (
-    <div className={`newTrade ruleModal ${isNewRuleModalVisible ? 'visible' : ''}`}>
-        <div className="newTrade__nav">
-            <div className="newTrade__close" onClick={() => setIsNewRuleModalVisible(false)}>
-                <CaretDoubleRight className='icon-16'/>
-            </div>
-            <div className="newTrade__next">
-                <CaretDown className='icon-16' />
-            </div>
-            <div className="newTrade__before">
-                <CaretUp className='icon-16' />
-            </div>
-            <div className="newTrade__delete" onClick={handleDeleteRule}>
-                <Trash className='icon-16' />
-            </div>
-        </div>
-        <h1 className="newTrade__title"  placeholder='名前を追加'></h1>
-        <div className="tradeInfo">
-            <div className="tradeInfo__row">
-                <div className="tradeInfo__title">
-                    <TextHOne className='icon-16'/>
-                    <span className="tradeInfo__name">Name</span>
+
+
+    return (
+        <ImageWrapperContext.Provider value={{ currentImageWrapper, setCurrentImageWrapper }}>
+            <div className={`newTrade ruleModal ${isNewRuleModalVisible ? 'visible' : ''}`}>
+                <div className="newTrade__nav">
+                    <div className="newTrade__close" onClick={() => setIsNewRuleModalVisible(false)}>
+                        <CaretDoubleRight className='icon-16'/>
+                    </div>
+                    <div className="newTrade__next">
+                        <CaretDown className='icon-16' />
+                    </div>
+                    <div className="newTrade__before">
+                        <CaretUp className='icon-16' />
+                    </div>
+                    <div className="newTrade__delete" onClick={handleDeleteRule}>
+                        <Trash className='icon-16' />
+                    </div>
                 </div>
-                <div className="tradeInfo__right">
-                    <input 
-                        type="text" 
-                        value={name}
-                        onChange={(e) => handleInputChange(e, "NAME", "NAME", setName)}
+                <h1 className="newTrade__title"  placeholder='名前を追加'></h1>
+                <div className="tradeInfo">
+                    <div className="tradeInfo__row">
+                        <div className="tradeInfo__title">
+                            <TextHOne className='icon-16'/>
+                            <span className="tradeInfo__name">Name</span>
+                        </div>
+                        <div className="tradeInfo__right">
+                            <input 
+                                type="text" 
+                                value={name}
+                                onChange={(e) => handleInputChange(e, "NAME", "NAME", setName)}
+                            />
+                        </div>
+                    </div>
+                    <div className="tradeInfo__row">
+                        <div className="tradeInfo__title">
+                            <ChartLineUp className='icon-16'/>
+                            <span className="tradeInfo__name">PATTERN</span>
+                        </div>
+                        <div className="tradeInfo__right">
+                            <PatternSelect 
+                                selectedPatternOption={selectedPatternOption} 
+                                setSelectedPatternOption={setSelectedPatternOption}
+                                updatePatternOption={(selectedPatternOption) => updatePatternOption(selectedPatternOption, ruleId)}
+                            />
+                        </div>
+                    </div>
+                    <div className="tradeInfo__row">
+                        <div className="tradeInfo__title">
+                            <ChartLineUp className='icon-16'/>
+                            <span className="tradeInfo__name">SETUP</span>
+                        </div>
+                        <div className="tradeInfo__right">
+                            <CustomCreatableSelect
+                                options={dbSetupOptions}
+                                handleCreateNewOption={async (inputValue) => {
+                                    const newOption = await handleCreateNewSetupOption(inputValue);
+                                    setSelectedSetupOption(newOption);
+                                }}
+                                selectedOption={selectedSetupOption}
+                                setSelectedOption={(selectedOption) => updateSetupOption(selectedOption, ruleId)}
+                            />
+                        </div>
+                    </div>
+                    <div className="tradeInfo__row">
+                        <div className="tradeInfo__title">
+                            <CheckSquare className='icon-16'/>
+                            <span className="tradeInfo__name">Rule1</span>
+                        </div>
+                        <div className="tradeInfo__right">
+                            <input 
+                                type="text" 
+                                value={rule1}
+                                onChange={(e) => handleInputChange(e, "RULE_1", "RULE_1", setRule1)}
+                            />
+                        </div>
+                    </div>
+                    <div className="tradeInfo__row">
+                        <div className="tradeInfo__title">
+                            <CheckSquare className='icon-16'/>
+                            <span className="tradeInfo__name">Rule2</span>
+                        </div>
+                        <div className="tradeInfo__right">
+                            <input 
+                                type="text"
+                                value={rule2}
+                                onChange={(e) => handleInputChange(e, "RULE_2", "RULE_2", setRule2)}
+                            />
+                        </div>
+                    </div>
+                    <div className="tradeInfo__row">
+                        <div className="tradeInfo__title">
+                            <CheckSquare className='icon-16'/>
+                            <span className="tradeInfo__name">Rule3</span>
+                        </div>
+                        <div className="tradeInfo__right">
+                            <input 
+                                type="text"
+                                value={rule3}
+                                onChange={(e) => handleInputChange(e, "RULE_3", "RULE_3", setRule3)}
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div className="noteContent">
+                    <MyEditor 
+                        id={ruleId} 
+                        content={noteContentFromDb}
+                        onContentChange={(newContent) => setEditorHtml(newContent)} 
+                        collectionName="rules"
+                        navRef={navRef}
+                        setCurrentImageWrapper={setCurrentImageWrapper}
+                    /> 
+                    <NavLayer />
+                    <ImageNav
+                        selectedRule={selectedRule}
+                        setSelectedRule={setSelectedRule}
+                        rules={rules}
+                        setRules={setRules}
                     />
                 </div>
             </div>
-            <div className="tradeInfo__row">
-                <div className="tradeInfo__title">
-                    <ChartLineUp className='icon-16'/>
-                    <span className="tradeInfo__name">PATTERN</span>
-                </div>
-                <div className="tradeInfo__right">
-                    <PatternSelect 
-                        selectedPatternOption={selectedPatternOption} 
-                        setSelectedPatternOption={setSelectedPatternOption}
-                        updatePatternOption={(selectedPatternOption) => updatePatternOption(selectedPatternOption, ruleId)}
-                    />
-                </div>
-            </div>
-            <div className="tradeInfo__row">
-                <div className="tradeInfo__title">
-                    <ChartLineUp className='icon-16'/>
-                    <span className="tradeInfo__name">SETUP</span>
-                </div>
-                <div className="tradeInfo__right">
-                    <CustomCreatableSelect
-                        options={dbSetupOptions}
-                        handleCreateNewOption={async (inputValue) => {
-                            const newOption = await handleCreateNewSetupOption(inputValue);
-                            setSelectedSetupOption(newOption);
-                        }}
-                        selectedOption={selectedSetupOption}
-                        setSelectedOption={(selectedOption) => updateSetupOption(selectedOption, ruleId)}
-                    />
-                </div>
-            </div>
-            <div className="tradeInfo__row">
-                <div className="tradeInfo__title">
-                    <CheckSquare className='icon-16'/>
-                    <span className="tradeInfo__name">Rule1</span>
-                </div>
-                <div className="tradeInfo__right">
-                    <input 
-                        type="text" 
-                        value={rule1}
-                        onChange={(e) => handleInputChange(e, "RULE_1", "RULE_1", setRule1)}
-                    />
-                </div>
-            </div>
-            <div className="tradeInfo__row">
-                <div className="tradeInfo__title">
-                    <CheckSquare className='icon-16'/>
-                    <span className="tradeInfo__name">Rule2</span>
-                </div>
-                <div className="tradeInfo__right">
-                    <input 
-                        type="text"
-                        value={rule2}
-                        onChange={(e) => handleInputChange(e, "RULE_2", "RULE_2", setRule2)}
-                    />
-                </div>
-            </div>
-            <div className="tradeInfo__row">
-                <div className="tradeInfo__title">
-                    <CheckSquare className='icon-16'/>
-                    <span className="tradeInfo__name">Rule3</span>
-                </div>
-                <div className="tradeInfo__right">
-                    <input 
-                        type="text"
-                        value={rule3}
-                        onChange={(e) => handleInputChange(e, "RULE_3", "RULE_3", setRule3)}
-                    />
-                </div>
-            </div>
-        </div>
-        <div className="noteContent">
-            <MyEditor 
-                id={ruleId} 
-                content={noteContentFromDb}
-                onContentChange={(newContent) => setEditorHtml(newContent)} 
-                collectionName="rules"
-            />  
-        </div>
-    </div>
-  )
+        </ImageWrapperContext.Provider>
+
+    )
 }
 
 export default NewRule

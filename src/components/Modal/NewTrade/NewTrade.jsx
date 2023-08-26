@@ -325,38 +325,38 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
                         <Palette className='textEditor__icon'/>
                     </div>
                 </div>
-                <div className="ternInto">
-                    <div className="ternInto__title">tern into</div>
-                    <ul className="ternInto__list">
-                        <li className="ternInto__item">
-                            <div className="ternInto__icon">
+                <div className="editorNav">
+                    <div className="editorNav__title">tern into</div>
+                    <ul className="editorNav__list">
+                        <li className="editorNav__item">
+                            <div className="editorNav__icon">
                                 <TextAa className='icon-16'/>
                             </div>
-                            <div className="ternInto__desc">text</div>
+                            <div className="editorNav__desc">text</div>
                         </li>
-                        <li className="ternInto__item">
-                            <div className="ternInto__icon">
+                        <li className="editorNav__item">
+                            <div className="editorNav__icon">
                                 <TextHOne className='icon-16'/>
                             </div>
-                            <div className="ternInto__desc">Heading 1</div>
+                            <div className="editorNav__desc">Heading 1</div>
                         </li>
-                        <li className="ternInto__item">
-                            <div className="ternInto__icon">
+                        <li className="editorNav__item">
+                            <div className="editorNav__icon">
                                 <TextHTwo className='icon-16'/>
                             </div>
-                            <div className="ternInto__desc">Heading 2</div>
+                            <div className="editorNav__desc">Heading 2</div>
                         </li>
-                        <li className="ternInto__item">
-                            <div className="ternInto__icon">
+                        <li className="editorNav__item">
+                            <div className="editorNav__icon">
                                 <TextHThree className='icon-16'/>
                             </div>
-                            <div className="ternInto__desc">Heading 3</div>
+                            <div className="editorNav__desc">Heading 3</div>
                         </li>
-                        <li className="ternInto__item">
-                            <div className="ternInto__icon">
+                        <li className="editorNav__item">
+                            <div className="editorNav__icon">
                                 <ListBullets className='icon-16'/>
                             </div>
-                            <div className="ternInto__desc">Bullet</div>
+                            <div className="editorNav__desc">Bullet</div>
                         </li>
                     </ul>
                 </div>

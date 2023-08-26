@@ -10,6 +10,7 @@ import { FilterProvider } from './contexts/FilterContext';
 import AppProvider from './Provider/AppProvider';
 
 function App() {
+
   return (
     <AppProvider>
       <FilterProvider>
