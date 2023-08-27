@@ -1,0 +1,27 @@
+@import "../../stylus/foundation/*"
+
+.ruleFilter
+    display flex
+    align-items center
+
+.ruleFilter__item
+    border-radius 8px
+    background: #ffffff
+    font-size 1.4rem
+    padding 24px
+    cursor pointer
+
+    &:nth-child(n + 2)
+        margin-left 16px
+
+    &:hover
+        outline 1px solid $brand-800
+        box-shadow: 3px 3px 24px 0px rgba(135, 102, 224, 0.10);
+
+    &.active
+        background $brand-800
+        color #ffffff
+        transition: .3s ease
+
+
+

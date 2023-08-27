@@ -40,14 +40,6 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
     
         // データベースに更新を保存
         saveRuleUpdateToDb(dbField, updatedValue, currentDocId);
-    
-        // ローカルのrulesを更新
-        setRules(prevRules => 
-            prevRules.map(rule => 
-                rule.ID === currentDocId ? { ...rule, [localField]: updatedValue } : rule
-            )
-        );
-        
     };
 
     const fetchRuleById = async (id) => {
@@ -81,7 +73,6 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
     const updatePatternOption = async (value, ruleId) => {
         setSelectedPatternOption(value);
         await updatePatternsInRule(value, ruleId);
-        setRules(rules.map(rule => rule.ID === ruleId ? { ...rule, PATTERN: value.value } : rule));
     };
     
 

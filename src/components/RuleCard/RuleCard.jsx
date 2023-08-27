@@ -1,9 +1,8 @@
 import React from 'react'
 import "./_ruleCard.styl"
 
-const RuleCard = ({ rule, onClick }) => {
-
-
+const RuleCard = ({ rule, onClick, rules, activeFilter }) => {
+    
     return (
     <li className="rules__item" onClick={onClick}>
         <div className="rules__thumbnail">

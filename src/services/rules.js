@@ -1,4 +1,4 @@
-import { getFirestore, collection, addDoc, doc, setDoc, getDoc, Timestamp, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore, collection, getDocs, addDoc, doc, setDoc, getDoc, Timestamp, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
 export async function addNewRule() {
@@ -28,6 +28,14 @@ export async function addNewRule() {
         console.error("ルールの追加中にエラーが発生しました:", e);
         throw e; // エラーを上位の関数に伝える
     }
+}
+
+export const fetchRules = async () => {
+    const db = getFirestore();
+    const rulesCollection = collection(db, "rules");
+    const ruleSnapshot = await getDocs(rulesCollection);
+    const ruleList = ruleSnapshot.docs.map(doc => ({ ID: doc.ID, ...doc.data() }));
+    return sortRulesByDate(ruleList); // ソート関数を使用
 }
 
 export const saveRuleUpdateToDb = async (fieldName, value, docId) => {
@@ -128,7 +136,6 @@ export const parseJapaneseDate = (timestamp) => {
     }
     return timestamp.toDate(); // TimestampオブジェクトをJavaScriptのDateオブジェクトに変換
 }
-
 
 // rulesを日付順にソートする関数
 export const sortRulesByDate = (rules) => {
