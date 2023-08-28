@@ -1,25 +1,43 @@
 import React, { useContext, useEffect, useState } from 'react'
 import { Timestamp } from 'firebase/firestore';
 import "./_tradeTable.styl"
-import { handleSearch, sortByEntryDateAsc, sortByEntryDateDesc } from '../../services/filter';
+import { sortByEntryDateAsc, sortByEntryDateDesc } from '../../services/filter';
 import { TradesContext } from '../../contexts/TradesContext'
+import { subscribeToTradeJournal, useTrades } from '../../services/trades';
+import { UserContext } from '../../contexts/UserContext';
 
-const TradeTable = ({ trades, onTradeRowClick, filteredOption }) => {
-    const { filteredTrades, setFilteredTrade } = useContext(TradesContext);
-    const [isInitialRender, setIsInitialRender] = useState(true); 
+const TradeTable = ({ trades, onTradeRowClick, filterIsActive, setFilterIsActive }) => {
+    const { filteredTrades } = useContext(TradesContext);
     const [dataToDisplay, setDataToDisplay] = useState(trades);  
+    const [originalTrades, setOriginalTrades] = useState([]);
+    const { user } = useContext(UserContext);
+    const [showNoTradesMessage, setShowNoTradesMessage] = useState(false);
 
-    
     useEffect(() => {
-        if (filteredTrades.length === 0) {
-            setIsInitialRender(false);
-            setDataToDisplay(trades); 
-        } else {
-            setDataToDisplay(filteredTrades); 
+        const unsubscribe = subscribeToTradeJournal((trades) => {
+            setOriginalTrades(trades);
+        });
+        setDataToDisplay(sortByEntryDateDesc(trades));
+
+        return () => { // コンポーネントがアンマウントされたときに購読を解除する
+            unsubscribe();
+        };
+    }, []);
+
+    useEffect(() => {
+        if (user) {
+            if(!filterIsActive) {
+                setDataToDisplay(sortByEntryDateDesc(originalTrades));
+            } else if (filterIsActive && filteredTrades.length === 0) {
+                    setShowNoTradesMessage(true);
+            } else {
+                setShowNoTradesMessage(false);
+                setDataToDisplay(sortByEntryDateDesc(filteredTrades));
+            }
         }
-    }, [filteredTrades, trades]);
+    }, [filteredTrades, originalTrades]);
      
-    if (!dataToDisplay || dataToDisplay.length === 0) {
+    if (showNoTradesMessage) {
         return <p className='noTrade'>表示できるトレードはありません。</p>;
     }
 
@@ -41,7 +59,7 @@ const TradeTable = ({ trades, onTradeRowClick, filteredOption }) => {
             </thead>
             <tbody>
             {dataToDisplay && dataToDisplay.length > 0 ?
-                sortByEntryDateDesc(dataToDisplay).map((trade, index) => (
+                dataToDisplay.map((trade, index) => (
                     <tr 
                         key={index} 
                         className="tradeTable__row" 

@@ -17,7 +17,18 @@ const dirOptions = [
     { value: "SHORT", label: "SHORT" },
 ];
 
-const Filter = ({ isActive, dbSetupOptions, setDbSetupOptions, dbPatternOptions, setDbPatternOptions, filteredOption, setFilteredOption, clearFilterIsActive, setClearFilterIsActive, filterUIClearClicked  }) => {
+const Filter = ({ 
+    dbSetupOptions, 
+    setDbSetupOptions, 
+    dbPatternOptions, 
+    setDbPatternOptions, 
+    filteredOption, 
+    setFilteredOption, 
+    clearFilterIsActive, 
+    setClearFilterIsActive, 
+    filterUIClearClicked, 
+    setFilterIsActive  }) => {
+
     const { trades, filteredTrades, setFilteredTrades } = useContext(TradesContext);
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndtDate] = useState('')
@@ -43,6 +54,7 @@ const Filter = ({ isActive, dbSetupOptions, setDbSetupOptions, dbPatternOptions,
     const handleSearch = (e, ignoreFilters = []) => {
         e.preventDefault();
 
+        setFilterIsActive(true)
         // 既にfilteredOptionのいずれかのフィールドが空でない場合、filteredOptionをリセットする
         const hasNonEmptyValues = Object.values(filteredOption).some(value => {
             if (typeof value === 'boolean') {

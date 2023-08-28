@@ -1,7 +1,8 @@
 import { addDoc, collection, doc, getDoc, onSnapshot, setDoc, updateDoc, Timestamp, getFirestore } from "firebase/firestore";
 import { db } from "./firebase";
 import { backgrounds } from "../constants/colors";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
+import { UserContext } from "../contexts/UserContext";
 
 export const INITIAL_TRADE_STATE = ( userId ) =>  {
     const trade = {
@@ -74,6 +75,7 @@ export const getTradeById = async (tradeId) => {
 };
 
 export function subscribeToTradeJournal(callback) {
+
     const journalRef = collection(db, "journal");
   
     return onSnapshot(journalRef, (snapshot) => {
@@ -196,10 +198,11 @@ export const getTagByLabel = async (label, userId, path) => {
     }
 };
 
-export const useTrades = (user) => {
+export const useTrades = () => {
+    const { user } = useContext(UserContext)
     const [trades, setTradesToJournal] = useState([]);
     const [filteredTrades, setFilteredTrades] = useState([]);
-  
+
     useEffect(() => {
       if(!user) {
           setTradesToJournal([]);
