@@ -156,7 +156,6 @@ export const updateExitDateInTrade = (inputValue, tradeId) => updateFieldInTrade
 
 export const updateDirInTrade = async (selectedOption, tradeId) => {
     await updateFieldInTrade('DIR', selectedOption, tradeId);
-
 };
 
 export const updateEntryPriceInTrade = async (inputValue, tradeId) => {

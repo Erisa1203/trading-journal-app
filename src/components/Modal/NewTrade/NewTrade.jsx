@@ -16,8 +16,8 @@ import { PatternSelect } from '../../Select/PatternSelect';
 
 const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
     const auth = getAuth();
-    const [entryDate, setEntryDate] = useState(new Date());
-    const [exitDate, setExitDate] = useState(new Date());
+    const [entryDate, setEntryDate] = useState(null);
+    const [exitDate, setExitDate] = useState(null);
     const [dbCurrencyOptions, setDbCurrencyOptions] = useState([]);
     const [selectedOption, setSelectedOption] = useState(null);
     const [selectedDirOption, setSelectedDirOption] = useState(null);
@@ -41,7 +41,6 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
         };
     };
     
-    // const updateStatusOption = createUpdateFunction(setTradeStatus, updateStatusInTrade);
     const updateSelectedOption = createUpdateFunction(setSelectedOption, updatePairsInTrade);
     const updateDirOption = createUpdateFunction(setSelectedDirOption, updateDirInTrade);
     const updateReturnValue = createUpdateFunction(setReturnValue, updateReturnInTrade);
@@ -81,6 +80,8 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
             setEntryPrice(trade.ENTRY_PRICE);
             setExitPrice(trade.EXIT_PRICE);
             setTradeStatus(trade.STATUS)
+            setEntryDate(trade.ENTRY_DATE)
+            setExitDate(trade.EXIT_DATE)
         }
         const unsubscribe = onAuthStateChanged(auth, (user) => {
             if (user) {
@@ -115,6 +116,8 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
         if (returnValue) {    
             const status = returnValue > 0 ? 'WIN' : (returnValue < 0 ? 'LOSS' : 'BREAKEVEN');
             setTradeStatus(status)
+        } else {
+            setTradeStatus(null)
         }
     }, [returnValue]);
     
