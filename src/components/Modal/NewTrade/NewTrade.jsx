@@ -1,4 +1,4 @@
-import { ArrowRight, Article, Calendar, CaretDoubleRight, CaretDown, CaretUp, ChartLineUp, Coin, Crosshair, DotsSixVertical, ListBullets, Palette, Percent, Tag, TextAa, TextHOne, TextHThree, TextHTwo } from 'phosphor-react'
+import { ArrowRight, Article, Calendar, CaretDoubleRight, CaretDown, CaretUp, ChartLineUp, Coin, Crosshair, DotsSixVertical, ListBullets, Palette, Percent, Tag, TextAa, TextHOne, TextHThree, TextHTwo, Trash } from 'phosphor-react'
 import React, { useEffect, useState } from 'react'
 import "./_newTrade.styl"
 import DatePicker from "react-datepicker";
@@ -10,11 +10,11 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useCustomOptionCreation } from '../../../hooks/useCustomOptionCreation';
 import { ShortLongSelect } from '../../Select/ShortLongSelect';
 import { useCustomSetupCreation } from '../../../hooks/useCustomSetupCreation';
-import { getTagByLabel, patternOption, shortLongOptions, updateDirInTrade, updateEntryDateInTrade, updateEntryPriceInTrade, updateExitDateInTrade, updateExitPriceInTrade, updateFieldInTrade, updateLotInTrade, updatePairsInTrade, updatePatternsInTrade, updateReturnInTrade, updateSetupInTrade } from '../../../services/trades';
+import { calculateStatus, deleteTradeById, getTagByLabel, patternOption, shortLongOptions, updateDirInTrade, updateEntryDateInTrade, updateEntryPriceInTrade, updateExitDateInTrade, updateExitPriceInTrade, updateFieldInTrade, updateLotInTrade, updatePairsInTrade, updatePatternsInTrade, updateReturnInTrade, updateSetupInTrade, updateStatusInTrade } from '../../../services/trades';
 import MyEditor from '../../QuillEditor/QuillEditor';
 import { PatternSelect } from '../../Select/PatternSelect';
 
-const NewTrade = ({ visible, trade, onClose, tradeId }) => {
+const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
     const auth = getAuth();
     const [entryDate, setEntryDate] = useState(new Date());
     const [exitDate, setExitDate] = useState(new Date());
@@ -41,6 +41,7 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
         };
     };
     
+    // const updateStatusOption = createUpdateFunction(setTradeStatus, updateStatusInTrade);
     const updateSelectedOption = createUpdateFunction(setSelectedOption, updatePairsInTrade);
     const updateDirOption = createUpdateFunction(setSelectedDirOption, updateDirInTrade);
     const updateReturnValue = createUpdateFunction(setReturnValue, updateReturnInTrade);
@@ -53,6 +54,7 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
     const updateExitDate = createUpdateFunction(setExitDate, updateExitDateInTrade);
 
     useEffect(() => {
+        
         if (trade) {
             const fetchTags = async () => {
                 const currencyTag = await getTagByLabel(trade.PAIRS, trade.USER_ID, 'customTags');
@@ -108,21 +110,18 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
         return () => unsubscribe();
     }, [trade]); // <-- change to empty array
     
-    useEffect(() => {
-        if (entryPrice && exitPrice) {
-            let status = "";
-    
-            if (trade && trade.DIR === 'SHORT') {
-                status = parseFloat(entryPrice) - parseFloat(exitPrice) > 0 ? 'WIN' : 'LOSS';
-            } else {
-                // Assuming any other case is 'LONG' or the default behavior you want
-                status = parseFloat(exitPrice) - parseFloat(entryPrice) > 0 ? 'WIN' : 'LOSS';
-            }
-    
-            setTradeStatus(status);
+
+    useEffect(() => {  
+        if (returnValue) {    
+            const status = returnValue > 0 ? 'WIN' : (returnValue < 0 ? 'LOSS' : 'BREAKEVEN');
+            setTradeStatus(status)
         }
-    }, [entryPrice, exitPrice, trade]);  // Depend on entryPrice, exitPrice, and trade for re-run
+    }, [returnValue]);
     
+    const onTrashClickHandle = () => {
+        deleteTradeById(tradeId)
+        setIsVisible(false);
+    }
 
     if (loading) {  // <--- add this conditional rendering
         return <div>Loading...</div>;  // or any other loading indicator you'd like to display
@@ -131,6 +130,7 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
   return (
     <div className={`newTrade ${visible ? 'visible' : ''}`}>
         <div className="newTrade__nav">
+            <div className="newTrade__nav__left">
                 <div className="newTrade__close" onClick={onClose}>
                     <CaretDoubleRight className='icon-16' />
                 </div>
@@ -140,6 +140,11 @@ const NewTrade = ({ visible, trade, onClose, tradeId }) => {
                 <div className="newTrade__before">
                     <CaretUp className='icon-16' />
                 </div>
+            </div>
+            <div className="newTrade__trash" onClick={onTrashClickHandle}>
+                <Trash className='icon-16' />
+            </div>
+
         </div>
         <h1 className="newTrade__title" placeholder='新しいトレードを追加'></h1>
         <div className="tradeInfo">

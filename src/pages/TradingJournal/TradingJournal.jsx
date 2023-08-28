@@ -83,6 +83,7 @@ const TradingJournal = () => {
                     />
                     <NewTrade 
                       visible={isVisible}
+                      setIsVisible={setIsVisible}
                       onClose={() => setIsVisible(false)}
                       tradeId={tradeId}
                       trade={selectedTrade}

@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, onSnapshot, setDoc, updateDoc, Timestamp, getFirestore } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, onSnapshot, setDoc, updateDoc, Timestamp, getFirestore, deleteDoc } from "firebase/firestore";
 import { db } from "./firebase";
 import { backgrounds } from "../constants/colors";
 import { useContext, useEffect, useState } from "react";
@@ -34,12 +34,9 @@ export const patternOption = [
 ];
 
 export const calculateStatus = (trade) => {
-    if (trade.ENTRY_PRICE && trade.EXIT_PRICE) {
-        if (trade.DIR === "SHORT") {
-            return trade.ENTRY_PRICE - trade.EXIT_PRICE > 0 ? "WIN" : "LOSS";
-        } else if (trade.DIR === "LONG") {
-            return trade.EXIT_PRICE - trade.ENTRY_PRICE > 0 ? "WIN" : "LOSS";
-        }
+    if (trade.RETURN) {
+        const status = trade.RETURN > 0 ? 'WIN' : (trade.RETURN < 0 ? 'LOSS' : 'BREAKEVEN');
+        return status; 
     }
     return null; 
 }
@@ -144,7 +141,12 @@ export const updateSetupInTrade = (selectedOption, tradeId) => updateFieldInTrad
 
 export const updatePatternsInTrade = (selectedOption, tradeId) => updateFieldInTrade('PATTERN', selectedOption, tradeId);
 
-export const updateReturnInTrade = (inputValue, tradeId) => updateFieldInTrade('RETURN', inputValue, tradeId);
+export const updateReturnInTrade = async (inputValue, tradeId) => {
+    await updateFieldInTrade('RETURN', inputValue, tradeId);
+    const updatedTrade = await getTradeById(tradeId);
+    const status = calculateStatus(updatedTrade);
+    await updateFieldInTrade('STATUS', status, tradeId);
+};
 
 export const updateLotInTrade = (inputValue, tradeId) => updateFieldInTrade('LOT', inputValue, tradeId);
 
@@ -155,21 +157,14 @@ export const updateExitDateInTrade = (inputValue, tradeId) => updateFieldInTrade
 export const updateDirInTrade = async (selectedOption, tradeId) => {
     await updateFieldInTrade('DIR', selectedOption, tradeId);
 
-    const newStatus = await calculateStatus(tradeId);
-    await updateFieldInTrade('STATUS', newStatus, tradeId);
 };
+
 export const updateEntryPriceInTrade = async (inputValue, tradeId) => {
     await updateFieldInTrade('ENTRY_PRICE', inputValue, tradeId);
-    const updatedTrade = await getTradeById(tradeId); // getTradeByIdはtradeIdに基づいてトレードの詳細を取得する関数
-    const status = calculateStatus(updatedTrade);
-    await updateFieldInTrade('STATUS', status, tradeId);
 };
 
 export const updateExitPriceInTrade = async (inputValue, tradeId) => {
     await updateFieldInTrade('EXIT_PRICE', inputValue, tradeId);
-    const updatedTrade = await getTradeById(tradeId); // getTradeByIdはtradeIdに基づいてトレードの詳細を取得する関数
-    const status = calculateStatus(updatedTrade);
-    await updateFieldInTrade('STATUS', status, tradeId);
 };
 
 export const getTagByLabel = async (label, userId, path) => {
@@ -215,4 +210,14 @@ export const useTrades = () => {
       }
     }, [user]);
     return { trades, setTradesToJournal, filteredTrades, setFilteredTrades };
-  }
+}
+
+export const deleteTradeById = async (tradeId) => {
+    try {
+        const tradeRef = doc(db, "journal", tradeId);
+        await deleteDoc(tradeRef);
+        console.log(`Trade with ID ${tradeId} has been successfully deleted.`);
+    } catch (error) {
+        console.error(`Error deleting trade with ID ${tradeId}:`, error);
+    }
+};

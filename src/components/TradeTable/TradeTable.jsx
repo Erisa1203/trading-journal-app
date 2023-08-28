@@ -12,10 +12,13 @@ const TradeTable = ({ trades, onTradeRowClick, filterIsActive, setFilterIsActive
     const [originalTrades, setOriginalTrades] = useState([]);
     const { user } = useContext(UserContext);
     const [showNoTradesMessage, setShowNoTradesMessage] = useState(false);
+    const [noOrgTradesMessage, setNoOrgTradesMessage] = useState(false);
 
     useEffect(() => {
         const unsubscribe = subscribeToTradeJournal((trades) => {
             setOriginalTrades(trades);
+            // console.log('aaa')
+
         });
         setDataToDisplay(sortByEntryDateDesc(trades));
 
@@ -28,9 +31,16 @@ const TradeTable = ({ trades, onTradeRowClick, filterIsActive, setFilterIsActive
         if (user) {
             if(!filterIsActive) {
                 setDataToDisplay(sortByEntryDateDesc(originalTrades));
+                
+                if(originalTrades.length === 0) {
+                    setNoOrgTradesMessage(true);
+                } else {
+                    setNoOrgTradesMessage(false);
+                }
             } else if (filterIsActive && filteredTrades.length === 0) {
-                    setShowNoTradesMessage(true);
+                setShowNoTradesMessage(true);
             } else {
+                setNoOrgTradesMessage(false);
                 setShowNoTradesMessage(false);
                 setDataToDisplay(sortByEntryDateDesc(filteredTrades));
             }
@@ -39,6 +49,10 @@ const TradeTable = ({ trades, onTradeRowClick, filterIsActive, setFilterIsActive
      
     if (showNoTradesMessage) {
         return <p className='noTrade'>表示できるトレードはありません。</p>;
+    }
+
+    if (noOrgTradesMessage) {
+        return <p className='noTrade'>トレード記録はまだありません。</p>;
     }
 
     return (
