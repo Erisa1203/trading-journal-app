@@ -1,5 +1,9 @@
 @import "../../stylus/foundation/*"
 
+.charts
+    display flex
+    align-items center
+
 .chartCard
     background: #ffffff
     border-radius: 8px
@@ -8,6 +12,10 @@
     flex-direction: column
     margin-top 16px
     position relative
+
+    &:nth-child(n + 2) 
+        margin-left 32px
+        
     
 .chartCard--sm
     width 28.6%
@@ -44,6 +52,9 @@
     border 1px solid $gray-200
     padding 8px 14px
     border-radius 30px
+    min-width 112px
+    justify-content: space-between
+    
     &:focus
         outline 1px solid
     select
@@ -58,3 +69,5 @@
 
 .recharts-wrapper
     left -34px
+
+

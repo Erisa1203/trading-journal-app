@@ -15,6 +15,7 @@ export const INITIAL_TRADE_STATE = ( userId ) =>  {
         LOT: "",
         DIR: "",
         RETURN: "",
+        PROFIT: "",
         SETUP: "",
         PATTERN: "",
         USER_ID: userId,
@@ -148,6 +149,8 @@ export const updateReturnInTrade = async (inputValue, tradeId) => {
     await updateFieldInTrade('STATUS', status, tradeId);
 };
 
+export const updateProfitInTrade = (inputValue, tradeId) => updateFieldInTrade('PROFIT', inputValue, tradeId);
+
 export const updateLotInTrade = (inputValue, tradeId) => updateFieldInTrade('LOT', inputValue, tradeId);
 
 export const updateEntryDateInTrade = (inputValue, tradeId) => updateFieldInTrade('ENTRY_DATE', inputValue, tradeId);
@@ -196,20 +199,25 @@ export const useTrades = () => {
     const { user } = useContext(UserContext)
     const [trades, setTradesToJournal] = useState([]);
     const [filteredTrades, setFilteredTrades] = useState([]);
+    const [loading, setLoading] = useState(true);  // loadingステートの初期化
 
     useEffect(() => {
       if(!user) {
           setTradesToJournal([]);
           setFilteredTrades([]);
+          setLoading(false);  // userが存在しない場合は即座にloadingを終了
       } else {
-          const unsubscribe = subscribeToTradeJournal((newTrades) => {
-              setTradesToJournal(newTrades);
-          });
+            const unsubscribe = subscribeToTradeJournal((newTrades) => {
+                setTradesToJournal(newTrades);
+            });
+            setLoading(false);  // データが読み込まれたのでloadingを終了
           return unsubscribe;
       }
     }, [user]);
-    return { trades, setTradesToJournal, filteredTrades, setFilteredTrades };
+
+    return { trades, setTradesToJournal, filteredTrades, setFilteredTrades, loading };  // loadingも返す
 }
+
 
 export const deleteTradeById = async (tradeId) => {
     try {

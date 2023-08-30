@@ -24,7 +24,7 @@ const TradingJournal = () => {
   const [filteredOption, setFilteredOption] = useState(INITIAL_FILTER_STATE)
   const [clearFilterIsActive, setClearFilterIsActive] = useState(false)
   const [filterUIClearClicked, setFilterUIClearClicked] = useState('')
-  const { trades, setTradesToJournal, filteredTrades, setFilteredTrades } = useTrades();
+  const { trades, setTradesToJournal, filteredTrades, setFilteredTrades, loading } = useTrades();
   const [filterIsActive, setFilterIsActive] = useState(false); 
 
   const onTradeRowClickHandle = (trade) => {
@@ -39,7 +39,8 @@ const TradingJournal = () => {
       setTradesToJournal,
       onTradeRowClickHandle,
       filteredTrades,
-      setFilteredTrades
+      setFilteredTrades,
+      loading
     }}>
         <AppContainer>
             <Sidebar page="trading-journal"/>

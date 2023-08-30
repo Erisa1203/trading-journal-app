@@ -1,4 +1,4 @@
-import { ArrowRight, Article, Calendar, CaretDoubleRight, CaretDown, CaretUp, ChartLineUp, Coin, Crosshair, DotsSixVertical, ListBullets, Palette, Percent, Tag, TextAa, TextHOne, TextHThree, TextHTwo, Trash } from 'phosphor-react'
+import { ArrowRight, Article, Bank, Calendar, CaretDoubleRight, CaretDown, CaretUp, ChartLineUp, Coin, Crosshair, CurrencyJpy, DotsSixVertical, ListBullets, Palette, Percent, Tag, TextAa, TextHOne, TextHThree, TextHTwo, Trash } from 'phosphor-react'
 import React, { useEffect, useState } from 'react'
 import "./_newTrade.styl"
 import DatePicker from "react-datepicker";
@@ -10,7 +10,7 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useCustomOptionCreation } from '../../../hooks/useCustomOptionCreation';
 import { ShortLongSelect } from '../../Select/ShortLongSelect';
 import { useCustomSetupCreation } from '../../../hooks/useCustomSetupCreation';
-import { calculateStatus, deleteTradeById, getTagByLabel, patternOption, shortLongOptions, updateDirInTrade, updateEntryDateInTrade, updateEntryPriceInTrade, updateExitDateInTrade, updateExitPriceInTrade, updateFieldInTrade, updateLotInTrade, updatePairsInTrade, updatePatternsInTrade, updateReturnInTrade, updateSetupInTrade, updateStatusInTrade } from '../../../services/trades';
+import { calculateStatus, deleteTradeById, getTagByLabel, patternOption, shortLongOptions, updateDirInTrade, updateEntryDateInTrade, updateEntryPriceInTrade, updateExitDateInTrade, updateExitPriceInTrade, updateFieldInTrade, updateLotInTrade, updatePairsInTrade, updatePatternsInTrade, updateProfitInTrade, updateReturnInTrade, updateSetupInTrade, updateStatusInTrade } from '../../../services/trades';
 import MyEditor from '../../QuillEditor/QuillEditor';
 import { PatternSelect } from '../../Select/PatternSelect';
 
@@ -31,6 +31,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
     const [currencyOptions, handleCreateNewOption, loading, setLoading] = useCustomOptionCreation([], setDbCurrencyOptions, setSelectedOption);
     const [initialContentFromDatabase, setInitialContentFromDatabase] = useState("");
     const [returnValue, setReturnValue] = useState('');
+    const [profitValue, setProfitValue] = useState('');
     const [editorHtml, setEditorHtml] = useState('');
     const [tradeStatus, setTradeStatus] = useState('');
 
@@ -44,6 +45,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
     const updateSelectedOption = createUpdateFunction(setSelectedOption, updatePairsInTrade);
     const updateDirOption = createUpdateFunction(setSelectedDirOption, updateDirInTrade);
     const updateReturnValue = createUpdateFunction(setReturnValue, updateReturnInTrade);
+    const updateProfitValue = createUpdateFunction(setProfitValue, updateProfitInTrade);
     const updateLotValue = createUpdateFunction(setLotValue, updateLotInTrade);
     const updateEntryPrice = createUpdateFunction(setEntryPrice, updateEntryPriceInTrade);
     const updateExitPrice = createUpdateFunction(setExitPrice, updateExitPriceInTrade);
@@ -76,6 +78,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
             setSelectedPatternOption(matchingPatternOption ? matchingPatternOption : "");
             setInitialContentFromDatabase(trade.NOTE)
             setReturnValue(trade.RETURN);
+            setProfitValue(trade.PROFIT);
             setLotValue(trade.LOT);
             setEntryPrice(trade.ENTRY_PRICE);
             setExitPrice(trade.EXIT_PRICE);
@@ -207,6 +210,20 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                         placeholder='EMPTY' 
                         value={returnValue || ''}
                         onChange={(e) => updateReturnValue(e.target.value, tradeId)}
+                    />
+                </div>
+            </div>
+            <div className="tradeInfo__row">
+                <div className="tradeInfo__title">
+                    <Bank className='icon-16'/>
+                    <span className="tradeInfo__name">PROFIT</span>
+                </div>
+                <div className="tradeInfo__right">
+                    <input 
+                        className="tradeInfo__input"  
+                        placeholder='EMPTY' 
+                        value={profitValue || ''}
+                        onChange={(e) => updateProfitValue(e.target.value, tradeId)}
                     />
                 </div>
             </div>
