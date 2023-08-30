@@ -12,6 +12,7 @@ import { subscribeToTradeJournal, useTrades } from '../../services/trades.js';
 import { TradesContext } from '../../contexts/TradesContext'
 import TradeTable from '../../components/TradeTable/TradeTable'
 import { INITIAL_FILTER_STATE } from '../../services/filter'
+import Summary from '../../components/Summary/Summary'
 
 const TradingJournal = () => {
   const { user } = useContext(UserContext)
@@ -54,7 +55,7 @@ const TradingJournal = () => {
                     }}
                 />
                 <div className="inner" style={!user ? { filter: 'blur(3px)' } : {}}>
-                    <FilterCards />
+                    <Summary />
                     <FilterUI 
                         filteredOption={filteredOption}
                         setFilteredOption={setFilteredOption}
