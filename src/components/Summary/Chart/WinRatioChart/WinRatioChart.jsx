@@ -2,14 +2,16 @@ import React, { useContext, useEffect, useState } from 'react';
 import { LineChart, Line, CartesianGrid, XAxis, YAxis, Tooltip } from 'recharts';
 import { TradesContext } from '../../../../contexts/TradesContext';
 import { CaretDown } from 'phosphor-react';
+import { FilterCardsContext } from '../../../../contexts/FilterCardsContext';
 
 const hasTradeData = (data) => {
     return data && data.length > 0;
 };
 
 const WinRatioChart = ({ onUpdateRatio }) => {
-    const { trades } = useContext(TradesContext);
+    const { selectedFilters, setSelectedFilters } = useContext(FilterCardsContext);
 
+    const { trades } = useContext(TradesContext);
     const [chartData, setChartData] = useState([]);
     const [timeframe, setTimeframe] = useState('this year');
     const [winRatios, setWinRatios] = useState({
@@ -41,7 +43,7 @@ const WinRatioChart = ({ onUpdateRatio }) => {
         return totalCount === 0 ? 0 : (winCount / totalCount) * 100;
     };
     
-    const calculateWinRatio = (specificTimeframe) => {
+    const calculateWinRatio = (specificTimeframe, filteredTrades) => {
         const monthlyWins = {};
         const monthlyTrades = {};
         const dailyWins = {};
@@ -57,7 +59,7 @@ const WinRatioChart = ({ onUpdateRatio }) => {
             targetYear -= 2;
         }
         
-        trades.forEach(trade => {
+        filteredTrades.forEach(trade => {
             const tradeDate = new Date(trade.ENTRY_DATE);
             const month = tradeDate.getMonth();
             const year = tradeDate.getFullYear();
@@ -130,18 +132,27 @@ const WinRatioChart = ({ onUpdateRatio }) => {
     useEffect(() => {
         const allTimeframes = ["this year", "last year", "this month", "two years ago"];
         const allRatios = {};
-    
+
+        let filteredTrades;
+
+        if (selectedFilters.length === 1 && selectedFilters.includes('SUMMARY')) {
+            filteredTrades = trades;
+        } else {
+            filteredTrades = trades.filter(trade => selectedFilters.includes(trade.PAIRS));
+        }
+
         allTimeframes.forEach(tf => {
-            allRatios[tf] = calculateWinRatio(tf);
+            allRatios[tf] = calculateWinRatio(tf, filteredTrades);
         });
     
         setWinRatios(allRatios);
         const currentData = allRatios['this year'];
-
+    
         setChartData(currentData);
         onUpdateRatio(currentData.overallWinRatio);
-
-    }, [ trades]);
+    
+    }, [trades, selectedFilters]);
+    
         
     useEffect(() => {
         const currentData = winRatios[timeframe];

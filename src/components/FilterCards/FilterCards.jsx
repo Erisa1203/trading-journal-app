@@ -1,42 +1,52 @@
 import { CaretDown } from '@phosphor-icons/react'
-import React from 'react'
+import React, { useContext } from 'react'
 import "./_filterCards.styl"
+import { FilterCardsContext } from '../../contexts/FilterCardsContext';
+import { TradesContext } from '../../contexts/TradesContext';
+import { colors, pairColors } from '../../constants/colors';
 
 const FilterCards = () => {
+    const { trades } = useContext(TradesContext);
+    const { selectedFilters, setSelectedFilters } = useContext(FilterCardsContext);
+    const uniquePairs = [...new Set(trades.map(trade => trade.PAIRS))].filter(pair => pair !== '');
+
+    const getRandomColor = () => {
+        const colorKeys = Object.keys(colors);
+        const randomKey = colorKeys[Math.floor(Math.random() * colorKeys.length)];
+        return colors[randomKey];
+    }
+
+    const toggleFilter = (filter) => {
+        if (filter === 'SUMMARY') {
+            setSelectedFilters(['SUMMARY']);
+        } else {
+            setSelectedFilters(['SUMMARY', filter]);
+        }
+    }
+
   return (
     <ul className="filterCards">
-        <li className="filterCards__item filterCards__summary">
+        <li className={`filterCards__item filterCards__summary ${selectedFilters.includes('SUMMARY') ? 'active' : ''}`} 
+            onClick={() => toggleFilter('SUMMARY')}>
             <span>SUMMARY</span>
-            <CaretDown />
+            <CaretDown className='filterCards__arrow'/>
         </li>
-        <li className="filterCards__item filterCards__EURUSD">
-            <span className='filterCards__bullet'></span>
-            <span>EURUSD</span>
-        </li>
-        <li className="filterCards__item filterCards__USDJPY">
-            <span className='filterCards__bullet'></span>
-            <span>USDJPY</span>
-        </li>
-        <li className="filterCards__item filterCards__GBPJPY">
-            <span className='filterCards__bullet'></span>
-            <span>GBPJPY</span>
-        </li>
-        <li className="filterCards__item filterCards__AUDUSD">
-            <span className='filterCards__bullet'></span>
-            <span>AUDUSD</span>
-        </li>
-        <li className="filterCards__item filterCards__AUDGBP">
-            <span className='filterCards__bullet'></span>
-            <span>AUDGBP</span>
-        </li>
-        <li className="filterCards__item filterCards__EURJPY">
-            <span className='filterCards__bullet'></span>
-            <span>EURJPY</span>
-        </li>
-        <li className="filterCards__item filterCards__GBPUSD">
-            <span className='filterCards__bullet'></span>
-            <span>GBPUSD</span>
-        </li>
+
+        {uniquePairs.map((pair, index) => {
+            const currentColor = pairColors[pair] || colors.default; // 該当する色がない場合はデフォルトの色を使用
+            return (
+                <li
+                    key={index}
+                    className={`filterCards__item ${selectedFilters.includes(pair) ? 'active' : ''}`}
+                    onClick={() => toggleFilter(pair)}
+                    style={{ outlineColor: currentColor }}
+                >
+                    <span className='filterCards__bullet' style={{ backgroundColor: currentColor }}></span>
+                    <span>{pair}</span>
+                </li>
+            );
+        })}
+
     </ul>
   )
 }

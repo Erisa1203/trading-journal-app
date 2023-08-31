@@ -17,8 +17,8 @@
     &:nth-child(n+2)
         margin-left 16px
     &.active
-        border-width: 1px
-        border-style: solid
+        outline-width: 1px
+        outline-style: solid
     &:hover:not(.filterCards__summary)
         outline-width: 1px
         outline-style: solid
@@ -28,10 +28,11 @@
     align-items center
     span
         margin-right 16px
-    &:hover
+    &:hover, &.active
         color: $white
         background-color: $brand-800
         transition: .3s ease
+
         
 
 .filterCards__bullet
@@ -83,3 +84,8 @@
     border-color $color-orange
     .filterCards__bullet
         background-color $color-orange 
+
+.filterCards__item
+    &.active
+        .filterCards__arrow
+            transform: rotate(180deg)

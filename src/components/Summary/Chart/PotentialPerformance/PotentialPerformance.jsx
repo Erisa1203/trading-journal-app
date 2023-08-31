@@ -3,23 +3,31 @@ import { BarChart, Bar, XAxis, YAxis, Tooltip, CartesianGrid } from 'recharts';
 import { TradesContext } from '../../../../contexts/TradesContext';
 import RoundedBar from '../RoundBar';
 import CustomBackground from '../CustomBackground';
+import { FilterCardsContext } from '../../../../contexts/FilterCardsContext';
 
 const PotentialPerformance = () => {
     const { trades } = useContext(TradesContext);
+    const { selectedFilters, setSelectedFilters } = useContext(FilterCardsContext);
+
+
     // ウィンドウの幅を取得するための state
     const [chartWidth, setChartWidth] = useState(0);
     const chartRef = useRef(null);
 
     const calculateDirectionalWinRate = (direction) => {
-        const totalTrades = trades.filter(trade => trade.DIR === direction).length;
-        const winningTrades = trades.filter(trade => trade.DIR === direction && trade.STATUS === 'WIN').length;
+        const filteredTrades = selectedFilters.length === 1 && selectedFilters.includes('SUMMARY') ? trades : trades.filter(trade => selectedFilters.includes(trade.PAIRS));
+
+        const totalTrades = filteredTrades.filter(trade => trade.DIR === direction).length;
+        const winningTrades = filteredTrades.filter(trade => trade.DIR === direction && trade.STATUS === 'WIN').length;
 
         return totalTrades === 0 ? 0 : (winningTrades / totalTrades) * 100;
     }
 
     const calculateSetupWinRate = (setup) => {
-        const totalTrades = trades.filter(trade => trade.SETUP === setup).length;
-        const winningTrades = trades.filter(trade => trade.SETUP === setup && trade.STATUS === 'WIN').length;
+        const filteredTrades = selectedFilters.length === 1 && selectedFilters.includes('SUMMARY') ? trades : trades.filter(trade => selectedFilters.includes(trade.PAIRS));
+
+        const totalTrades = filteredTrades.filter(trade => trade.SETUP === setup).length;
+        const winningTrades = filteredTrades.filter(trade => trade.SETUP === setup && trade.STATUS === 'WIN').length;
 
         return totalTrades === 0 ? 0 : (winningTrades / totalTrades) * 100;
     }
@@ -27,7 +35,7 @@ const PotentialPerformance = () => {
     // 全てのユニークなセットアップを取得
     const uniqueSetups = [...new Set(trades.map(trade => trade.SETUP))].filter(setup => setup !== '');
     uniqueSetups.sort();
-    console.log('uniqueSetups', uniqueSetups)
+
     // 各セットアップの勝率を計算
     const setupData = uniqueSetups.map(setup => ({
         name: setup,
@@ -75,14 +83,14 @@ const PotentialPerformance = () => {
                         {chartWidth > 0 && (
                             <BarChart
                                 width={chartWidth}
-                                height={15}
+                                height={30}
                                 data={[item]} 
                                 layout="vertical"
-                                margin={{ top: 30, right: 0, bottom: 0, left: 0 }}
+                                margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
                             >
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} vertical={false} />
                                 <XAxis type="number" tick={false} axisLine={false} tickLine={false} /> {/* メモリを非表示 */}
-                                <YAxis type="category" dataKey="name" hide={true} /> {/* Y軸の名前を非表示 */}
+                                <YAxis type="category" dataKey="name" hide={true} padding={{ top: 30}} />
                                 <Tooltip 
                                     formatter={(value) => `${value.toFixed(2)}%`}
                                 />
