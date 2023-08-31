@@ -3,12 +3,13 @@ import PotentialPerformance from '../../Chart/PotentialPerformance/PotentialPerf
 
 const PotentialPerformanceCard = () => {
   return (
-    <div className='chartCard chartCard--sm'>
+    <div className='chartCard chartCard--performance chartCard--flex'>
         <div className="chartCard__head">POTENTIAL PERFORMANCE</div>
 
         <div className="chart">
             <PotentialPerformance />
         </div>
+        <div className='chartCard__seeReport'>SEE REPORT</div>
     </div>
   )
 }

@@ -2,7 +2,6 @@
 
 .charts
     display flex
-    align-items center
 
 .chartCard
     background: #ffffff
@@ -12,6 +11,8 @@
     flex-direction: column
     margin-top 16px
     position relative
+    max-height 430px
+    overflow-y scroll
 
     &:nth-child(n + 2) 
         margin-left 32px
@@ -19,6 +20,9 @@
     
 .chartCard--sm
     width 28.6%
+
+.chartCard--flex
+    flex 1
 
 .chartCard__head
     font-size 1.4rem
@@ -70,4 +74,35 @@
 .recharts-wrapper
     left -34px
 
+.performance__item
+    .recharts-wrapper
+        left 0
 
+.performance__desc
+    display flex
+    align-items center
+    justify-content space-between
+
+.performance__chart
+    margin-top 8px
+
+.performance__item
+    &:nth-child(n + 2) 
+        margin-top 16px
+
+.performance__name, .performance__value
+    font-size 1.4rem
+    font-en()
+    font-weight 550
+
+.chartCard--performance
+    padding 24px
+
+.chartCard__seeReport
+    margin-left auto
+    font-size 1.4rem
+    font-en()
+    font-weight: 200
+    color $gray-600
+    margin-top 16px
+    cursor pointer
