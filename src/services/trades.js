@@ -1,4 +1,4 @@
-import { addDoc, collection, doc, getDoc, onSnapshot, setDoc, updateDoc, Timestamp, getFirestore, deleteDoc } from "firebase/firestore";
+import { addDoc, collection, doc, getDoc, onSnapshot, setDoc, updateDoc, Timestamp, getFirestore, deleteDoc, query, where } from "firebase/firestore";
 import { db } from "./firebase";
 import { backgrounds } from "../constants/colors";
 import { useContext, useEffect, useState } from "react";
@@ -98,6 +98,59 @@ export function subscribeToTradeJournal(callback) {
     });
 }
 
+export const useTrades = () => {
+    const { user } = useContext(UserContext);
+    const [trades, setTradesToJournal] = useState([]);
+    const [filteredTrades, setFilteredTrades] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    const subscribeToTradeJournal = (callback) => {
+        if (!user) {
+            return;
+        }
+    
+        const journalRef = collection(db, "journal");
+        const userQuery = query(journalRef, where("USER_ID", "==", user.uid));
+
+        return onSnapshot(userQuery, (snapshot) => {
+            const trades = snapshot.docs.map((doc) => {
+                const data = doc.data();
+
+                if (data.ENTRY_DATE && typeof data.ENTRY_DATE.toDate === 'function') {
+                    data.ENTRY_DATE = data.ENTRY_DATE.toDate();
+                }
+                if (data.EXIT_DATE && typeof data.EXIT_DATE.toDate === 'function') {
+                    data.EXIT_DATE = data.EXIT_DATE.toDate();
+                }
+
+                return {
+                    id: doc.id,
+                    ...data
+                };
+            });
+
+            callback(trades);
+        });
+    };
+
+    useEffect(() => {
+        if (!user) {
+            setTradesToJournal([]);
+            setFilteredTrades([]);
+            setLoading(false);
+        } else {
+            const unsubscribe = subscribeToTradeJournal((newTrades) => {
+                setTradesToJournal(newTrades);
+            });
+            setLoading(false);
+            return unsubscribe;
+        }
+    }, [user]);
+
+    return { trades, setTradesToJournal, filteredTrades, setFilteredTrades, loading };
+};
+
+
 export const addTrade = async (trade) => {
     const journalCol = collection(db, "journal");
     const docRef = await addDoc(journalCol, trade);
@@ -195,28 +248,7 @@ export const getTagByLabel = async (label, userId, path) => {
     }
 };
 
-export const useTrades = () => {
-    const { user } = useContext(UserContext)
-    const [trades, setTradesToJournal] = useState([]);
-    const [filteredTrades, setFilteredTrades] = useState([]);
-    const [loading, setLoading] = useState(true);  // loadingステートの初期化
 
-    useEffect(() => {
-      if(!user) {
-          setTradesToJournal([]);
-          setFilteredTrades([]);
-          setLoading(false);  // userが存在しない場合は即座にloadingを終了
-      } else {
-            const unsubscribe = subscribeToTradeJournal((newTrades) => {
-                setTradesToJournal(newTrades);
-            });
-            setLoading(false);  // データが読み込まれたのでloadingを終了
-          return unsubscribe;
-      }
-    }, [user]);
-
-    return { trades, setTradesToJournal, filteredTrades, setFilteredTrades, loading };  // loadingも返す
-}
 
 
 export const deleteTradeById = async (tradeId) => {
