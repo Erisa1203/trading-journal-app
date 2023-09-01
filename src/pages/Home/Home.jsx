@@ -59,10 +59,12 @@ const Home = () => {
                         <PairsRatioCard />
                     </div>
                 </div>
+                <div className='c-heading02'>直近のトレード</div>
                 <TradeTable
                     trades={trades}
                     onTradeRowClick={(trade) => onTradeRowClickHandle(trade)}
                     filteredOption={filteredOption}
+                    limitToLast={10}
                 />
                 <MyEditor />
                 </div>

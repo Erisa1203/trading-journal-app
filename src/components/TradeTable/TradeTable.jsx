@@ -6,7 +6,7 @@ import { TradesContext } from '../../contexts/TradesContext'
 import { subscribeToTradeJournal, useTrades } from '../../services/trades';
 import { UserContext } from '../../contexts/UserContext';
 
-const TradeTable = ({ trades, onTradeRowClick, filterIsActive, setFilterIsActive }) => {
+const TradeTable = ({ trades, onTradeRowClick, filterIsActive, limitToLast}) => {
     const { filteredTrades } = useContext(TradesContext);
     const [dataToDisplay, setDataToDisplay] = useState(trades);  
     const [originalTrades, setOriginalTrades] = useState([]);
@@ -17,35 +17,42 @@ const TradeTable = ({ trades, onTradeRowClick, filterIsActive, setFilterIsActive
     useEffect(() => {
         const unsubscribe = subscribeToTradeJournal((trades) => {
             setOriginalTrades(trades);
-            // console.log('aaa')
-
         });
-        setDataToDisplay(sortByEntryDateDesc(trades));
 
-        return () => { // コンポーネントがアンマウントされたときに購読を解除する
+        let tradesToDisplay = sortByEntryDateDesc(trades);
+        if (limitToLast) {
+            tradesToDisplay = tradesToDisplay.slice(0, limitToLast);
+        }
+        setDataToDisplay(tradesToDisplay);
+
+        return () => {
             unsubscribe();
         };
-    }, []);
+    }, [trades, limitToLast]);
 
     useEffect(() => {
         if (user) {
-            if(!filterIsActive) {
-                setDataToDisplay(sortByEntryDateDesc(originalTrades));
-                
-                if(originalTrades.length === 0) {
-                    setNoOrgTradesMessage(true);
-                } else {
-                    setNoOrgTradesMessage(false);
-                }
-            } else if (filterIsActive && filteredTrades.length === 0) {
-                setShowNoTradesMessage(true);
+            let tradesToSet = originalTrades;
+
+            if (limitToLast) {
+                tradesToSet = tradesToSet.slice(0, limitToLast);
+            }
+            
+            setDataToDisplay(sortByEntryDateDesc(tradesToSet));
+            
+            if(originalTrades.length === 0) {
+                setNoOrgTradesMessage(true);
             } else {
                 setNoOrgTradesMessage(false);
+            }
+
+            if (filterIsActive && filteredTrades.length === 0) {
+                setShowNoTradesMessage(true);
+            } else {
                 setShowNoTradesMessage(false);
-                setDataToDisplay(sortByEntryDateDesc(filteredTrades));
             }
         }
-    }, [filteredTrades, originalTrades]);
+    }, [filteredTrades, originalTrades, limitToLast]);
      
     if (showNoTradesMessage) {
         return <p className='noTrade'>表示できるトレードはありません。</p>;
@@ -54,6 +61,7 @@ const TradeTable = ({ trades, onTradeRowClick, filterIsActive, setFilterIsActive
     if (noOrgTradesMessage) {
         return <p className='noTrade'>トレード記録はまだありません。</p>;
     }
+    
 
     return (
         <table className="tradeTable">
