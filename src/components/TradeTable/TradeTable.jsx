@@ -36,9 +36,13 @@ const TradeTable = ({ trades, onTradeRowClick, filterIsActive, limitToLast}) => 
 
             if (limitToLast) {
                 tradesToSet = tradesToSet.slice(0, limitToLast);
+                setDataToDisplay(sortByEntryDateDesc(tradesToSet));
+            } else {
+
+                if(filteredTrades.length !== 0) {
+                    setDataToDisplay(sortByEntryDateDesc(filteredTrades));
+                } 
             }
-            
-            setDataToDisplay(sortByEntryDateDesc(tradesToSet));
             
             if(originalTrades.length === 0) {
                 setNoOrgTradesMessage(true);
