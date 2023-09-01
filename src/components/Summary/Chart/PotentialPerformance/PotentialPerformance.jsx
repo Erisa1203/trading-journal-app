@@ -91,9 +91,6 @@ const PotentialPerformance = () => {
                                 <CartesianGrid strokeDasharray="3 3" horizontal={false} vertical={false} />
                                 <XAxis type="number" tick={false} axisLine={false} tickLine={false} /> {/* メモリを非表示 */}
                                 <YAxis type="category" dataKey="name" hide={true} padding={{ top: 30}} />
-                                <Tooltip 
-                                    formatter={(value) => `${value.toFixed(2)}%`}
-                                />
                                 <Bar dataKey="value" fill="#8884d8" background={<CustomBackground fill="#E0E0E0" />} barSize={15} shape={<RoundedBar />} />
                             </BarChart>
                         )}

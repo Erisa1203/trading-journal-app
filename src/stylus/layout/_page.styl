@@ -18,3 +18,30 @@
     transition: .3s ease
     &.sidebar-close
         margin-left 88px
+
+.sumBlock
+    display flex
+    margin-bottom 32px
+
+.sumBlock__left
+    display flex
+    flex-direction: column
+    width 56%
+
+    > div:first-child
+        display flex
+        .chartCard
+            flex 1
+
+.sumBlock__left__bottom
+    display flex
+    margin-top 32px
+    .chartCard
+        margin-top 0
+
+.sumBlock__right
+    flex 1
+    margin-left 32px
+    .chartCard
+        width 100%
+        max-height: 892px
