@@ -18,11 +18,16 @@ const FilterCards = () => {
 
     const toggleFilter = (filter) => {
         if (filter === 'SUMMARY') {
-            setSelectedFilters(['SUMMARY']);
+            if (selectedFilters.includes('SUMMARY')) {
+                setSelectedFilters([]); 
+            } else {
+                setSelectedFilters(['SUMMARY']);
+            }
         } else {
             setSelectedFilters(['SUMMARY', filter]);
         }
     }
+    
 
   return (
     <ul className="filterCards">
