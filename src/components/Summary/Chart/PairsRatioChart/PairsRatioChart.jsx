@@ -42,33 +42,43 @@ const PairsRatioChart = () => {
     }, []);
 
     return (
-        <div className='performance' ref={chartRef}>
-            {data.map((item, index) => (
-                <div key={index} className="performance__item">
-                    <div className="performance__desc">
-                        <div className="performance__name">{item.name}</div>
-                        <div className="performance__value">{item.value.toFixed(2)}%</div>
-                    </div>
-                    <div className="performance__chart">
-                        {chartWidth > 0 && (
-                            <BarChart
-                                width={chartWidth}
-                                height={30}
-                                data={[item]} 
-                                layout="vertical"
-                                margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
-                            >
-                                <CartesianGrid strokeDasharray="3 3" horizontal={false} vertical={false} />
-                                <XAxis type="number" tick={false} axisLine={false} tickLine={false} />
-                                <YAxis type="category" dataKey="name" hide={true} padding={{ top: 30}} />
-                                <Bar dataKey="value" fill="#8884d8" background={<CustomBackground fill="#E0E0E0" />} barSize={15} shape={<RoundedBar />} />
-                            </BarChart>
-                        )}
-                    </div>
-                </div>
-            ))}
-        </div>
-    );
+      <div className='performance' ref={chartRef}>
+          {(() => {
+              // デフォルトの空のデータ
+              const defaultData = [{ name: '---', value: 0 }, { name: '---', value: 0 }, { name: '---', value: 0 }];
+              
+              // 実際に表示するデータの配列
+              const displayData = [...data, ...defaultData].slice(0, 3);
+              
+              return displayData.map((item, index) => (
+                  <div key={index} className="performance__item">
+                      <div className="performance__desc">
+                          <div className="performance__name">{item.name || '---'}</div>
+                          <div className="performance__value">{item.value.toFixed(2)}%</div>
+                      </div>
+                      <div className="performance__chart">
+                          {chartWidth > 0 && (
+                              <BarChart
+                                  width={chartWidth}
+                                  height={30}
+                                  data={[item]}
+                                  layout="vertical"
+                                  margin={{ top: 0, right: 0, bottom: 0, left: 0 }}
+                              >
+                                  <CartesianGrid strokeDasharray="3 3" horizontal={false} vertical={false} />
+                                  <XAxis type="number" tick={false} axisLine={false} tickLine={false} />
+                                  <YAxis type="category" dataKey="name" hide={true} padding={{ top: 30}} />
+                                  <Bar dataKey="value" fill="#8884d8" background={<CustomBackground fill="#E0E0E0" />} barSize={15} shape={<RoundedBar />} />
+                              </BarChart>
+                          )}
+                      </div>
+                  </div>
+              ));
+          })()}
+      </div>
+  );
+  
+  
 }
 
 export default PairsRatioChart;
