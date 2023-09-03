@@ -4,14 +4,16 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip } from 'recharts'
 import { CaretDown } from 'phosphor-react';
 // import firebase from 'firebase/app';
 import { initializeApp } from 'firebase/app';
-import { collection, getFirestore, query, orderBy, limit, getDocs, addDoc, where, updateDoc } from 'firebase/firestore';
+import { collection, getFirestore, query, orderBy, limit, getDoc, setDoc, getDocs, addDoc, where, updateDoc, doc } from 'firebase/firestore';
 import { db } from '../../../../services/firebase';
+import { UserContext } from '../../../../contexts/UserContext';
 
 const AccountChart = ({ onBalanceChange }) => {
     const { trades, loading } = useContext(TradesContext);
     const [selectedYear, setSelectedYear] = useState('this year');
     const [chartWidth, setChartWidth] = useState(window.innerWidth);
     const [initialBalance, setInitialBalance] = useState(500000);
+    const { user } = useContext(UserContext);
 
     useEffect(() => {
         let isMounted = true;
@@ -129,7 +131,37 @@ const AccountChart = ({ onBalanceChange }) => {
         };
     }, []);
 
-   
+    const updateSummaryInFirestore = async (year, calculatedBalance) => {
+        // 当該ユーザーのドキュメントの参照を取得
+        const userDocRef = doc(db, 'users', user.uid);
+    
+        const userDocSnapshot = await getDoc(userDocRef);
+    
+        if (userDocSnapshot.exists()) {
+            const userData = userDocSnapshot.data();
+    
+            // 既存のsummaryを取得または新しい空の配列を作成
+            let summaryArray = userData.summary ? [...userData.summary] : [];
+    
+            // 同じ年のオブジェクトを検索
+            const existingIndex = summaryArray.findIndex(item => item.year === year);
+    
+            if (existingIndex !== -1) {
+                // 既存の年のバランスを更新
+                summaryArray[existingIndex].balance = calculatedBalance;
+            } else {
+                // 新しい年のオブジェクトを追加
+                summaryArray.push({ year, balance: calculatedBalance });
+            }
+    
+            // ドキュメントを更新
+            await updateDoc(userDocRef, { summary: summaryArray });
+    
+        } else {
+            console.error('ユーザーが存在しません。');
+        }
+    };
+
     useEffect(() => {
         const calculateYearlyBalance = (year, trades) => {
             let balance = 500000;  // 初期値
@@ -143,36 +175,29 @@ const AccountChart = ({ onBalanceChange }) => {
         };
     
         const updateFirestore = async () => {
-            const summaryRef = collection(db, 'summary');
-    
-            // 全ての年のバランスを計算する
-            const yearsSet = new Set(trades.map(trade => new Date(trade.EXIT_DATE).getFullYear()));
-            const years = [...yearsSet];
-    
-            for (const year of years) {
-                const calculatedBalance = calculateYearlyBalance(year, trades);
-    
-                const yearQuery = query(summaryRef, where("year", "==", year));
-                const querySnapshot = await getDocs(yearQuery);
-    
-                if (!querySnapshot.empty) {
-                    // その年のドキュメントが存在する場合
-                    const doc = querySnapshot.docs[0];
-                    const storedBalance = doc.data().balance;
-    
-                    if (storedBalance !== calculatedBalance) {
-                        // バランスが違う場合、ドキュメントを更新する
-                        const docRef = doc.ref;
-                        await updateDoc(docRef, {
-                            balance: calculatedBalance
-                        });
+            // ユーザーのドキュメントに紐づくsummaryサブコレクションの参照を取得
+            if(user) {
+                const summaryCollectionRef = collection(db, 'users', user.uid, 'summary');
+                
+                // 全ての年のバランスを計算する
+                const yearsSet = new Set(trades.map(trade => new Date(trade.EXIT_DATE).getFullYear()));
+                const years = [...yearsSet];
+                
+                for (const year of years) {
+                    const calculatedBalance = calculateYearlyBalance(year, trades);
+                    
+                    // 各年のドキュメントのIDを年として設定
+                    const yearDocRef = doc(summaryCollectionRef, year.toString());
+                    
+                    const yearDocSnapshot = await getDoc(yearDocRef);
+                    
+                    if (yearDocSnapshot.exists()) {
+                        // その年のドキュメントが存在する場合、更新
+                        await updateSummaryInFirestore(year, calculatedBalance);
+                    } else {
+                        // その年のドキュメントが存在しない場合、新しいドキュメントを作成
+                        await updateSummaryInFirestore(year, calculatedBalance);
                     }
-                } else {
-                    // その年のドキュメントが存在しない場合、新しいドキュメントを作成する
-                    await addDoc(summaryRef, {
-                        year: year,
-                        balance: calculatedBalance
-                    });
                 }
             }
         };

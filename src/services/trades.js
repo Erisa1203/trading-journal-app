@@ -110,7 +110,7 @@ export const useTrades = () => {
         }
     
         const journalRef = collection(db, "journal");
-        const userQuery = query(journalRef, where("USER_ID", "==", user.uid));
+        const userQuery = user ? query(journalRef, where("USER_ID", "==", user.uid)) : null;
 
         return onSnapshot(userQuery, (snapshot) => {
             const trades = snapshot.docs.map((doc) => {

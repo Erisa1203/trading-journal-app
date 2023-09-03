@@ -8,8 +8,9 @@ const signInWithGoogle = () => {
   signInWithPopup(auth, provider)
     .then((result) => {
       const user = result.user;
-      console.log("User name: ", user.displayName);
-      console.log("User email: ", user.email);
+      // console.log("User name: ", user.displayName);
+      // console.log("User email: ", user.email);
+
       // Firestoreの操作を追加
       const firestore = getFirestore();
       const userDocRef = doc(firestore, "users", user.uid);
@@ -56,9 +57,6 @@ const GoogleSignInBtn = () => {
   }, [auth]);
 
   return (
-    // <div className="">
-    //     {user? <p>User is logged in</p> : <p>User is not logged in</p>}
-    // </div>
     <img
       className="googleBtn"
       src="/img/btn_google.png"
@@ -67,7 +65,4 @@ const GoogleSignInBtn = () => {
     />
   );
 };
-{
-  /* <img className='googleBtn' src="/img/btn_google.png" alt="Googleでサインイン" onClick={signInWithGoogle} /> */
-}
 export default GoogleSignInBtn;

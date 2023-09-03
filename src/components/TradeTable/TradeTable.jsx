@@ -6,7 +6,8 @@ import { TradesContext } from '../../contexts/TradesContext'
 import { subscribeToTradeJournal, useTrades } from '../../services/trades';
 import { UserContext } from '../../contexts/UserContext';
 
-const TradeTable = ({ trades, onTradeRowClick, filterIsActive, limitToLast}) => {
+const TradeTable = ({ onTradeRowClick, filterIsActive, limitToLast}) => {
+    const { trades } = useTrades();
     const { filteredTrades } = useContext(TradesContext);
     const [dataToDisplay, setDataToDisplay] = useState(trades);  
     const [originalTrades, setOriginalTrades] = useState([]);
@@ -15,9 +16,7 @@ const TradeTable = ({ trades, onTradeRowClick, filterIsActive, limitToLast}) => 
     const [noOrgTradesMessage, setNoOrgTradesMessage] = useState(false);
 
     useEffect(() => {
-        const unsubscribe = subscribeToTradeJournal((trades) => {
-            setOriginalTrades(trades);
-        });
+        setOriginalTrades(trades);
 
         let tradesToDisplay = sortByEntryDateDesc(trades);
         if (limitToLast) {
@@ -25,9 +24,9 @@ const TradeTable = ({ trades, onTradeRowClick, filterIsActive, limitToLast}) => 
         }
         setDataToDisplay(tradesToDisplay);
 
-        return () => {
-            unsubscribe();
-        };
+        // return () => {
+        //     unsubscribe();
+        // };
     }, [trades, limitToLast]);
 
     useEffect(() => {
