@@ -1,4 +1,4 @@
-import { getFirestore, collection, getDocs, addDoc, doc, setDoc, getDoc, Timestamp, updateDoc, deleteDoc, serverTimestamp } from "firebase/firestore";
+import { getFirestore, collection, getDocs, addDoc, doc, setDoc, getDoc, Timestamp, updateDoc, deleteDoc, serverTimestamp, where, query } from "firebase/firestore";
 import { auth, db } from "./firebase";
 
 export async function addNewRule() {
@@ -30,13 +30,19 @@ export async function addNewRule() {
     }
 }
 
-export const fetchRules = async () => {
+export const fetchRules = async (userId) => {
     const db = getFirestore();
     const rulesCollection = collection(db, "rules");
-    const ruleSnapshot = await getDocs(rulesCollection);
-    const ruleList = ruleSnapshot.docs.map(doc => ({ ID: doc.ID, ...doc.data() }));
+    
+    // ユーザーのIDとrule.USER_IDが一致するものだけをフェッチするクエリを設定
+    const userQuery = query(rulesCollection, where("USER_ID", "==", userId));
+    
+    const ruleSnapshot = await getDocs(userQuery);
+    const ruleList = ruleSnapshot.docs.map(doc => ({ ID: doc.id, ...doc.data() }));
+    
     return sortRulesByDate(ruleList); // ソート関数を使用
 }
+
 
 export const saveRuleUpdateToDb = async (fieldName, value, docId) => {
     const db = getFirestore();

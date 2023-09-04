@@ -1,12 +1,21 @@
 import React from 'react'
 import "./_ruleCard.styl"
 
-const RuleCard = ({ rule, onClick, rules, activeFilter }) => {
+const RuleCard = ({ 
+        rule={
+            NAME: "rule",
+            PATTERN: "PATTERN",
+            RULE_1: "RULE_1",
+            RULE_2: "RULE_2",
+            RULE_3: "RULE_3",
+        }, 
+        onClick, rules, activeFilter 
+    }) => {
     
     return (
     <li className="rules__item" onClick={onClick}>
         <div className="rules__thumbnail">
-            <img src={rule.THUMBNAIL || '/img/no-image.png'} alt="" />
+            <img src={rule?.THUMBNAIL || '/img/no-image.png'} alt="" />
         </div>
         <div className="rules__title">{rule.NAME}</div>
         <ul className="rules__tag">

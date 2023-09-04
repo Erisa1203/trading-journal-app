@@ -1,4 +1,4 @@
-import { getFirestore, collection, onSnapshot } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, where, query } from "firebase/firestore";
 import React, { useContext, useEffect, useState } from 'react'
 import Sidebar from '../../components/Sidebar/Sidebar'
 import Header from '../../components/Header/Header'
@@ -11,6 +11,7 @@ import { addNewRule, fetchRuleById, fetchRules, sortRulesByDate } from "../../se
 import './Rules.styl'
 import RuleFilter from "../../components/RuleFilter/RuleFilter";
 import { useCustomSetupCreation } from "../../hooks/useCustomSetupCreation";
+import { db } from "../../services/firebase";
 
 const Rules = () => {
     const { user } = useContext(UserContext);
@@ -25,7 +26,7 @@ const Rules = () => {
     const [isActive, setIsActive] = useState(false);
     const [originalRules, setOriginalRules] = useState([]);
     const [filteredRules, setFilteredRules] = useState([]);
-    
+
     useEffect(() => {
         if (activeFilter) {
             let filteredRules;
@@ -53,19 +54,23 @@ const Rules = () => {
     }, [originalRules, activeFilter]);
 
     useEffect(() => {
-        const db = getFirestore();
+        if (!user) return;  // ユーザーが存在しない場合は、何もしない
+    
         const rulesCollection = collection(db, "rules");
     
+        // ユーザーのIDとrule.USER_IDが一致するものだけをフェッチするクエリを設定
+        const userQuery = user ? query(rulesCollection, where("USER_ID", "==", user.uid)) : null;
         // onSnapshotリスナーを設定
-        const unsubscribe = onSnapshot(rulesCollection, (snapshot) => {
-            const updatedRules = snapshot.docs.map(doc => ({ ID: doc.ID, ...doc.data() }));
+        const unsubscribe = onSnapshot(userQuery, (snapshot) => {
+            const updatedRules = snapshot.docs.map(doc => ({ ID: doc.id, ...doc.data() }));
             setRules(updatedRules);
             setOriginalRules(updatedRules);  // originalRulesも更新
         });
     
         // クリーンアップ関数で、リスナーの解除を行う
         return () => unsubscribe();
-    }, []); 
+    }, [user]);  // 依存性配列にuserを追加
+    
 
     useEffect(() => {
         const db = getFirestore();
@@ -96,13 +101,16 @@ const Rules = () => {
 
     useEffect(() => {
         async function loadRules() {
-          const fetchedRules = await fetchRules();
-          setRules(fetchedRules);
-          setOriginalRules(fetchedRules);  // フェッチしたルールをoriginalRulesにもセット
-          setLoading(false);
+            if (!user) return;  // この行を追加
+    
+            const fetchedRules = await fetchRules(user.uid);
+            setRules(fetchedRules);
+            setOriginalRules(fetchedRules);
+            setLoading(false);
         }
         loadRules();
-    }, []);
+    }, [user]);
+    
 
     const resetFilter = () => {
         setFilteredRules(rules);
@@ -113,7 +121,7 @@ const Rules = () => {
         try {
             const newDocId = await addNewRule();
             setCurrentDocId(newDocId)
-            const updatedRules = await fetchRules(); // 新しいルールを取得します
+            const updatedRules = await fetchRules(user.uid); // 新しいルールを取得します
             setRuleId(newDocId)
             setRules(updatedRules); // 最新のルールのリストでstateを更新します
             const newRuleDetails = await fetchRuleById(newDocId);
@@ -139,21 +147,24 @@ const Rules = () => {
                 <div className="inner" style={!user ? { filter: 'blur(3px)' } : {}}>
                     <ul className="ruleFilter">
                         {userSetup.map((setup, index) => (
-                            <RuleFilter 
-                                setup={setup}
-                                index={index}
-                                key={index}
-                                rules={rules}
-                                setRules={setRules}
-                                originalRules={originalRules}
-                                isActive={setup.label === activeFilter}
-                                activeFilter={activeFilter}
-                                setActiveFilter={setActiveFilter}
-                            />
+                            setup ? (
+                                <RuleFilter 
+                                    setup={setup}
+                                    index={index}
+                                    key={index}
+                                    rules={rules}
+                                    setRules={setRules}
+                                    originalRules={originalRules}
+                                    isActive={setup.label === activeFilter}
+                                    activeFilter={activeFilter}
+                                    setActiveFilter={setActiveFilter}
+                                />
+                            ) : null
                         ))}
                     </ul>
                     <ul className="rules">
-                        {rules.length > 0 ? (
+                    {user ? (
+                        rules.length > 0 ? (
                             rules.map((rule, index) => (
                                 <RuleCard 
                                     key={rule.ID} 
@@ -166,7 +177,12 @@ const Rules = () => {
                             ))
                         ) : (
                             <p>表示できるルールはありません。</p>
-                        )}
+                        )
+                    ) : (
+                        Array.from({ length: 6 }).map((_, index) => (
+                            <RuleCard key={index} />
+                        ))
+                    )}
                     </ul>
                 </div>
                 <NewRule 
