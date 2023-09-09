@@ -19,7 +19,7 @@ import PairsRatioCard from '../../components/Summary/Card/PairsRatioCard/PairsRa
 const Home = () => {
   const { user } = useContext(UserContext);
   const [tradeId, setTradeId] = useState(null)
-  const { trades, setTradesToJournal, filteredTrades, setFilteredTrades } = useTrades(user);
+  const { trades, setTradesToJournal, filteredTrades, setFilteredTrades } = useTrades("journal");
   const [isVisible, setIsVisible] = useState(false)
   const [selectedTrade, setSelectedTrade] = useState(null)
   const [filteredOption, setFilteredOption] = useState(INITIAL_FILTER_STATE)

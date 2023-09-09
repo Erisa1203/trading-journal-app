@@ -42,9 +42,9 @@ export const calculateStatus = (trade) => {
     return null; 
 }
 
-export const getTradeById = async (tradeId) => {
+export const getTradeById = async (tradeId, colName) => {
     try {
-        const tradeRef = doc(db, "journal", tradeId);
+        const tradeRef = doc(db, colName, tradeId);
         const tradeDoc = await getDoc(tradeRef);
 
         if (tradeDoc.exists()) {
@@ -98,7 +98,7 @@ export function subscribeToTradeJournal(callback) {
     });
 }
 
-export const useTrades = () => {
+export const useTrades = (collectionName) => {
     const { user } = useContext(UserContext);
     const [trades, setTradesToJournal] = useState([]);
     const [filteredTrades, setFilteredTrades] = useState([]);
@@ -109,7 +109,7 @@ export const useTrades = () => {
             return;
         }
     
-        const journalRef = collection(db, "journal");
+        const journalRef = collection(db, collectionName);
         const userQuery = user ? query(journalRef, where("USER_ID", "==", user.uid)) : null;
 
         return onSnapshot(userQuery, (snapshot) => {
@@ -151,19 +151,19 @@ export const useTrades = () => {
 };
 
 
-export const addTrade = async (trade) => {
-    const journalCol = collection(db, "journal");
-    const docRef = await addDoc(journalCol, trade);
+export const addTrade = async (trade, colName) => {
+    const collectionName = collection(db, colName);
+    const docRef = await addDoc(collectionName, trade);
     return docRef.id;
 };
 
-export const updateFieldInTrade = async (fieldName, inputValue, tradeId) => {
+export const updateFieldInTrade = async (fieldName, inputValue, tradeId, colName) => {
     if (inputValue === undefined) {
         console.error(`Undefined inputValue for ${fieldName} in trade ${tradeId}`);
         return;
     }
 
-    const tradeRef = doc(getFirestore(), "journal", tradeId);
+    const tradeRef = doc(getFirestore(), colName, tradeId);
     const docSnap = await getDoc(tradeRef);
     
     let valueToUpdate;
@@ -188,38 +188,38 @@ export const updateFieldInTrade = async (fieldName, inputValue, tradeId) => {
     }
 };
 
-export const updatePairsInTrade = (selectedOption, tradeId) => updateFieldInTrade('PAIRS', selectedOption, tradeId);
+export const updatePairsInTrade = (selectedOption, tradeId, colName) => updateFieldInTrade('PAIRS', selectedOption, tradeId, colName);
 
 
-export const updateSetupInTrade = (selectedOption, tradeId) => updateFieldInTrade('SETUP', selectedOption, tradeId);
+export const updateSetupInTrade = (selectedOption, tradeId, colName) => updateFieldInTrade('SETUP', selectedOption, tradeId, colName);
 
-export const updatePatternsInTrade = (selectedOption, tradeId) => updateFieldInTrade('PATTERN', selectedOption, tradeId);
+export const updatePatternsInTrade = (selectedOption, tradeId, colName) => updateFieldInTrade('PATTERN', selectedOption, tradeId, colName);
 
-export const updateReturnInTrade = async (inputValue, tradeId) => {
-    await updateFieldInTrade('RETURN', inputValue, tradeId);
-    const updatedTrade = await getTradeById(tradeId);
+export const updateReturnInTrade = async (inputValue, tradeId, colName) => {
+    await updateFieldInTrade('RETURN', inputValue, tradeId, colName);
+    const updatedTrade = await getTradeById(tradeId, colName);
     const status = calculateStatus(updatedTrade);
-    await updateFieldInTrade('STATUS', status, tradeId);
+    await updateFieldInTrade('STATUS', status, tradeId, colName);
 };
 
-export const updateProfitInTrade = (inputValue, tradeId) => updateFieldInTrade('PROFIT', inputValue, tradeId);
+export const updateProfitInTrade = (inputValue, tradeId, colName) => updateFieldInTrade('PROFIT', inputValue, tradeId, colName);
 
-export const updateLotInTrade = (inputValue, tradeId) => updateFieldInTrade('LOT', inputValue, tradeId);
+export const updateLotInTrade = (inputValue, tradeId, colName) => updateFieldInTrade('LOT', inputValue, tradeId, colName);
 
-export const updateEntryDateInTrade = (inputValue, tradeId) => updateFieldInTrade('ENTRY_DATE', inputValue, tradeId);
+export const updateEntryDateInTrade = (inputValue, tradeId, colName) => updateFieldInTrade('ENTRY_DATE', inputValue, tradeId, colName);
 
-export const updateExitDateInTrade = (inputValue, tradeId) => updateFieldInTrade('EXIT_DATE', inputValue, tradeId);
+export const updateExitDateInTrade = (inputValue, tradeId, colName) => updateFieldInTrade('EXIT_DATE', inputValue, tradeId, colName);
 
-export const updateDirInTrade = async (selectedOption, tradeId) => {
-    await updateFieldInTrade('DIR', selectedOption, tradeId);
+export const updateDirInTrade = async (selectedOption, tradeId, colName) => {
+    await updateFieldInTrade('DIR', selectedOption, tradeId, colName);
 };
 
-export const updateEntryPriceInTrade = async (inputValue, tradeId) => {
-    await updateFieldInTrade('ENTRY_PRICE', inputValue, tradeId);
+export const updateEntryPriceInTrade = async (inputValue, tradeId, colName) => {
+    await updateFieldInTrade('ENTRY_PRICE', inputValue, tradeId, colName);
 };
 
-export const updateExitPriceInTrade = async (inputValue, tradeId) => {
-    await updateFieldInTrade('EXIT_PRICE', inputValue, tradeId);
+export const updateExitPriceInTrade = async (inputValue, tradeId, colName) => {
+    await updateFieldInTrade('EXIT_PRICE', inputValue, tradeId, colName);
 };
 
 export const getTagByLabel = async (label, userId, path) => {
@@ -248,12 +248,9 @@ export const getTagByLabel = async (label, userId, path) => {
     }
 };
 
-
-
-
-export const deleteTradeById = async (tradeId) => {
+export const deleteTradeById = async (colName, tradeId) => {
     try {
-        const tradeRef = doc(db, "journal", tradeId);
+        const tradeRef = doc(db, colName, tradeId);
         await deleteDoc(tradeRef);
         console.log(`Trade with ID ${tradeId} has been successfully deleted.`);
     } catch (error) {

@@ -34,7 +34,6 @@ export const useCustomSetupCreation = (initialOptions, setDbSetupOptions, setSel
                     onSnapshot(docRef, async (docSnap) => {
                         if (docSnap.exists()) {
                             // Check if the setups field exists in the document
-                            // console.log(docSnap)
                             if (!docSnap.data().hasOwnProperty('setup')) {
                                 // If the setups field does not exist, create it by setting an empty array
                                 await updateDoc(docRef, {
@@ -47,8 +46,9 @@ export const useCustomSetupCreation = (initialOptions, setDbSetupOptions, setSel
                                     label: setup.label,
                                     color: setup.color,
                                 }));
-                                // console.log(newOptions)
-                                setDbSetupOptions(newOptions);
+                                const sortedNewOptions = newOptions.sort((a, b) => a.label.localeCompare(b.label));
+
+                                setDbSetupOptions(sortedNewOptions);
                                 setLoading(false);
                             }
                         } else {

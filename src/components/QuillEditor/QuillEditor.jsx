@@ -9,14 +9,14 @@ import ReactQuill, { Quill } from 'react-quill';
 import { getDownloadURL, getStorage, ref, uploadBytesResumable } from '@firebase/storage';
 import { ImageDrop } from 'quill-image-drop-module';
 
-async function fetchNotesFromFirestore(collectionName, id) {
+async function fetchNotesFromFirestore(dbCollection, id) {
     if (!id) {
       console.error("No id provided for fetching notes!");
       return "";
     }
   
     try {
-      const docRef = doc(db, collectionName, id);
+      const docRef = doc(db, dbCollection, id);
       const docData = await getDoc(docRef);
   
       if (docData.exists()) {
@@ -80,7 +80,7 @@ async function uploadImage(file) {
 }
 
 
-function MyEditor({ id, content, onContentChange, collectionName }) {
+function MyEditor({ id, content, onContentChange, dbCollection }) {
     const [editorHtml, setEditorHtml] = useState(content || "");
     const quillRef = useRef(null);
 
@@ -129,7 +129,7 @@ function MyEditor({ id, content, onContentChange, collectionName }) {
     useEffect(() => {
         // FirestoreからNOTESを取得
         async function fetchAndSetNotes() {
-            const notes = await fetchNotesFromFirestore(collectionName, id);
+            const notes = await fetchNotesFromFirestore(dbCollection, id);
             setEditorHtml(notes);
         }
     
@@ -138,14 +138,14 @@ function MyEditor({ id, content, onContentChange, collectionName }) {
         } else {
             setEditorHtml(content || "");
         }
-    }, [id, content, collectionName]);
+    }, [id, content, dbCollection]);
     
     
 
     const debouncedAutoSave = debounce(async (html) => {
         try {
             if (id) {
-                const tradeRef = doc(db, collectionName, id);
+                const tradeRef = doc(db, dbCollection, id);
                 await updateDoc(tradeRef, {
                     NOTES: html,
                     timestamp: Timestamp.fromDate(new Date()),

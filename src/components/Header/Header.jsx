@@ -7,15 +7,25 @@ import { auth } from '../../services/firebase';
 const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page, createNewRuleHandle }) => {
     const handleAddTradeBtnClick = async () => {
         const userId = auth.currentUser ? auth.currentUser.uid : null;
-    
         const trade = INITIAL_TRADE_STATE(userId);
-
-        const id = await addTrade(trade);
+    
+        // pageプロパティの値に基づいてcolNameを設定
+        let colName = '';
+        if (page === 'TradingJournal') {
+            colName = 'journal';
+        } else if (page === 'Backtest') {
+            colName = 'backtest';
+        }
+    
+        // 引数として設定したcolNameを使用してaddTradeを呼び出す
+        const id = await addTrade(trade, colName);
+    
         console.log("Added trade with ID: ", id);
         setTradeId(id)
         setSelectedTrade(trade);
         onAddTradeBtnClick(trade)  // 追加したトレードのIDを引数として渡す
     };
+    
 
     const buttonConfigs = {
         'TradingJournal': {
@@ -23,7 +33,8 @@ const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page,
             onClick: handleAddTradeBtnClick
         },
         'Backtest': {
-            className: "addNewBacktestBtn"
+            className: "addNewBacktestBtn",
+            onClick: handleAddTradeBtnClick
         },
         'Rules': {
             className: "addNewRulesBtn",

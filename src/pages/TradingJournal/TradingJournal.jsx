@@ -24,7 +24,7 @@ const TradingJournal = () => {
   const [filteredOption, setFilteredOption] = useState(INITIAL_FILTER_STATE)
   const [clearFilterIsActive, setClearFilterIsActive] = useState(false)
   const [filterUIClearClicked, setFilterUIClearClicked] = useState('')
-  const { trades, setTradesToJournal, filteredTrades, setFilteredTrades, loading } = useTrades();
+  const { trades, setTradesToJournal, filteredTrades, setFilteredTrades, loading } = useTrades("journal");
   const [filterIsActive, setFilterIsActive] = useState(false); 
 
   const onTradeRowClickHandle = (trade) => {
@@ -84,6 +84,7 @@ const TradingJournal = () => {
                         setFilterIsActive={setFilterIsActive}
                     />
                     <NewTrade 
+                      dbCollection="journal"
                       visible={isVisible}
                       setIsVisible={setIsVisible}
                       onClose={() => setIsVisible(false)}

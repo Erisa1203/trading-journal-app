@@ -10,11 +10,11 @@ import { getAuth, onAuthStateChanged } from 'firebase/auth';
 import { useCustomOptionCreation } from '../../../hooks/useCustomOptionCreation';
 import { ShortLongSelect } from '../../Select/ShortLongSelect';
 import { useCustomSetupCreation } from '../../../hooks/useCustomSetupCreation';
-import { calculateStatus, deleteTradeById, getTagByLabel, patternOption, shortLongOptions, updateDirInTrade, updateEntryDateInTrade, updateEntryPriceInTrade, updateExitDateInTrade, updateExitPriceInTrade, updateFieldInTrade, updateLotInTrade, updatePairsInTrade, updatePatternsInTrade, updateProfitInTrade, updateReturnInTrade, updateSetupInTrade, updateStatusInTrade } from '../../../services/trades';
+import { calculateStatus, deleteTradeById, getTagByLabel, patternOption, shortLongOptions, updateDirInTrade, updateEntryDateInTrade, updateEntryPriceInTrade, updateExitDateInTrade, updateExitPriceInTrade, updateLotInTrade, updatePairsInTrade, updatePatternsInTrade, updateProfitInTrade, updateReturnInTrade, updateSetupInTrade, updateStatusInTrade } from '../../../services/trades';
 import MyEditor from '../../QuillEditor/QuillEditor';
 import { PatternSelect } from '../../Select/PatternSelect';
 
-const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
+const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId, dbCollection }) => {
     const auth = getAuth();
     const [entryDate, setEntryDate] = useState(null);
     const [exitDate, setExitDate] = useState(null);
@@ -36,12 +36,12 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
     const [tradeStatus, setTradeStatus] = useState('');
 
     const createUpdateFunction = (setState, updateFunctionName) => {
-        return async (value, tradeId) => {
+        return async (value, tradeId, dbCollection) => {
             setState(value);
-            await updateFunctionName(value, tradeId);
+            await updateFunctionName(value, tradeId, dbCollection);
         };
     };
-    
+
     const updateSelectedOption = createUpdateFunction(setSelectedOption, updatePairsInTrade);
     const updateDirOption = createUpdateFunction(setSelectedDirOption, updateDirInTrade);
     const updateReturnValue = createUpdateFunction(setReturnValue, updateReturnInTrade);
@@ -99,7 +99,9 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                                 label: tag.label,
                                 color: tag.color,
                             }));
-                            setDbCurrencyOptions(newOptions);
+                            const sortedNewOptions = newOptions.sort((a, b) => a.label.localeCompare(b.label));
+
+                            setDbCurrencyOptions(sortedNewOptions);
                             setLoading(false);
                         } else {
                             console.log("No such document!");
@@ -111,6 +113,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                 setLoading(false);
             }
         });
+
         return () => unsubscribe();
     }, [trade]); // <-- change to empty array
     
@@ -125,7 +128,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
     }, [returnValue]);
     
     const onTrashClickHandle = () => {
-        deleteTradeById(tradeId)
+        deleteTradeById(dbCollection, tradeId)
         setIsVisible(false);
     }
 
@@ -177,10 +180,11 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                             handleCreateNewOption={async (inputValue) => {
                                 const newOption = await handleCreateNewOption(inputValue);
                                 setSelectedOption(newOption);
+                                updateSelectedOption(newOption, tradeId, dbCollection)
                             }}
                             
                             selectedOption={selectedOption}
-                            setSelectedOption={(selectedOption) => updateSelectedOption(selectedOption, tradeId)}
+                            setSelectedOption={(selectedOption) => updateSelectedOption(selectedOption, tradeId, dbCollection)}
                         />
                     }
                 </div>
@@ -195,7 +199,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                     <ShortLongSelect 
                         selectedDirOption={selectedDirOption} 
                         setSelectedDirOption={setSelectedDirOption}
-                        updateDirOption={(selectedDirOption) => updateDirOption(selectedDirOption, tradeId)}
+                        updateDirOption={(selectedDirOption) => updateDirOption(selectedDirOption, tradeId, dbCollection)}
                     />
                 </div>
             </div>
@@ -209,7 +213,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                         className="tradeInfo__input"  
                         placeholder='EMPTY' 
                         value={returnValue || ''}
-                        onChange={(e) => updateReturnValue(e.target.value, tradeId)}
+                        onChange={(e) => updateReturnValue(e.target.value, tradeId, dbCollection)}
                     />
                 </div>
             </div>
@@ -223,7 +227,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                         className="tradeInfo__input"  
                         placeholder='EMPTY' 
                         value={profitValue || ''}
-                        onChange={(e) => updateProfitValue(e.target.value, tradeId)}
+                        onChange={(e) => updateProfitValue(e.target.value, tradeId, dbCollection)}
                     />
                 </div>
             </div>
@@ -237,7 +241,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                         className="tradeInfo__input"  
                         placeholder='EMPTY' 
                         value={lotValue || ''}
-                        onChange={(e) => updateLotValue(e.target.value, tradeId)}
+                        onChange={(e) => updateLotValue(e.target.value, tradeId, dbCollection)}
                     />
                 </div>
             </div>
@@ -251,11 +255,11 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                     options={dbSetupOptions}
                     handleCreateNewOption={async (inputValue) => {
                         const newOption = await handleCreateNewSetupOption(inputValue);
-
                         setSelectedSetupOption(newOption);
+                        updateSetupOption(newOption, tradeId, dbCollection)
                     }}
                     selectedOption={selectedSetupOption}
-                    setSelectedOption={(selectedOption) => updateSetupOption(selectedOption, tradeId)}
+                    setSelectedOption={(selectedOption) => updateSetupOption(selectedOption, tradeId, dbCollection)}
                 />
 
                 </div>
@@ -269,7 +273,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                     <PatternSelect 
                         selectedPatternOption={selectedPatternOption} 
                         setSelectedPatternOption={setSelectedPatternOption}
-                        updatePatternOption={(selectedPatternOption) => updatePatternOption(selectedPatternOption, tradeId)}
+                        updatePatternOption={(selectedPatternOption) => updatePatternOption(selectedPatternOption, tradeId, dbCollection)}
                     />
                 </div>
             </div>
@@ -286,7 +290,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                                 showTimeInput
                                 dateFormat="yyyy年M月d日 h:mm aa"
                                 selected={entryDate} 
-                                onChange={(date) => updateEntryDate(date, tradeId)} 
+                                onChange={(date) => updateEntryDate(date, tradeId, dbCollection)} 
                             />
                         </div>
                         <div>
@@ -295,7 +299,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                                 showTimeInput
                                 dateFormat="yyyy年M月d日 h:mm aa"
                                 selected={exitDate} 
-                                onChange={(date) => updateExitDate(date, tradeId)} 
+                                onChange={(date) => updateExitDate(date, tradeId, dbCollection)} 
                             />
                         </div>
                     </div>
@@ -314,7 +318,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                                 className="tradeInfo__input"  
                                 placeholder='EMPTY' 
                                 value={entryPrice}
-                                onChange={(e) => updateEntryPrice(e.target.value, tradeId)}
+                                onChange={(e) => updateEntryPrice(e.target.value, tradeId, dbCollection)}
                             />
                         </div>
                         <div>
@@ -323,7 +327,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                                 className="tradeInfo__input"  
                                 placeholder='EMPTY' 
                                 value={exitPrice}
-                                onChange={(e) => updateExitPrice(e.target.value, tradeId)}
+                                onChange={(e) => updateExitPrice(e.target.value, tradeId, dbCollection)}
                             />
                         </div>
                     </div>
@@ -335,7 +339,7 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId }) => {
                 id={tradeId} 
                 content={initialContentFromDatabase}
                 onContentChange={(newContent) => setEditorHtml(newContent)} 
-                collectionName="journal"
+                dbCollection={dbCollection}
             />            
             <div className="textEditor">
                 <div className="textEditor__edit">

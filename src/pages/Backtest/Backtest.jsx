@@ -1,4 +1,4 @@
-import React, { useContext } from 'react'
+import React, { useContext, useState } from 'react'
 import Sidebar from '../../components/Sidebar/Sidebar'
 import Header from '../../components/Header/Header'
 import Filter from '../../components/Filter/Filter'
@@ -8,21 +8,83 @@ import FilterUI from '../../components/FilterUI/FilterUI'
 import { UserContext } from '../../contexts/UserContext'
 import HideContents from '../../components/HideContents/HideContents'
 import AppContainer from '../../components/Container/AppContainer'
+import Summary from '../../components/Summary/Summary'
+import NewTrade from '../../components/Modal/NewTrade/NewTrade'
+import { useTrades } from '../../services/trades'
+import { INITIAL_FILTER_STATE } from '../../services/filter'
 
 const Backtest = () => {
   const { user } = useContext(UserContext);
+  const [filteredOption, setFilteredOption] = useState(INITIAL_FILTER_STATE)
+  const [clearFilterIsActive, setClearFilterIsActive] = useState(false)
+  const [filterIsActive, setFilterIsActive] = useState(false); 
+  const [dbSetupOptions, setDbSetupOptions] = useState([])
+
+  const [isVisible, setIsVisible] = useState(false)
+  const [selectedTrade, setSelectedTrade] = useState(null)
+  const [tradeId, setTradeId] = useState(null)
+  const { trades, setTradesToJournal, filteredTrades, setFilteredTrades, loading } = useTrades("backtest");
+
+
+  const onTradeRowClickHandle = (trade) => {
+    setSelectedTrade(trade)
+    setIsVisible(true)
+    setTradeId(trade.id)
+  }
 
   return (
     <AppContainer>
         <Sidebar page="backtest"/>
         <div className="mainContent" style={!user ? { overflow: 'hidden' } : {}}>
-            <Header title="トレード検証" page="Backtest"/>
+            <Header 
+                title="トレード検証"
+                page="Backtest"
+                setTradeId={setTradeId}
+                setSelectedTrade={setSelectedTrade}
+                onAddTradeBtnClick={(newTrade) => {  // 新しいトレード情報を引数として受け取る
+                    setSelectedTrade(newTrade);  // 新しい（空の）トレード情報をセット
+                    setIsVisible(true);
+                }}
+            />
             <div className="inner" style={!user ? { filter: 'blur(3px)' } : {}}>
-                {/* <FilterCards />
-                <Filter />
-                <FilterUI /> */}
-
-            </div>
+                    {/* <Summary />
+                    <FilterUI
+                        filteredOption={filteredOption}
+                        setFilteredOption={setFilteredOption}
+                        setClearFilterIsActive={setClearFilterIsActive}
+                        setFilterUIClearClicked={setFilterUIClearClicked}
+                    /> */}
+                    {/* <Filter 
+                      trades={trades} 
+                      dbSetupOptions={dbSetupOptions} 
+                      setDbSetupOptions={setDbSetupOptions}
+                      dbPatternOptions={dbPatternOptions} 
+                      setDbPatternOptions={setDbPatternOptions}
+                      filteredOption={filteredOption}
+                      setFilteredOption={setFilteredOption}
+                      clearFilterIsActive={clearFilterIsActive}
+                      setClearFilterIsActive={setClearFilterIsActive}
+                      filterUIClearClicked={filterUIClearClicked}
+                      setFilterIsActive={setFilterIsActive}
+                    /> */}
+                    <TradeTable
+                        trades={trades}
+                        onTradeRowClick={(trade) => onTradeRowClickHandle(trade)}
+                        filteredOption={filteredOption}
+                        filterIsActive={filterIsActive}
+                        setFilterIsActive={setFilterIsActive}
+                    />
+                    <NewTrade 
+                        dbCollection="backtest"
+                      visible={isVisible}
+                      setIsVisible={setIsVisible}
+                      onClose={() => setIsVisible(false)}
+                      tradeId={tradeId}
+                      trade={selectedTrade}
+                      dbSetupOptions={dbSetupOptions} 
+                      setDbSetupOptions={setDbSetupOptions}
+                    />
+                </div>
             {!user && <HideContents />}
       </div>
     </AppContainer>

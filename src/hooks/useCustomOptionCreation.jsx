@@ -9,47 +9,45 @@ export const useCustomOptionCreation = (initialOptions, onOptionsChange, setSele
     const [options, setOptions] = useState(initialOptions);
     const user = auth.currentUser;
     const [loading, setLoading] = useState(false)
-    // console.log('initialOptions', initialOptions)
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
-            if (user) {
-                const fetchData = async () => {
-                    setLoading(true);
-                    const db = getFirestore();
-                    const docRef = doc(db, "users", user.uid);
-                    const docSnap = await getDoc(docRef);
-                    if (docSnap.exists()) {
-                        const fetchedTags = docSnap.data().customTags;
-                        const newOptions = sortOptionsAlphabetically(fetchedTags.map(tag => ({
-                            value: tag.value,
-                            label: tag.label,
-                            color: tag.color,
-                        })));
+    // useEffect(() => {
+    //     const unsubscribe = onAuthStateChanged(auth, (user) => {
+    //         if (user) {
+
+    //             const fetchData = async () => {
+    //                 setLoading(true);
+    //                 const db = getFirestore();
+    //                 const docRef = doc(db, "users", user.uid);
+    //                 const docSnap = await getDoc(docRef);
+    //                 if (docSnap.exists()) {
+    //                     const fetchedTags = docSnap.data().customTags;
+    //                     const newOptions = sortOptionsAlphabetically(fetchedTags.map(tag => ({
+    //                         value: tag.value,
+    //                         label: tag.label,
+    //                         color: tag.color,
+    //                     })));
                         
-                        setOptions(newOptions);
-                    } else {
-                        console.log("No such document!");
-                    }
-                    setLoading(false);
-                };
-                fetchData();
-            } else {
-                setOptions([]);
-                setLoading(false);
-            }
-        });
-        return () => unsubscribe();
-    }, []); // Changed from [auth]
-    
-    
+    //                     console.log('newOptions', newOptions)
+    //                     setOptions(newOptions);
+    //                 } else {
+    //                     console.log("No such document!");
+    //                 }
+    //                 setLoading(false);
+    //             };
+    //             fetchData();
+    //         } else {
+    //             setOptions([]);
+    //             setLoading(false);
+    //         }
+    //     });
+    //     return () => unsubscribe();
+    // }, []); // Changed from [auth]
 
     const handleCreateNewOption = async (inputValue) => {
         // Skip if the tag already exists
         if (options.some(option => option.value === inputValue)) {
             return;
         }
-    
         if (typeof inputValue !== 'string') {
             console.error('Invalid input value: ', inputValue);
             return;
@@ -90,7 +88,7 @@ export const useCustomOptionCreation = (initialOptions, onOptionsChange, setSele
             const db = getFirestore();
             const userDoc = doc(db, 'users', user.uid);
             await updateDoc(userDoc, {
-                setups: arrayUnion(newOption)
+                customTags: arrayUnion(newOption)
             });
             setSelectedOption(newOption);
         } catch (error) {
@@ -98,10 +96,6 @@ export const useCustomOptionCreation = (initialOptions, onOptionsChange, setSele
         }    
         return newOption;
     };
-    
-    
-    
-    
-    // console.log('options', options)
+
     return [options, handleCreateNewOption, loading, setLoading];
 };
