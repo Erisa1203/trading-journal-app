@@ -64,7 +64,8 @@ const Home = () => {
                     trades={trades}
                     onTradeRowClick={(trade) => onTradeRowClickHandle(trade)}
                     filteredOption={filteredOption}
-                    limitToLast={10}
+                    limitToLast={5}
+                    page="journal"
                 />
                 <MyEditor />
                 </div>

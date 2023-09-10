@@ -58,7 +58,7 @@ const Backtest = () => {
                   }}
               />
               <div className="inner" style={!user ? { filter: 'blur(3px)' } : {}}>
-                      {/* <Summary /> */}
+                      <Summary />
                       <FilterUI
                           filteredOption={filteredOption}
                           setFilteredOption={setFilteredOption}
