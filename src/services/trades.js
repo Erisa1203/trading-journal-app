@@ -252,7 +252,6 @@ export const deleteTradeById = async (colName, tradeId) => {
     try {
         const tradeRef = doc(db, colName, tradeId);
         await deleteDoc(tradeRef);
-        console.log(`Trade with ID ${tradeId} has been successfully deleted.`);
     } catch (error) {
         console.error(`Error deleting trade with ID ${tradeId}:`, error);
     }
