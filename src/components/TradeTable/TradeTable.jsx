@@ -6,8 +6,8 @@ import { TradesContext } from '../../contexts/TradesContext'
 import { subscribeToTradeJournal, useTrades } from '../../services/trades';
 import { UserContext } from '../../contexts/UserContext';
 
-const TradeTable = ({ trades, onTradeRowClick, filterIsActive, limitToLast}) => {
-    // const { trades } = useTrades("journal");
+const TradeTable = ({  page, onTradeRowClick, filterIsActive, limitToLast}) => {
+    const { trades } = useTrades(page);
     const { filteredTrades } = useContext(TradesContext);
     const [dataToDisplay, setDataToDisplay] = useState(trades);  
     const [originalTrades, setOriginalTrades] = useState([]);
@@ -30,6 +30,7 @@ const TradeTable = ({ trades, onTradeRowClick, filterIsActive, limitToLast}) => 
     }, [trades, limitToLast]);
 
     useEffect(() => {
+
         if (user) {
             let tradesToSet = originalTrades;
 
@@ -37,7 +38,6 @@ const TradeTable = ({ trades, onTradeRowClick, filterIsActive, limitToLast}) => 
                 tradesToSet = tradesToSet.slice(0, limitToLast);
                 setDataToDisplay(sortByEntryDateDesc(tradesToSet));
             } else {
-
                 if(filteredTrades && filteredTrades.length !== 0) {
                     setDataToDisplay(sortByEntryDateDesc(filteredTrades));
                 } 

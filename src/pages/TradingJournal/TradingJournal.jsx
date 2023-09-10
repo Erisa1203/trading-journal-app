@@ -75,6 +75,7 @@ const TradingJournal = () => {
                       setClearFilterIsActive={setClearFilterIsActive}
                       filterUIClearClicked={filterUIClearClicked}
                       setFilterIsActive={setFilterIsActive}
+                      page="journal"
                     />
                     <TradeTable
                         trades={trades}
@@ -82,6 +83,7 @@ const TradingJournal = () => {
                         filteredOption={filteredOption}
                         filterIsActive={filterIsActive}
                         setFilterIsActive={setFilterIsActive}
+                        page="journal"
                     />
                     <NewTrade 
                       dbCollection="journal"
