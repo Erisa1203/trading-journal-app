@@ -48,12 +48,12 @@ const Sidebar = ({ page }) => {
                     </li>
                 </ul>
                 <ul className="navigation navigation--bottom">
-                    <li className={`navigation__item ${page === 'setting' ? 'active' : ''}`}>
+                    {/* <li className={`navigation__item ${page === 'setting' ? 'active' : ''}`}>
                         <Link to="/setting" className='navigation__link'>
                             <Gear weight={page === 'setting' ? 'fill' : 'regular'} className='icon-24 navigation__icon'/>
                             <span className='navigation__title'>SETTING</span>
                         </Link>
-                    </li>
+                    </li> */}
                     <li className="navigation__item">
                         <Link to="/" className='navigation__link'>
                             <SignOut className='icon-24 navigation__icon'/>

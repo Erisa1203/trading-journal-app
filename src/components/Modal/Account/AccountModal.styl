@@ -1,0 +1,49 @@
+@import "../../../stylus/foundation/*"
+
+.menuModal
+    width 200px
+    position absolute
+    right 30px
+    top 70px
+    background: #ffffff
+    border-radius 8px
+    border 1px solid $brand-800
+    padding 16px
+    z-index 1
+    shadow()
+    
+.menuModal__img
+    width 32px
+    height 32px
+    border-radius 8px
+    overflow: hidden
+
+.menuModal__name
+    display flex
+    align-items center
+    img 
+        width 32px
+    span
+        margin-left 16px
+        font-size 1.4rem
+        font-weight: 600
+    .initial
+        width 32px
+        height 32px
+        display flex
+        align-items center
+        font-weight: 600
+        font-size: 14px
+        border-radius 8px
+  
+.menuModal__menu
+    margin-top 16px
+
+.menuModal__item
+    font-size 1.4rem
+    padding 16px
+    border-radius: 8px
+    cursor pointer
+    &:hover
+        background: $brand-300
+        transition: .3s linear

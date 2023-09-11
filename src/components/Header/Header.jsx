@@ -1,10 +1,13 @@
 import { Bell, Moon, Plus } from '@phosphor-icons/react'
 import "./_header.styl"
-import React from 'react'
+import React, { useState } from 'react'
 import { INITIAL_TRADE_STATE, addTrade } from '../../services/trades';
 import { auth } from '../../services/firebase';
+import AccountModal from '../Modal/Account/AccountModal';
 
-const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page, createNewRuleHandle }) => {
+const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page, createNewRuleHandle, onSettingClick }) => {
+    
+    const [IsAccountModalVisible, setIsAccountModalVisible] = useState(false)
     const handleAddTradeBtnClick = async () => {
         const userId = auth.currentUser ? auth.currentUser.uid : null;
         const trade = INITIAL_TRADE_STATE(userId);
@@ -58,9 +61,16 @@ const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page,
                     <Moon className='icon-24'/>
                 </div>
                 <Bell className='icon-24 notificationBtn'/>
-                <div className="account-img">
+                <div className="account-img" onClick={() => setIsAccountModalVisible(!IsAccountModalVisible)}>
                     <img src="/img/account.png" alt="" />
                 </div>
+                {IsAccountModalVisible && (
+                    <>
+                        <div className="modal-overlay" onClick={() => setIsAccountModalVisible(false)}></div>
+                        <AccountModal onSettingClick={onSettingClick}/>
+                    </>
+                )}
+                
             </div>
         </div>
     )

@@ -20,7 +20,7 @@ function App() {
             <Route path="/trading-journal" element={<TradingJournal />} />
             <Route path="/backtest" element={<Backtest />} />
             <Route path="/rules" element={<Rules />} />
-            <Route path="/setting" element={<Setting />} />
+            {/* <Route path="/setting" element={<Setting />} /> */}
           </Routes>
         </Router>
       </FilterProvider>
