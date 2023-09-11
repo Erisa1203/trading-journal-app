@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Sidebar from '../../components/Sidebar/Sidebar'
 import Header from '../../components/Header/Header'
 import { UserContext } from '../../contexts/UserContext'
@@ -16,6 +16,8 @@ import WinRatioCard from '../../components/Summary/Card/WinRatioCard/WinRatioCar
 import PotentialPerformanceCard from '../../components/Summary/Card/PotentialPerformanceCard/PotentialPerformanceCard'
 import PairsRatioCard from '../../components/Summary/Card/PairsRatioCard/PairsRatioCard'
 import SettingModal from '../../components/Modal/Setting/SettingModal'
+import { db } from '../../services/firebase'
+import { doc, getDoc, updateDoc } from 'firebase/firestore'
 
 const Home = () => {
   const { user } = useContext(UserContext);
@@ -26,6 +28,7 @@ const Home = () => {
   const [filteredOption, setFilteredOption] = useState(INITIAL_FILTER_STATE)
   const [selectedFilters, setSelectedFilters] = useState(["SUMMARY"]);
   const [isSettingModalVisible, setIsSettingModalVisible] = useState(false);
+  const [isFirstLogin, setIsFirstLogin] = useState(false);
 
   const onTradeRowClickHandle = (trade) => {
     setSelectedTrade(trade)
@@ -36,6 +39,37 @@ const Home = () => {
   const toggleSettingModal = () => {
     setIsSettingModalVisible(prevVisible => !prevVisible);
   };
+
+  useEffect(() => {
+    if (user) {
+      const userDocRef = doc(db, "users", user.uid);
+      getDoc(userDocRef).then((docSnapshot) => {
+        if (docSnapshot.exists()) {
+          const userData = docSnapshot.data();
+          // Check if firstLogin field exists and if it's set to true
+          if (userData.firstLogin) {
+            setIsFirstLogin(true);
+            // Update the firstLogin field to false
+            updateDoc(userDocRef, { firstLogin: false });
+            // Open the modal
+            setIsSettingModalVisible(true);
+          } else if (!("firstLogin" in userData)) {
+            // If the user's document doesn't have a firstLogin field, consider it as a first login
+            updateDoc(userDocRef, { firstLogin: false });
+            setIsSettingModalVisible(true);
+          }
+        } else {
+          // If the user document doesn't exist, create one with firstLogin set to false
+          updateDoc(userDocRef, { firstLogin: false });
+          setIsSettingModalVisible(true);
+        }
+      }).catch(error => {
+        console.error("Error fetching user data: ", error);
+      });
+    }
+  }, [user]);
+  
+  
 
   return (
     <TradesContext.Provider value={{

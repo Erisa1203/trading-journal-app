@@ -3,6 +3,7 @@ import "./_login.styl"
 import GoogleSignInBtn from '../../Button/GoogleSignInBtn'
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { Firestore, doc, setDoc } from 'firebase/firestore'
+import { db } from '../../../services/firebase'
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -30,7 +31,7 @@ const Login = () => {
           const userCredential = await createUserWithEmailAndPassword(auth, email, password);
           const user = userCredential.user;
           // ユーザーが正常に作成されたら、Firestoreに新規ドキュメントを作成
-          const userDocRef = doc(Firestore, "users", user.uid);
+          const userDocRef = doc(db, "users", user.uid);
           await setDoc(userDocRef, {
             customTags: ["USD/JPY", "USD/CAD", "EUR/USD", "EUR/GBP", "EUR/JPY", "EUR/CHF", "GBP/JPY", "GBP/USD", "GBP/CAD", "CAD/JPY"],
             email: user.email,

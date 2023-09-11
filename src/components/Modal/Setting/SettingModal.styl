@@ -10,7 +10,10 @@
     z-index 1
 
 .modal
-    width 500px
+    width 600px
+    min-height 300px
+    display flex
+    flex-direction: column
     padding 24px
     background: #ffffff
     border-radius 24px
@@ -30,21 +33,80 @@
     display flex
     justify-content: space-between
     margin-top 16px
-    padding 0 16px
 
-    input, select
+    input, select, label
         width 200px
         padding 16px
         border-radius: 8px
         font-size 1.6rem
         border 1px solid $gray-200
+        word-break: keep-all
+        white-space: nowrap
+        overflow-x:scroll 
+
+    label
+        font-size 1.4rem
 
 .modal__sub
     display flex
     align-items center
+    margin-right 16px
+
 .modal__sub, .modal__desc
     font-size 1.6rem
 
 .modal .btn
     margin-left auto
     margin-top 16px
+
+.modal__update
+    color $color-green
+    font-size 1.4rem
+    font-weight: 600
+
+.modal__side
+    display flex
+    align-items flex-end
+
+.modal__close
+    width 24px
+    height 24px
+    position absolute
+    right 16px
+    top 16px
+    display flex
+    align-items center
+    justify-content center
+    cursor pointer
+
+    &:after, &:before 
+        content ''
+        width 1px
+        height 100%
+        background $gray-400
+        position relative
+
+    &:after 
+        transform: rotate(-45deg)
+
+    &:before 
+        transform: rotate(45deg)
+
+.modal__content
+    display flex
+    flex 1
+
+.modal__sidebar
+    padding 16px 16px 16px 0
+    border-right: 1px solid $gray-50
+    flex-shrink: 0
+
+.modal__sidebar__list
+    font-size 1.4rem
+    padding 14px
+    cursor pointer
+
+.modal__main
+    padding 16px 24px 0 24px
+    width 100%
+

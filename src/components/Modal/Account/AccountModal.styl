@@ -23,7 +23,10 @@
     align-items center
     img 
         width 32px
-    span
+        height 100%
+        object-fit: cover
+        
+    span:not(.initial)
         margin-left 16px
         font-size 1.4rem
         font-weight: 600
@@ -35,6 +38,8 @@
         font-weight: 600
         font-size: 14px
         border-radius 8px
+        justify-content center
+        background: $gray-50
   
 .menuModal__menu
     margin-top 16px
