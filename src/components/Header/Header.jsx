@@ -1,12 +1,13 @@
 import { Bell, Moon, Plus } from '@phosphor-icons/react'
 import "./_header.styl"
-import React, { useState } from 'react'
+import React, { useContext, useState } from 'react'
 import { INITIAL_TRADE_STATE, addTrade } from '../../services/trades';
 import { auth } from '../../services/firebase';
 import AccountModal from '../Modal/Account/AccountModal';
+import { UserContext } from '../../contexts/UserContext';
 
 const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page, createNewRuleHandle, onSettingClick }) => {
-    
+    const { user, photoURL, initial } = useContext(UserContext);
     const [IsAccountModalVisible, setIsAccountModalVisible] = useState(false)
     const handleAddTradeBtnClick = async () => {
         const userId = auth.currentUser ? auth.currentUser.uid : null;
@@ -62,7 +63,10 @@ const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page,
                 </div>
                 <Bell className='icon-24 notificationBtn'/>
                 <div className="account-img" onClick={() => setIsAccountModalVisible(!IsAccountModalVisible)}>
-                    <img src="/img/account.png" alt="" />
+                    {photoURL 
+                        ? <img src={photoURL} alt="" />
+                        : <span className="initial">{initial}</span>
+                    }
                 </div>
                 {IsAccountModalVisible && (
                     <>
