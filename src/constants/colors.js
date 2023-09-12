@@ -50,6 +50,7 @@ export const pairColors = {
     'EUR/AUD': adjustBrightness(colors.blue, getRandomPercent()),
     'EUR/CAD': adjustBrightness(colors.blue, getRandomPercent()),
     'EUR/NZD': adjustBrightness(colors.blue, getRandomPercent()),
+    'EUR/CHF': adjustBrightness(colors.blue, getRandomPercent()),
 
     // USD に関連する通貨ペア
     'USD/JPY': adjustBrightness(colors.red, getRandomPercent()),

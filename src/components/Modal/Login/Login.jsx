@@ -4,12 +4,23 @@ import GoogleSignInBtn from '../../Button/GoogleSignInBtn'
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { Firestore, doc, setDoc } from 'firebase/firestore'
 import { db } from '../../../services/firebase'
+import { pairColors } from '../../../constants/colors'
 
 const Login = () => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [isNewUser, setIsNewUser] = useState(false);
+    const tags = ["USD/JPY", "USD/CAD", "EUR/USD", "EUR/GBP", "EUR/JPY", "EUR/CHF", "GBP/JPY", "GBP/USD", "GBP/CAD", "CAD/JPY"];
 
+    const customTags = tags.map(tag => {
+        return {
+          color: pairColors[tag], // color.js から取得したカラーコード
+          label: tag,
+          value: tag
+        };
+    });
+
+      
     const handleLogin = () => {
         const auth = getAuth();
         signInWithEmailAndPassword(auth, email, password)
@@ -32,17 +43,25 @@ const Login = () => {
           const user = userCredential.user;
           // ユーザーが正常に作成されたら、Firestoreに新規ドキュメントを作成
           const userDocRef = doc(db, "users", user.uid);
+          console.log("customTags:", customTags);
+console.log("user.email:", user.email);
+console.log("user.displayName:", user.displayName);
           await setDoc(userDocRef, {
-            customTags: ["USD/JPY", "USD/CAD", "EUR/USD", "EUR/GBP", "EUR/JPY", "EUR/CHF", "GBP/JPY", "GBP/USD", "GBP/CAD", "CAD/JPY"],
+
+            customTags: customTags,
             email: user.email,
-            username: user.displayName,
+            username: user.displayName || '',
           });
         } catch (error) {
-          const errorCode = error.code;
-          const errorMessage = error.message;
+            const errorCode = error.code;
+            const errorMessage = error.message;
+            console.error("errorCode:", errorCode); 
+            console.error("errorMessage:", errorMessage); 
+            console.error("Signup Error:", error); 
           // エラーメッセージを表示するなど、エラーハンドリングを行います
         }
       };
+      
 
     return (
         <div className="userModal">

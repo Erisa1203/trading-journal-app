@@ -12,13 +12,11 @@ const AccountChart = ({ onBalanceChange, currentBalance, setCurrentBalance }) =>
     const { trades, loading } = useContext(TradesContext);
     const [selectedYear, setSelectedYear] = useState('this year');
     const [chartWidth, setChartWidth] = useState(window.innerWidth);
-    // const [initialBalance, setCurrentBalance] = useState(500000);
     const { user } = useContext(UserContext);
 
     useEffect(() => {
-        let isMounted = true;
         (async () => {
-            let balance = 500000; // default value
+            let balance = currentBalance; // default value
             if (selectedYear === 'this year') {
                 const lastYear = new Date().getFullYear() - 1;
                 const lastYearBalance = await getYearlyBalanceFromFirestore(lastYear);
@@ -28,14 +26,10 @@ const AccountChart = ({ onBalanceChange, currentBalance, setCurrentBalance }) =>
                 const balanceYearBeforeLast = await getYearlyBalanceFromFirestore(yearBeforeLast);
                 balance = balanceYearBeforeLast || balance;
             }
-            if (isMounted) {
-                setCurrentBalance(balance);
-            }
         })();
 
-        return () => { isMounted = false; };
     }, [selectedYear]);
-
+    
     const getYearlyBalanceFromFirestore = async (year) => {
         const summaryRef = collection(db, 'summary');
         const yearQuery = query(summaryRef, where("year", "==", year));
@@ -164,7 +158,7 @@ const AccountChart = ({ onBalanceChange, currentBalance, setCurrentBalance }) =>
 
     useEffect(() => {
         const calculateYearlyBalance = (year, trades) => {
-            let balance = 500000;  // 初期値
+            let balance = currentBalance;  // 初期値
             trades.forEach((trade) => {
                 const tradeYear = new Date(trade.EXIT_DATE).getFullYear();
                 if (tradeYear !== year) return;
