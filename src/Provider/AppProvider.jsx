@@ -8,9 +8,12 @@ import { SidebarContext } from "../contexts/SidebarContext";
 const AppProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [isSidebarClosed, setIsSidebarClosed] = useState(false);
+  const [loading, setLoading] = useState(false);
+
 
   useEffect(() => {
     onAuthStateChanged(auth, setUser);
+    setLoading(false)
   }, []);
 
   const logout = () => {
@@ -21,7 +24,7 @@ const AppProvider = ({ children }) => {
   };
 
   return (
-    <UserContext.Provider value={{ user, logout }}>
+    <UserContext.Provider value={{ user, logout, loading }}>
       <SidebarContext.Provider value={{ isSidebarClosed, setIsSidebarClosed }}>
         {children}
       </SidebarContext.Provider>

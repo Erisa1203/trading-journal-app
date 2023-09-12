@@ -8,11 +8,11 @@ import { collection, getFirestore, query, orderBy, limit, getDoc, setDoc, getDoc
 import { db } from '../../../../services/firebase';
 import { UserContext } from '../../../../contexts/UserContext';
 
-const AccountChart = ({ onBalanceChange }) => {
+const AccountChart = ({ onBalanceChange, currentBalance, setCurrentBalance }) => {
     const { trades, loading } = useContext(TradesContext);
     const [selectedYear, setSelectedYear] = useState('this year');
     const [chartWidth, setChartWidth] = useState(window.innerWidth);
-    const [initialBalance, setInitialBalance] = useState(500000);
+    // const [initialBalance, setCurrentBalance] = useState(500000);
     const { user } = useContext(UserContext);
 
     useEffect(() => {
@@ -29,7 +29,7 @@ const AccountChart = ({ onBalanceChange }) => {
                 balance = balanceYearBeforeLast || balance;
             }
             if (isMounted) {
-                setInitialBalance(balance);
+                setCurrentBalance(balance);
             }
         })();
 
@@ -70,7 +70,7 @@ const AccountChart = ({ onBalanceChange }) => {
     
     const data = useMemo(() => {
             // 初期のバランスの設定
-        let balance = initialBalance;
+        let balance = currentBalance;
 
         if (selectedYear === 'this year') {
             (async () => {
@@ -110,7 +110,7 @@ const AccountChart = ({ onBalanceChange }) => {
         });
 
         return chartData;
-    }, [filteredTrades, initialBalance]);
+    }, [filteredTrades, currentBalance]);
 
     useEffect(() => {
         if(data.length > 0) {
