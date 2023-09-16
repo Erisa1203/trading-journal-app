@@ -2,12 +2,12 @@ import React, { useContext, useEffect, useState } from 'react'
 import "./SettingModal.styl"
 import { UserContext } from '../../../contexts/UserContext';
 import { db } from '../../../services/firebase';
-import { doc, getDoc, setDoc } from 'firebase/firestore';
+import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes, getStorage } from '@firebase/storage';
 
 const SettingModal = ({setIsSettingModalVisible}) => {
     const [accountValue, setAccountValue] = useState("");
-    const { user } = useContext(UserContext);
+    const { user, isFirstLogin } = useContext(UserContext);
     const [currency, setCurrency] = useState("");
     const [isUpdated, setIsUpdated] = useState(false);
     const [currentContent, setCurrentContent] = useState("user"); // "user" or "account"
@@ -55,6 +55,23 @@ const SettingModal = ({setIsSettingModalVisible}) => {
         return imageUrl;
     };
 
+    // isFirstLoginがtrueの場合、Firestoreのデータベースを更新する関数
+    const updateIsFirstLogin = async () => {
+        if (isFirstLogin) {
+            const userDocRef = doc(db, "users", user.uid);
+            try {
+                await updateDoc(userDocRef, { isFirstLogin: false });
+            } catch (error) {
+                console.error("Error updating isFirstLogin:", error);
+            }
+        }
+    };
+
+    const closeModal = () => {
+        updateIsFirstLogin();
+        setIsSettingModalVisible(false);
+    };
+
     const handleUpdate = async () => {
         if (user) {
             try {
@@ -72,6 +89,7 @@ const SettingModal = ({setIsSettingModalVisible}) => {
                     profileImageUrl: imageUrl || null  // imageUrlが存在しない場合はnullを保存します
                 });
                 setIsUpdated(true);
+                updateIsFirstLogin();
             } catch (error) {
                 console.error("Error updating document:", error);
             }
@@ -83,12 +101,12 @@ const SettingModal = ({setIsSettingModalVisible}) => {
     <>
         <div 
             className='modal_wrapper'
-            onClick={() => setIsSettingModalVisible(false)}
+            onClick={closeModal}
         ></div>
         <div className="modal">
             <div 
                 className="modal__close"
-                onClick={() => setIsSettingModalVisible(prevState => !prevState)}
+                onClick={closeModal}
             >
             </div>
             <div className="modal__title">設定</div>

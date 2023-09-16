@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import "./_login.styl"
 import GoogleSignInBtn from '../../Button/GoogleSignInBtn'
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth'
-import { Firestore, doc, setDoc } from 'firebase/firestore'
+import { Firestore, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../../../services/firebase'
 import { pairColors } from '../../../constants/colors'
 
@@ -25,9 +25,21 @@ const Login = () => {
         const auth = getAuth();
         signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
-                // Signed in 
                 const user = userCredential.user;
-                // ...
+
+                // ログイン後に isFirstLogin を確認するロジックを追加
+                const userDocRef = doc(db, "users", user.uid);
+                getDoc(userDocRef).then((docSnapshot) => {
+                    if (docSnapshot.exists()) {
+                        const userData = docSnapshot.data();
+                        if (userData.isFirstLogin) {
+                            // isFirstLogin を false に更新
+                            updateDoc(userDocRef, { isFirstLogin: false }).catch((updateError) => {
+                                console.error('isFirstLoginの更新中にエラーが発生:', updateError);
+                            });
+                        }
+                    }
+                });
             })
             .catch((error) => {
                 const errorCode = error.code;
@@ -43,22 +55,16 @@ const Login = () => {
           const user = userCredential.user;
           // ユーザーが正常に作成されたら、Firestoreに新規ドキュメントを作成
           const userDocRef = doc(db, "users", user.uid);
-          console.log("customTags:", customTags);
-console.log("user.email:", user.email);
-console.log("user.displayName:", user.displayName);
           await setDoc(userDocRef, {
-
             customTags: customTags,
             email: user.email,
             username: user.displayName || '',
+            isFirstLogin: true
           });
         } catch (error) {
             const errorCode = error.code;
             const errorMessage = error.message;
-            console.error("errorCode:", errorCode); 
-            console.error("errorMessage:", errorMessage); 
             console.error("Signup Error:", error); 
-          // エラーメッセージを表示するなど、エラーハンドリングを行います
         }
       };
       
