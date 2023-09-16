@@ -35,18 +35,20 @@ export const UserProvider = ({ children }) => {
 
     useEffect(() => {
         if (user) {
-            const settingsRef = doc(db, 'users', user.uid);  // usersコレクションを参照する
+            const settingsRef = doc(db, 'setting', user.uid);
     
             onSnapshot(settingsRef, (docSnapshot) => {
                 if (docSnapshot.exists()) {
                     const data = docSnapshot.data();
     
-                    // FirestoreからisFirstLoginのデータを取得
+                    // FirestoreからisFirstLoginとusernameのデータを取得
                     if (data.hasOwnProperty("isFirstLogin")) {
                         setIsFirstLogin(data.isFirstLogin);
                     }
     
+                    // 'setting' コレクションの username を参照します
                     setDisplayName(data.username || user.displayName);
+    
                     const googleProviderInfo = user.providerData.find(data => data.providerId === 'google.com');
                     const newPhotoURL = googleProviderInfo?.photoURL || data.profileImageUrl;
                     setPhotoURL(newPhotoURL);
@@ -57,6 +59,7 @@ export const UserProvider = ({ children }) => {
             });
         }
     }, [user]);
+    
     
 
     return (

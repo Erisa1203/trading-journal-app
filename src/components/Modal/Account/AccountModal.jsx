@@ -1,17 +1,11 @@
 import React, { useContext, useState, useEffect } from 'react';
 import "./AccountModal.styl";
 import { UserContext } from '../../../contexts/UserContext';
-import { db } from '../../../services/firebase';
-import { doc, onSnapshot } from 'firebase/firestore'; // onSnapshotをインポート
 
 const AccountModal = ({onSettingClick}) => {
-    const [username, setUsername] = useState("");
-    const [profileImageUrl, setProfileImageUrl] = useState(null);
     const { user, logout, photoURL, initial, displayName } = useContext(UserContext);
 
     if (!user) return null;
-
-    const googleProviderInfo = user.providerData.find(data => data.providerId === 'google.com');
 
     return (
         <div className='menuModal'>
