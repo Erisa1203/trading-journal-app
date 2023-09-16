@@ -4,6 +4,7 @@ import { UserContext } from '../../../contexts/UserContext';
 import { db } from '../../../services/firebase';
 import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore';
 import { getDownloadURL, ref, uploadBytes, getStorage } from '@firebase/storage';
+import { EmailAuthProvider, getAuth, reauthenticateWithCredential, updateEmail } from 'firebase/auth';
 
 const SettingModal = ({setIsSettingModalVisible}) => {
     const [accountValue, setAccountValue] = useState("");
@@ -15,37 +16,74 @@ const SettingModal = ({setIsSettingModalVisible}) => {
     const [profileImage, setProfileImage] = useState(null);
     const [profileImageName, setProfileImageName] = useState("画像を選択してください");
     const Storage = getStorage();
+    const [profileImageUrl, setProfileImageUrl] = useState(null);
+    const [email, setEmail] = useState(user.email || "");
+    const [currentPassword, setCurrentPassword] = useState("");
 
     useEffect(() => {
         if (user) {
-            // ユーザーのdisplayNameを設定、もしない場合はFirestoreから取得
-            if (user.displayName) {
-                setUserName(user.displayName);
-            } else {
-                const settingsRef = doc(db, 'setting', user.uid);
-                getDoc(settingsRef).then((docSnapshot) => {
-                    if (docSnapshot.exists()) {
-                        const data = docSnapshot.data();
-                        if (data.username) {
-                            setUserName(data.username);
-                        }
-                        if (data.accountValue) {
-                            setAccountValue(data.accountValue);
-                        }
+            const settingsRef = doc(db, 'setting', user.uid);
+            getDoc(settingsRef).then((docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    const data = docSnapshot.data();
+                    if (data.username) {
+                        setUserName(data.username);
                     }
-                });
-            }
+                    if (data.accountValue) {
+                        setAccountValue(data.accountValue);
+                    }
+                    if (data.profileImageUrl) {
+                        setProfileImageUrl(data.profileImageUrl);
+                    }
+                    if (data.email) {
+                        setEmail(data.email);
+                    }
+                }
+            });
         }
     }, [user]);
     
-
+    // emailの更新処理
+    const updateEmailInAuth = async (newEmail, currentPassword) => {
+        try {
+          const isAuthenticated = await reauthenticateUser(currentPassword);
+      
+          if (!isAuthenticated) {
+            console.error("Failed to reauthenticate user.");
+            return false;
+          }
+      
+          const auth = getAuth();
+          const currentUser = auth.currentUser;
+          if (currentUser) {
+            await updateEmail(currentUser, newEmail);
+            return true;
+          } else {
+            console.error("No authenticated user found.");
+            return false;
+          }
+        } catch (error) {
+          console.error("Error updating email in Firebase Auth:", error);
+          return false;
+        }
+    };
+      
+    
+    
 
     const handleImageChange = (e) => {
         if (e.target.files[0]) {
             setProfileImage(e.target.files[0]);
             setProfileImageName(e.target.files[0].name);
+    
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                setProfileImageUrl(event.target.result); // これで画像をすぐに表示できます
+            };
+            reader.readAsDataURL(e.target.files[0]);
         }
     };
+    
 
     const uploadProfileImage = async () => {
         // パスを`user/`から`profileImages/`に変更します
@@ -79,21 +117,45 @@ const SettingModal = ({setIsSettingModalVisible}) => {
                 if (profileImage) {
                     imageUrl = await uploadProfileImage();
                 }
-
+    
                 const settingsRef = doc(db, 'setting', user.uid);
                 await setDoc(settingsRef, {
                     accountValue,
                     user_id: user.uid,
                     currency,
                     username: userName,
-                    profileImageUrl: imageUrl || null  // imageUrlが存在しない場合はnullを保存します
+                    profileImageUrl: imageUrl || null,
+                    email  // Firestoreにemailを保存
                 });
+                // Firebase Authenticationのemailを更新
+                const isEmailUpdated = await updateEmailInAuth(email, currentPassword);
+                if (!isEmailUpdated) {
+                    throw new Error("Failed to update email in Firebase Auth.");
+                }
                 setIsUpdated(true);
                 updateIsFirstLogin();
             } catch (error) {
                 console.error("Error updating document:", error);
             }
         }
+    };
+
+    const reauthenticateUser = async (currentPassword) => {
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+
+    if (currentUser) {
+        const credential = EmailAuthProvider.credential(currentUser.email, currentPassword);
+
+        try {
+        await reauthenticateWithCredential(currentUser, credential);
+        return true;
+        } catch (error) {
+        console.error("Error during reauthentication:", error);
+        return false;
+        }
+    }
+    return false;
     };
 
     
@@ -137,15 +199,26 @@ const SettingModal = ({setIsSettingModalVisible}) => {
                         <div className="modal__userContent">
                             <div className="modal__block">
                                 <div className="modal__sub">プロフィール画像</div>
-                                <input 
-                                    type="file" 
-                                    id="fileInput" 
-                                    style={{ display: 'none' }} 
-                                    onChange={handleImageChange} 
-                                />
-                                <label htmlFor="fileInput" style={{ cursor: 'pointer' }}>
-                                    {profileImageName} 
-                                </label>
+                                <div className='profBlock'>
+                                    {profileImageUrl && (
+                                        <div className='profImg'>
+                                            <img src={profileImageUrl} alt="プロフィール画像" />
+                                        </div>
+                                    )}
+                                    <input 
+                                        type="file" 
+                                        id="fileInput" 
+                                        style={{ display: 'none' }} 
+                                        onChange={handleImageChange} 
+                                    />
+                                    <label 
+                                        htmlFor="fileInput" 
+                                        style={{ cursor: 'pointer' }}
+                                        className={profileImageUrl ? "modal__label__onedit" : ""}
+                                    >
+                                        {profileImageUrl ? "画像を変更" : profileImageName}
+                                    </label>
+                                </div>
                             </div>
 
                             <div className="modal__block">
@@ -156,6 +229,24 @@ const SettingModal = ({setIsSettingModalVisible}) => {
                                     onChange={(e) => setUserName(e.target.value)}
                                 />
                             </div>
+                            <div className="modal__block">
+                                <div className="modal__sub">Email</div>
+                                <input 
+                                    type="text" 
+                                    value={email} 
+                                    onChange={(e) => setEmail(e.target.value)}
+                                />
+                            </div>
+                            <div className="modal__block">
+                                <div className="modal__sub">現在のパスワード</div>
+                                <input 
+                                    type="password" 
+                                    value={currentPassword} 
+                                    onChange={(e) => setCurrentPassword(e.target.value)}
+                                    placeholder="現在のパスワードを入力"
+                                />
+                            </div>
+
                         </div>
                     )}
                     {currentContent === "account" && (

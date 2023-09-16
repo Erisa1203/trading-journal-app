@@ -32,10 +32,11 @@
 .modal__block
     display flex
     justify-content: space-between
+    align-items center
     margin-top 16px
 
     input, select, label
-        width 200px
+        width 100%
         padding 16px
         border-radius: 8px
         font-size 1.6rem
@@ -51,6 +52,8 @@
     display flex
     align-items center
     margin-right 16px
+    flex-shrink 0
+    min-width: 132px
 
 .modal__sub, .modal__desc
     font-size 1.6rem
@@ -110,3 +113,30 @@
     padding 16px 24px 0 24px
     width 100%
 
+.modal__block .modal__label__onedit
+    width: auto;
+    padding: 12px;
+    line-height: 1;
+    font-size: 1.2rem;
+    border: none;
+    margin-top: 8px;
+    justify-content: center;
+    display: flex;
+    background: #eee;
+
+.profImg
+    width: 100%;
+    height: auto;
+    flex-shrink: 0;
+    padding: 8px;
+    border: 1px solid $gray-200
+    border-radius: 8px;
+    img
+        width 100%
+        height 100%
+        object-fit: cover
+
+.profBlock
+    display flex
+    flex-direction: column
+    width 100%
