@@ -1,36 +1,42 @@
 import React, { useContext, useEffect, useState } from 'react'
 import AccountChart from '../../Chart/AccountChart/AccountChart'
 import { db } from '../../../../services/firebase';
-import { doc, onSnapshot } from 'firebase/firestore';
+import { doc, getDoc, onSnapshot } from 'firebase/firestore';
 import { UserContext } from '../../../../contexts/UserContext';
+import { TradesContext } from '../../../../contexts/TradesContext';
 
 const AccountCard = () => {
-    const [currentBalance, setCurrentBalance] = useState("---");
+    const [currentBalance, setCurrentBalance] = useState("");
     const [currency, setCurrency] = useState('yen');
     const { user, loading } = useContext(UserContext);
+    const { trades } = useContext(TradesContext);
 
     useEffect(() => {
         if (loading || !user) return;
-
-        const settingsRef = doc(db, 'setting', user.uid);
-
-        const unsubscribe = onSnapshot(settingsRef, (docSnapshot) => {
-            if (docSnapshot.exists()) {
-                const data = docSnapshot.data();
-                if (data.accountValue) {
-                    setCurrentBalance(parseFloat(data.accountValue));
-                } else {
-                    setCurrentBalance("---");
-                }
-
-                if (data.currency) {
-                    setCurrency(data.currency);
+    
+        const currentYear = new Date().getFullYear();
+        const userDocRef = doc(db, 'users', user.uid);
+    
+        // onSnapshotを使用してドキュメントの変更をリアルタイムで監視
+        const unsubscribe = onSnapshot(userDocRef, (userDocSnapshot) => {
+            if (userDocSnapshot.exists()) {
+                const userData = userDocSnapshot.data();
+            
+                if (userData && userData.summary) {
+                    const currentYearSummary = userData.summary.find(item => item.year === currentYear);
+                    
+                    if (currentYearSummary) {
+                        setCurrentBalance(currentYearSummary.balance);
+                    }
                 }
             }
+            
         });
-
+    
+        // コンポーネントがアンマウントされるときに監視を終了する
         return () => unsubscribe();
-    }, [user, loading]);
+    
+    }, [user, loading, trades]);
     
     // 通貨の記号を取得するためのヘルパー関数
     const getCurrencySymbol = () => {
@@ -50,7 +56,7 @@ const AccountCard = () => {
                 <span className='chartCard__sub'>+12%</span>
             </div>
             <div className="chart">
-                <AccountChart currentBalance={currentBalance !== '---' ? currentBalance : undefined} setCurrentBalance={setCurrentBalance} onBalanceChange={setCurrentBalance} />
+                <AccountChart currentBalance={currentBalance} setCurrentBalance={setCurrentBalance} onBalanceChange={setCurrentBalance} />
             </div>
         </div>
     )

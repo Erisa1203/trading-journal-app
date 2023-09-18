@@ -10,7 +10,6 @@ const hasTradeData = (data) => {
 
 const WinRatioChart = ({ onUpdateRatio }) => {
     const { selectedFilters, setSelectedFilters } = useContext(FilterCardsContext);
-
     const { trades } = useContext(TradesContext);
     const [chartData, setChartData] = useState([]);
     const [timeframe, setTimeframe] = useState('this year');

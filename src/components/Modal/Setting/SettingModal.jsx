@@ -19,6 +19,7 @@ const SettingModal = ({setIsSettingModalVisible}) => {
     const [profileImageUrl, setProfileImageUrl] = useState(null);
     const [email, setEmail] = useState(user.email || "");
     const [currentPassword, setCurrentPassword] = useState("");
+    const [startDate, setStartDate] = useState("");
 
     useEffect(() => {
         if (user) {
@@ -37,6 +38,9 @@ const SettingModal = ({setIsSettingModalVisible}) => {
                     }
                     if (data.email) {
                         setEmail(data.email);
+                    }
+                    if (data.startDate) {
+                        setStartDate(data.startDate);
                     }
                 }
             });
@@ -68,9 +72,6 @@ const SettingModal = ({setIsSettingModalVisible}) => {
         }
     };
       
-    
-    
-
     const handleImageChange = (e) => {
         if (e.target.files[0]) {
             setProfileImage(e.target.files[0]);
@@ -84,7 +85,6 @@ const SettingModal = ({setIsSettingModalVisible}) => {
         }
     };
     
-
     const uploadProfileImage = async () => {
         // パスを`user/`から`profileImages/`に変更します
         const storageRef = ref(Storage, `profileImages/${user.uid}`);
@@ -125,13 +125,19 @@ const SettingModal = ({setIsSettingModalVisible}) => {
                     currency,
                     username: userName,
                     profileImageUrl: imageUrl || null,
-                    email  // Firestoreにemailを保存
+                    email,
+                    startDate
                 });
-                // Firebase Authenticationのemailを更新
-                const isEmailUpdated = await updateEmailInAuth(email, currentPassword);
-                if (!isEmailUpdated) {
-                    throw new Error("Failed to update email in Firebase Auth.");
+    
+                // ここでユーザーの現在のメールアドレスと新しいメールアドレスが異なる場合のみ、
+                // updateEmailInAuth 関数を呼び出します
+                if (user.email !== email) {
+                    const isEmailUpdated = await updateEmailInAuth(email, currentPassword);
+                    if (!isEmailUpdated) {
+                        throw new Error("Failed to update email in Firebase Auth.");
+                    }
                 }
+                
                 setIsUpdated(true);
                 updateIsFirstLogin();
             } catch (error) {
@@ -139,6 +145,7 @@ const SettingModal = ({setIsSettingModalVisible}) => {
             }
         }
     };
+    
 
     const reauthenticateUser = async (currentPassword) => {
     const auth = getAuth();
@@ -267,7 +274,14 @@ const SettingModal = ({setIsSettingModalVisible}) => {
                                     <option value="euro">€ ユーロ</option>
                                 </select>
                             </div>
-
+                            <div className="modal__block">
+                                <div className="modal__sub">トレード開始日</div>
+                                <input 
+                                    type="date" 
+                                    value={startDate} 
+                                    onChange={(e) => setStartDate(e.target.value)} 
+                                />
+                            </div>
                         </div>
                     )}
                     <div className='modal__side'>
