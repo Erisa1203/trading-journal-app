@@ -13,9 +13,11 @@ import NewTrade from '../../components/Modal/NewTrade/NewTrade'
 import { useTrades } from '../../services/trades'
 import { INITIAL_FILTER_STATE } from '../../services/filter'
 import { TradesContext } from '../../contexts/TradesContext'
+import SettingModal from '../../components/Modal/Setting/SettingModal'
+import useSettingModal from '../../hooks/useSettingModal'
 
 const Backtest = () => {
-  const { user } = useContext(UserContext);
+  const { user, isFirstLogin } = useContext(UserContext);
   const [filteredOption, setFilteredOption] = useState(INITIAL_FILTER_STATE)
   const [clearFilterIsActive, setClearFilterIsActive] = useState(false)
   const [filterIsActive, setFilterIsActive] = useState(false); 
@@ -27,6 +29,7 @@ const Backtest = () => {
   const [selectedTrade, setSelectedTrade] = useState(null)
   const [tradeId, setTradeId] = useState(null)
   const { trades, setTradesToJournal, filteredTrades, setFilteredTrades, loading } = useTrades("backtest");
+  const { isSettingModalVisible, toggleSettingModal, setIsSettingModalVisible } = useSettingModal(user, isFirstLogin);
 
 
   const onTradeRowClickHandle = (trade) => {
@@ -56,6 +59,7 @@ const Backtest = () => {
                       setSelectedTrade(newTrade);  // 新しい（空の）トレード情報をセット
                       setIsVisible(true);
                   }}
+                  onSettingClick={toggleSettingModal}
               />
               <div className="inner" style={!user ? { filter: 'blur(3px)' } : {}}>
                       <Summary />
@@ -99,6 +103,7 @@ const Backtest = () => {
                       />
                   </div>
               {!user && <HideContents />}
+              {isSettingModalVisible && <SettingModal setIsSettingModalVisible = {setIsSettingModalVisible}/>}
         </div>
       </AppContainer>
     </TradesContext.Provider>

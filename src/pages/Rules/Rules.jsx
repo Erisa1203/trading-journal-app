@@ -12,9 +12,11 @@ import './Rules.styl'
 import RuleFilter from "../../components/RuleFilter/RuleFilter";
 import { useCustomSetupCreation } from "../../hooks/useCustomSetupCreation";
 import { db } from "../../services/firebase";
+import useSettingModal from "../../hooks/useSettingModal";
+import SettingModal from "../../components/Modal/Setting/SettingModal";
 
 const Rules = () => {
-    const { user } = useContext(UserContext);
+    const { user, isFirstLogin } = useContext(UserContext);
     const [rules, setRules] = useState([]);
     const [loading, setLoading] = useState(true);
     const [isNewRuleModalVisible, setIsNewRuleModalVisible] = useState(false)
@@ -26,6 +28,7 @@ const Rules = () => {
     const [isActive, setIsActive] = useState(false);
     const [originalRules, setOriginalRules] = useState([]);
     const [filteredRules, setFilteredRules] = useState([]);
+    const { isSettingModalVisible, toggleSettingModal, setIsSettingModalVisible } = useSettingModal(user, isFirstLogin);
 
     useEffect(() => {
         if (activeFilter) {
@@ -143,6 +146,7 @@ const Rules = () => {
                     page="Rules" 
                     createNewRuleHandle={createNewRuleHandle}
                     setRuleId={setRuleId}
+                    onSettingClick={toggleSettingModal}
                 />
                 <div className="inner" style={!user ? { filter: 'blur(3px)' } : {}}>
                     <ul className="ruleFilter">
@@ -197,6 +201,7 @@ const Rules = () => {
                     
                 />
                 {!user && <HideContents />}
+                {isSettingModalVisible && <SettingModal setIsSettingModalVisible = {setIsSettingModalVisible}/>}
             </div>
         </AppContainer>
         

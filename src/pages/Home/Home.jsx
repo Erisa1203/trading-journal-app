@@ -9,15 +9,14 @@ import TradeTable from '../../components/TradeTable/TradeTable'
 import { TradesContext } from '../../contexts/TradesContext'
 import { useTrades } from '../../services/trades'
 import { INITIAL_FILTER_STATE } from '../../services/filter'
-import SummaryCharts from '../../components/Summary/SummaryCharts/SummaryCharts'
 import { FilterCardsContext } from '../../contexts/FilterCardsContext'
 import AccountCard from '../../components/Summary/Card/AccountCard/AccountCard'
 import WinRatioCard from '../../components/Summary/Card/WinRatioCard/WinRatioCard'
 import PotentialPerformanceCard from '../../components/Summary/Card/PotentialPerformanceCard/PotentialPerformanceCard'
 import PairsRatioCard from '../../components/Summary/Card/PairsRatioCard/PairsRatioCard'
 import SettingModal from '../../components/Modal/Setting/SettingModal'
-import { db } from '../../services/firebase'
-import { doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
+import useSettingModal from '../../hooks/useSettingModal'
+
 
 const Home = () => {
   const { user, isFirstLogin } = useContext(UserContext);
@@ -27,25 +26,13 @@ const Home = () => {
   const [selectedTrade, setSelectedTrade] = useState(null)
   const [filteredOption, setFilteredOption] = useState(INITIAL_FILTER_STATE)
   const [selectedFilters, setSelectedFilters] = useState(["SUMMARY"]);
-  const [isSettingModalVisible, setIsSettingModalVisible] = useState(false);
+  const { isSettingModalVisible, toggleSettingModal, setIsSettingModalVisible } = useSettingModal(user, isFirstLogin);
 
   const onTradeRowClickHandle = (trade) => {
     setSelectedTrade(trade)
     setIsVisible(true)
     setTradeId(trade.id)
   }
-
-  const toggleSettingModal = () => {
-    setIsSettingModalVisible(prevVisible => !prevVisible);
-  };
-
-  useEffect(() => {
-    if (user && isFirstLogin === true) {
-      setIsSettingModalVisible(true);
-    }
-  }, [user, isFirstLogin]);
-
-
 
   return (
     <TradesContext.Provider value={{
