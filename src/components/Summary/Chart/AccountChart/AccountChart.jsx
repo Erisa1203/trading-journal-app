@@ -5,9 +5,11 @@ import { CaretDown } from 'phosphor-react';
 import {  getDoc,  updateDoc, doc, arrayRemove } from 'firebase/firestore';
 import { db } from '../../../../services/firebase';
 import { UserContext } from '../../../../contexts/UserContext';
+import { useTrades } from '../../../../services/trades';
 
 const AccountChart = ({ onBalanceChange, currentBalance, setCurrentBalance }) => {
-    const { trades, loading } = useContext(TradesContext);
+    const { trades } = useTrades("journal");
+
     const [selectedYear, setSelectedYear] = useState('this year');
     const [chartWidth, setChartWidth] = useState(window.innerWidth);
     const { user } = useContext(UserContext);
@@ -48,7 +50,8 @@ const AccountChart = ({ onBalanceChange, currentBalance, setCurrentBalance }) =>
             
             // summaryの中で指定されたyearとマッチするデータを探す
             const matchedSummary = userData.summary.find(item => item.year == String(year));
-            
+            // console.log('year',year)
+
             if (matchedSummary) {
                 return matchedSummary.balance;
             }
@@ -181,7 +184,7 @@ const AccountChart = ({ onBalanceChange, currentBalance, setCurrentBalance }) =>
                 // summaryが存在するか確認
                 const summaryData = userData.summary || [];
                 const yearSummary = summaryData.find(item => item.year === targetYear);
-                        
+
                 if (yearSummary) {
                     return yearSummary.balance;
                 }
@@ -196,6 +199,7 @@ const AccountChart = ({ onBalanceChange, currentBalance, setCurrentBalance }) =>
     
             if (selectedYear === 'this year') {
                 balance = await getYearlyBalance(currentYear);
+
             } else if (selectedYear === 'last year') {
                 balance = await getYearlyBalance(currentYear - 1);
             }
@@ -225,7 +229,6 @@ const AccountChart = ({ onBalanceChange, currentBalance, setCurrentBalance }) =>
                 default:
                     break;
             }
-
             setCurrentBalance(balance);
         };
     
@@ -249,84 +252,10 @@ const AccountChart = ({ onBalanceChange, currentBalance, setCurrentBalance }) =>
             window.removeEventListener('resize', updateWidth);
         };
     }, []);
-
     useEffect(() => {
-        const earliestYear = Math.min(...trades.map(trade => new Date(trade.EXIT_DATE).getFullYear()));
-        const currentYear = new Date().getFullYear();
-
-        const getPreviousYearBalance = (year, summaryArray) => {
-            const previousYearIndex = summaryArray.findIndex(item => item.year === (year - 1));
-            if (previousYearIndex !== -1) {
-                return summaryArray[previousYearIndex].balance;
-            }
-            return 0; // これは前年のデータが見つからなかった場合のデフォルトのバランスです
-        };
-        
-        const calculateYearlyBalance = async (year, trades, previousBalance) => {        
-            // 前年のバランスがない場合はaccountValueを取得
-            if (previousBalance === null) {
-                previousBalance = await getAccountValueFromSetting(user.uid);
-            }
-        
-            let balance = previousBalance;  // 前年のバランスまたはaccountValueから開始
-            trades.forEach((trade) => {
-                const tradeYear = new Date(trade.EXIT_DATE).getFullYear();
-                if (tradeYear !== year) return;
-                const profit = trade.PROFIT ? parseFloat(trade.PROFIT) : 0;
-                balance += profit;
-            });
-            return balance;
-        };
-    
-        const updateFirestore = async () => {
-            if (user) {
-                // Step 1: Firestoreからsummaryを取得
-                const userDocRef = doc(db, 'users', user.uid);
-                const userDocSnapshot = await getDoc(userDocRef);
-                if (!userDocSnapshot.exists()) {
-                    return;
-                }
-                const existingSummaries = userDocSnapshot.data().summary || [];
-    
-                // Step 2: 年毎のバランスを計算
-                const yearsSet = new Set(trades.map(trade => new Date(trade.EXIT_DATE).getFullYear()));
-                const years = [...yearsSet].sort();
-                let localSummaries = [];
-                for (const year of years) {
-                    const previousYear = year - 1;
-                    const previousYearData = existingSummaries.find(item => item.year === previousYear);
-                    const previousYearBalance = previousYearData ? previousYearData.balance : null;
-                    const calculatedBalance = await calculateYearlyBalance(year, trades, previousYearBalance);
-                    localSummaries.push({ year, balance: calculatedBalance });
-                }
-    
-                // Step 3: Firestoreのデータとローカルのデータを比較
-                for (const existingSummary of existingSummaries) {
-                    const matchingLocalSummary = localSummaries.find(item => item.year === existingSummary.year);
-                    if (!matchingLocalSummary) {
-                        // この年のデータをFirestoreから削除
-                        await updateDoc(userDocRef, {
-                            summary: arrayRemove(existingSummary)
-                        });
-                    }
-                }
-                for (const localSummary of localSummaries) {
-                    const matchingExistingSummary = existingSummaries.find(item => item.year === localSummary.year);
-                    if (!matchingExistingSummary) {
-                        // 新しいデータをFirestoreに追加
-                        await updateSummaryInFirestore(localSummary.year, localSummary.balance);
-                    } else if (matchingExistingSummary.balance !== localSummary.balance) {
-                        // 既存のデータをFirestoreで更新
-                        await updateSummaryInFirestore(localSummary.year, localSummary.balance);
-                    }
-                }
-            }
-        };
-    
-        if (!loading) {
-            updateFirestore();
-        }
-    }, [trades, loading]);
+        // console.log('Trades updated:', trades);
+        // ... 他の処理 ...
+    }, [trades]);
     
     const data = useMemo(() => {
         const currentYear = new Date().getFullYear();
@@ -398,13 +327,13 @@ const AccountChart = ({ onBalanceChange, currentBalance, setCurrentBalance }) =>
                 };
             }
             balance += profit;
+            // console.log('balance', balance)
             return {
                 name: `${index + 1}月`,
                 balance: parseFloat(balance.toFixed(2))
             };
         });
     }, [filteredTrades, startingBalance, fetched, startDate, selectedYear]);
-
 
     // 最大値を見つける
     const maxBalance = Math.max(...data.map(item => parseFloat(item.balance)));
@@ -434,6 +363,42 @@ const AccountChart = ({ onBalanceChange, currentBalance, setCurrentBalance }) =>
     
         fetchSummaryData();
     }, [user, db]);  // 依存変数を適切に設定
+    
+    useEffect(() => {
+        if (!trades || !user) return;
+    
+        const calculateYearEndBalance = async () => {
+            const groupedTrades = trades.reduce((acc, trade) => {
+                const year = new Date(trade.EXIT_DATE).getFullYear();
+                if (!acc[year]) acc[year] = [];
+                acc[year].push(trade);
+                return acc;
+            }, {});
+    
+            for (const yearString in groupedTrades) {
+                const year = parseInt(yearString);  // 文字列から数値に変換
+                const yearTrades = groupedTrades[year];
+                const yearProfit = yearTrades.reduce((sum, trade) => sum + (trade.PROFIT ? parseFloat(trade.PROFIT) : 0), 0);
+    
+                let startingBalance;
+                const prevYearBalance = await getYearlyBalanceFromFirestore(year - 1);
+    
+                if (prevYearBalance !== null) {
+                    startingBalance = prevYearBalance;
+                } else {
+                    startingBalance = await getAccountValueFromSetting(user.uid);
+                    if (startingBalance === null) startingBalance = 0;  // デフォルト値
+                }
+    
+                const yearEndBalance = startingBalance + yearProfit;
+    
+                await updateSummaryInFirestore(year, yearEndBalance);
+            }
+        };
+    
+        calculateYearEndBalance();
+    
+    }, [trades, user, db]);
     
     return (
         <div className="chartContainer">

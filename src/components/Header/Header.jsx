@@ -27,7 +27,7 @@ const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page,
         // 引数として設定したcolNameを使用してaddTradeを呼び出す
         const id = await addTrade(trade, colName);
     
-        console.log("Added trade with ID: ", id);
+        // console.log("Added trade with ID: ", id);
         setTradeId(id)
         setSelectedTrade(trade);
         onAddTradeBtnClick(trade)  // 追加したトレードのIDを引数として渡す

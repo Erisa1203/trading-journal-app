@@ -10,7 +10,15 @@ const AccountCard = () => {
     const [currency, setCurrency] = useState('yen');
     const { user, loading } = useContext(UserContext);
     const { trades } = useContext(TradesContext);
-
+    const [currentYearBalance, setCurrentYearBalance] = useState(0);
+    const [lastYearBalance, setLastYearBalance] = useState(0);
+    
+    const getPercentageChange = () => {
+        if (lastYearBalance === 0) return 0; // 昨年のバランスが0の場合、0%の変化として扱います
+        const difference = currentYearBalance - lastYearBalance;
+        return ((difference / lastYearBalance) * 100).toFixed(2);  // 小数点以下2桁までのパーセンテージを返す
+    };
+    
     useEffect(() => {
         if (loading || !user) return;
     
@@ -21,14 +29,21 @@ const AccountCard = () => {
         const unsubscribe = onSnapshot(userDocRef, (userDocSnapshot) => {
             if (userDocSnapshot.exists()) {
                 const userData = userDocSnapshot.data();
-            
+        
                 if (userData && userData.summary) {
                     const currentYearSummary = userData.summary.find(item => item.year === currentYear);
+                    const lastYearSummary = userData.summary.find(item => item.year === currentYear - 1);
                     
                     if (currentYearSummary) {
                         setCurrentBalance(currentYearSummary.balance);
+                        setCurrentYearBalance(currentYearSummary.balance);
+                    }
+                    
+                    if (lastYearSummary) {
+                        setLastYearBalance(lastYearSummary.balance);
                     }
                 }
+                
             }
             
         });
@@ -74,7 +89,7 @@ const AccountCard = () => {
             <div className="chartCard__head">ACCOUNT</div>
             <div className="chartCard__desc">
                 <div className="chartCard__total">{getCurrencySymbol()}{currentBalance}</div>
-                <span className='chartCard__sub'>+12%</span>
+                <span className='chartCard__sub'>{getPercentageChange()}%</span>
             </div>
             <div className="chart">
                 <AccountChart currentBalance={currentBalance} setCurrentBalance={setCurrentBalance} onBalanceChange={setCurrentBalance} />
