@@ -38,6 +38,27 @@ const AccountCard = () => {
     
     }, [user, loading, trades]);
     
+    useEffect(() => {
+        if (loading || !user) return;
+    
+        const settingDocRef = doc(db, 'setting', user.uid);
+    
+        // onSnapshotを使用してドキュメントの変更をリアルタイムで監視
+        const unsubscribe = onSnapshot(settingDocRef, (settingDocSnapshot) => {
+            if (settingDocSnapshot.exists()) {
+                const settingData = settingDocSnapshot.data();
+    
+                if (settingData && settingData.currency) {
+                    setCurrency(settingData.currency);
+                }
+            }
+        });
+    
+        // コンポーネントがアンマウントされるときに監視を終了する
+        return () => unsubscribe();
+    
+    }, [user, loading]);
+    
     // 通貨の記号を取得するためのヘルパー関数
     const getCurrencySymbol = () => {
         switch(currency) {
