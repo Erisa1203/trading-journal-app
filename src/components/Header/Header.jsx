@@ -29,8 +29,7 @@ const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page,
         setSelectedTrade(trade);
         onAddTradeBtnClick(trade)  // 追加したトレードのIDを引数として渡す
     };
-
-
+    
     const buttonConfigs = {
         'TradingJournal': {
             className: "addTradeBtn",

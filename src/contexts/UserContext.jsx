@@ -40,18 +40,27 @@ export const UserProvider = ({ children }) => {
             onSnapshot(settingsRef, (docSnapshot) => {
                 if (docSnapshot.exists()) {
                     const data = docSnapshot.data();
-    
-                    // 'setting' コレクションの username を参照します
-                    setDisplayName(data.username || user.displayName);
-    
+                    
+                    // 'setting' コレクションの username が存在すればそれを使い、存在しなければ user の displayName を使用
+                    const newDisplayName = data.username ? data.username : user.displayName || "";
+                    setDisplayName(newDisplayName);
+            
+                    const newInitial = newDisplayName?.[0]; // username または displayName の最初の文字を initial に設定
+                    setInitial(newInitial);
+            
                     const googleProviderInfo = user.providerData.find(data => data.providerId === 'google.com');
                     const newPhotoURL = googleProviderInfo?.photoURL || data.profileImageUrl;
                     setPhotoURL(newPhotoURL);
-    
-                    const newInitial = (data.username || user.displayName)?.[0];
-                    setInitial(newInitial);
+                } else {
+                    // Firestoreの 'setting' コレクションにデータがない場合、
+                    // Firebase AuthenticationのuserからdisplayNameを取得してinitialとdisplayNameを設定
+                    if (user.displayName) {
+                        setDisplayName(user.displayName);
+                        setInitial(user.displayName[0]);
+                    }
                 }
             });
+            
             
             const usersRef = doc(db, 'users', user.uid);
             onSnapshot(usersRef, (docSnapshot) => {
