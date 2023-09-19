@@ -3,7 +3,7 @@ import React, { useContext } from 'react'
 import "./_filterCards.styl"
 import { FilterCardsContext } from '../../contexts/FilterCardsContext';
 import { TradesContext } from '../../contexts/TradesContext';
-import { colors, pairColors } from '../../constants/colors';
+import { colors, getPairColor, pairColors } from '../../constants/colors';
 
 const FilterCards = () => {
     const { trades } = useContext(TradesContext);
@@ -38,7 +38,7 @@ const FilterCards = () => {
         </li>
 
         {uniquePairs.map((pair, index) => {
-            const currentColor = pairColors[pair] || colors.default; // 該当する色がない場合はデフォルトの色を使用
+            const currentColor = getPairColor(pair) || colors.default; // 該当する色がない場合はデフォルトの色を使用
             return (
                 <li
                     key={index}

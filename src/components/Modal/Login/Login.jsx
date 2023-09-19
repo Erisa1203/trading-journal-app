@@ -4,7 +4,7 @@ import GoogleSignInBtn from '../../Button/GoogleSignInBtn'
 import { createUserWithEmailAndPassword, getAuth, signInWithEmailAndPassword } from 'firebase/auth'
 import { Firestore, doc, getDoc, setDoc, updateDoc } from 'firebase/firestore'
 import { db } from '../../../services/firebase'
-import { pairColors } from '../../../constants/colors'
+import { getPairColor, pairColors } from '../../../constants/colors'
 
 const Login = () => {
     const [email, setEmail] = useState("");
@@ -14,7 +14,7 @@ const Login = () => {
 
     const customTags = tags.map(tag => {
         return {
-          color: pairColors[tag], // color.js から取得したカラーコード
+          color: getPairColor(tag),
           label: tag,
           value: tag
         };

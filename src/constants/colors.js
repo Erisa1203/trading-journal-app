@@ -42,52 +42,23 @@ function getRandomPercent() {
     return variation - 20; // -20から20の間の数を返す
 }
 
-export const pairColors = {
-    // EUR に関連する通貨ペア
-    'EUR/USD': adjustBrightness(colors.blue, getRandomPercent()),
-    'EUR/JPY': adjustBrightness(colors.blue, getRandomPercent()),
-    'EUR/GBP': adjustBrightness(colors.blue, getRandomPercent()),
-    'EUR/AUD': adjustBrightness(colors.blue, getRandomPercent()),
-    'EUR/CAD': adjustBrightness(colors.blue, getRandomPercent()),
-    'EUR/NZD': adjustBrightness(colors.blue, getRandomPercent()),
-    'EUR/CHF': adjustBrightness(colors.blue, getRandomPercent()),
+export const getPairColor = (tag) => {
+    const mainCurrency = tag.substring(0, 3); // 通貨ペアから最初の3文字を取得
 
-    // USD に関連する通貨ペア
-    'USD/JPY': adjustBrightness(colors.red, getRandomPercent()),
-    'GBP/USD': adjustBrightness(colors.red, getRandomPercent()),
-    'AUD/USD': adjustBrightness(colors.red, getRandomPercent()),
-    'USD/CAD': adjustBrightness(colors.red, getRandomPercent()),
-    'USD/CHF': adjustBrightness(colors.red, getRandomPercent()),
-    'NZD/USD': adjustBrightness(colors.red, getRandomPercent()),
-    'USD/ZAR': adjustBrightness(colors.red, getRandomPercent()),
-    'USD/TRY': adjustBrightness(colors.red, getRandomPercent()),
-    'USD/SGD': adjustBrightness(colors.red, getRandomPercent()),
-    'USD/RUB': adjustBrightness(colors.red, getRandomPercent()),
-    'USD/MXN': adjustBrightness(colors.red, getRandomPercent()),
-    'USD/HKD': adjustBrightness(colors.red, getRandomPercent()),
-    'USD/SEK': adjustBrightness(colors.red, getRandomPercent()),
-    'USD/DKK': adjustBrightness(colors.red, getRandomPercent()),
-    'USD/CNH': adjustBrightness(colors.red, getRandomPercent()),
-    'USD/BRL': adjustBrightness(colors.red, getRandomPercent()),
-    'USD/NOK': adjustBrightness(colors.red, getRandomPercent()),
-    'USD/INR': adjustBrightness(colors.red, getRandomPercent()),
-
-    // GBP に関連する通貨ペア
-    'GBP/JPY': adjustBrightness(colors.green, getRandomPercent()),
-    'GBP/AUD': adjustBrightness(colors.green, getRandomPercent()),
-    'GBP/CAD': adjustBrightness(colors.green, getRandomPercent()),
-    'GBP/CHF': adjustBrightness(colors.green, getRandomPercent()),
-    'GBP/NZD': adjustBrightness(colors.green, getRandomPercent()),
-
-    // AUD に関連する通貨ペア
-    'AUD/JPY': adjustBrightness(colors.orange, getRandomPercent()),
-    'AUD/CAD': adjustBrightness(colors.orange, getRandomPercent()),
-    'AUD/NZD': adjustBrightness(colors.orange, getRandomPercent()),
-
-    // その他の通貨ペア
-    'CAD/JPY': adjustBrightness(colors.yellow, getRandomPercent()),
-    'CHF/JPY': adjustBrightness(colors.pink, getRandomPercent()),
-    'NZD/JPY': adjustBrightness(colors.purple, getRandomPercent()),
-
-    // 必要に応じて他の通貨ペアと色のマッピングを追加...
-};
+    switch(mainCurrency) {
+        case 'EUR':
+            return backgrounds.blue;
+        case 'USD':
+            return backgrounds.red;
+        case 'GBP':
+            return backgrounds.green;
+        case 'AUD':
+            return backgrounds.orange;
+        case 'CAD':
+            return backgrounds.yellow;
+        case 'NZD':
+            return backgrounds.purple;
+        default:
+            return backgrounds.gray; // 
+    }
+}
