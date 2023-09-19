@@ -37,7 +37,7 @@ textarea,
 button,
 input[type=date] {
     appearance: none;
-    background-color: $white;
+    // background-color: $white;
     border none
 }
 
@@ -52,3 +52,52 @@ img {
     width 100%
     height: auto;
 }
+
+
+body.dark-mode
+    background: #2C2B2E
+
+    .mainContent:not(.newTrade), .sidebar, .header
+        background: #2C2B2E
+        color #ffffff
+        a
+            color #ffffff
+
+    .newTrade
+        background: #2C2B2E
+        color #2C2B2E!important
+        
+    .navigation__item.active .navigation__link
+        background: rgba(255, 255, 255, 0.10);
+
+    .tradeTable__head
+        background rgba(135, 102, 224, 0.37)
+
+    .tradeTable__row
+        background transparent
+        border-color rgba(241, 241, 241, 0.2)
+
+    .tradeTable
+        outline 1px solid rgba(241, 241, 241, 0.2)
+
+    .chartCard, .filterCards__item, .filterBtn, .filter, .form-select__control, .filter .react-datepicker-wrapper input, .filteredItems__item,
+    .ruleFilter__item, .rules__item
+        border 1px solid rgba(241, 241, 241, 0.2)!important
+        background: rgba(255, 255, 255, 0.10)
+
+    .sidebar, .filter__left, .noteContent, .header
+        border-color rgba(255, 255, 255, 0.15)
+
+    .newTrade
+        .tag
+            color #2C2B2E
+
+    .tradeInfo__right:hover:not(.tradeInfo__right.tag), .tradeTable__row:hover
+        background: rgba(255, 255, 255, 0.10)
+    
+    .tradeInfo__input, .react-datepicker__input-container input, .quill, .sidebar__back
+        color #ffffff
+
+    .darkModeBtn:hover
+        background #fff
+        color #2C2B2E

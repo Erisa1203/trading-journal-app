@@ -3,7 +3,7 @@ import React, { useContext } from 'react'
 import "./_filterCards.styl"
 import { FilterCardsContext } from '../../contexts/FilterCardsContext';
 import { TradesContext } from '../../contexts/TradesContext';
-import { colors, getPairColor, pairColors } from '../../constants/colors';
+import { colors, getPairColor, getPairColorBg } from '../../constants/colors';
 
 const FilterCards = () => {
     const { trades } = useContext(TradesContext);

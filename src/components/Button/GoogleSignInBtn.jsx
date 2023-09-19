@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { getAuth, onAuthStateChanged, signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../services/firebase";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
-import { backgrounds, colors, getPairColor } from "../../constants/colors";
+import {  getPairColorBg } from "../../constants/colors";
 
 const signInWithGoogle = () => {
   signInWithPopup(auth, provider)
@@ -17,7 +17,7 @@ const signInWithGoogle = () => {
 
       const customTags = tags.map(tag => {
         return {
-          color: getPairColor(tag),
+          color: getPairColorBg(tag),
           label: tag,
           value: tag
         };

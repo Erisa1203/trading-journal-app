@@ -47,6 +47,26 @@ export const getPairColor = (tag) => {
 
     switch(mainCurrency) {
         case 'EUR':
+            return colors.blue;
+        case 'USD':
+            return colors.red;
+        case 'GBP':
+            return colors.green;
+        case 'AUD':
+            return colors.orange;
+        case 'CAD':
+            return colors.yellow;
+        case 'NZD':
+            return colors.purple;
+        default:
+            return colors.gray;
+    }
+}
+export const getPairColorBg = (tag) => {
+    const mainCurrency = tag.substring(0, 3); // 通貨ペアから最初の3文字を取得
+
+    switch(mainCurrency) {
+        case 'EUR':
             return backgrounds.blue;
         case 'USD':
             return backgrounds.red;
@@ -59,6 +79,6 @@ export const getPairColor = (tag) => {
         case 'NZD':
             return backgrounds.purple;
         default:
-            return backgrounds.gray; // 
+            return backgrounds.gray;
     }
 }

@@ -1,14 +1,17 @@
 import { Bell, Moon, Plus } from '@phosphor-icons/react'
 import "./_header.styl"
-import React, { useContext, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import { INITIAL_TRADE_STATE, addTrade } from '../../services/trades';
 import { auth } from '../../services/firebase';
 import AccountModal from '../Modal/Account/AccountModal';
 import { UserContext } from '../../contexts/UserContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page, createNewRuleHandle, onSettingClick }) => {
     const { user, photoURL, initial } = useContext(UserContext);
     const [IsAccountModalVisible, setIsAccountModalVisible] = useState(false)
+    const { darkMode, toggleDarkMode } = useTheme();
+
     const handleAddTradeBtnClick = async () => {
         const userId = auth.currentUser ? auth.currentUser.uid : null;
         const trade = INITIAL_TRADE_STATE(userId);
@@ -29,7 +32,6 @@ const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page,
         setSelectedTrade(trade);
         onAddTradeBtnClick(trade)  // 追加したトレードのIDを引数として渡す
     };
-    
     const buttonConfigs = {
         'TradingJournal': {
             className: "addTradeBtn",
@@ -46,6 +48,11 @@ const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page,
     };
     const config = buttonConfigs[page];
 
+    useEffect(() => {
+        document.body.classList.toggle('dark-mode', darkMode);
+        document.body.classList.toggle('light-mode', !darkMode);
+    }, [darkMode]);
+
     return (
         <div className='header'>
             <div className="header__left">
@@ -57,10 +64,10 @@ const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page,
                 )}
             </div>
             <div className="header__right">
-                <div className="darkModeBtn">
+                <div className="darkModeBtn" onClick={toggleDarkMode}>
                     <Moon className='icon-24'/>
                 </div>
-                <Bell className='icon-24 notificationBtn'/>
+                {/* <Bell className='icon-24 notificationBtn'/> */}
                 <div className="account-img" onClick={() => setIsAccountModalVisible(!IsAccountModalVisible)}>
                     {photoURL 
                         ? <img src={photoURL} alt="" />

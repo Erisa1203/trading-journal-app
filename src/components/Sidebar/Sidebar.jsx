@@ -4,10 +4,12 @@ import "./_sidebar.styl"
 import { Link } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { SidebarContext } from '../../contexts/SidebarContext';
+import { useTheme } from '../../contexts/ThemeContext';
 
 const Sidebar = ({ page }) => {
     const { logout } = useContext(UserContext);
     const { isSidebarClosed, setIsSidebarClosed } = useContext(SidebarContext)
+    const { darkMode } = useTheme();
 
     const handleSidebarToggle = () => {  // sidebarを開閉する関数を定義
         setIsSidebarClosed(prev => !prev);
@@ -17,8 +19,10 @@ const Sidebar = ({ page }) => {
         <div className={`sidebar ${isSidebarClosed ? 'close' : ''}`}>
             <CaretDoubleLeft weight='bold' className={`icon-16 icon-color-primary sidebar__back ${isSidebarClosed ? 'active' : ''}`} onClick={handleSidebarToggle}/>
             <div className="sidebar__logo">
+            {darkMode ? 
+                <img src="img/logo_white.svg" alt="" /> :
                 <img src="img/logo.svg" alt="" />
-
+            }
             </div>
             <nav className='sidebar__nav'>
                 <ul className='navigation'>
