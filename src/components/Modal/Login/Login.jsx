@@ -26,20 +26,8 @@ const Login = () => {
         signInWithEmailAndPassword(auth, email, password)
             .then((userCredential) => {
                 const user = userCredential.user;
-
-                // ログイン後に isFirstLogin を確認するロジックを追加
-                const userDocRef = doc(db, "users", user.uid);
-                getDoc(userDocRef).then((docSnapshot) => {
-                    if (docSnapshot.exists()) {
-                        const userData = docSnapshot.data();
-                        if (userData.isFirstLogin) {
-                            // isFirstLogin を false に更新
-                            updateDoc(userDocRef, { isFirstLogin: false }).catch((updateError) => {
-                                console.error('isFirstLoginの更新中にエラーが発生:', updateError);
-                            });
-                        }
-                    }
-                });
+    
+                // ログイン後に isFirstLogin を確認するロジックを削除しました。
             })
             .catch((error) => {
                 const errorCode = error.code;
@@ -47,6 +35,7 @@ const Login = () => {
                 console.error("Error: ", errorCode, errorMessage);
         });
     };
+    
 
     const handleSignup = async () => {
         const auth = getAuth();

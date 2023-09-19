@@ -41,11 +41,6 @@ export const UserProvider = ({ children }) => {
                 if (docSnapshot.exists()) {
                     const data = docSnapshot.data();
     
-                    // FirestoreからisFirstLoginとusernameのデータを取得
-                    if (data.hasOwnProperty("isFirstLogin")) {
-                        setIsFirstLogin(data.isFirstLogin);
-                    }
-    
                     // 'setting' コレクションの username を参照します
                     setDisplayName(data.username || user.displayName);
     
@@ -57,6 +52,20 @@ export const UserProvider = ({ children }) => {
                     setInitial(newInitial);
                 }
             });
+            
+            const usersRef = doc(db, 'users', user.uid);
+            onSnapshot(usersRef, (docSnapshot) => {
+                if (docSnapshot.exists()) {
+                    const data = docSnapshot.data();
+                    // FirestoreからisFirstLoginとusernameのデータを取得
+                    if (data.hasOwnProperty("isFirstLogin")) {
+                        setIsFirstLogin(data.isFirstLogin);
+                    }
+                }
+
+            });
+
+
         }
     }, [user]);
     

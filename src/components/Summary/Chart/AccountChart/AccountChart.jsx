@@ -283,6 +283,9 @@ const AccountChart = ({ onBalanceChange, currentBalance, setCurrentBalance }) =>
                 // Step 1: Firestoreからsummaryを取得
                 const userDocRef = doc(db, 'users', user.uid);
                 const userDocSnapshot = await getDoc(userDocRef);
+                if (!userDocSnapshot.exists()) {
+                    return;
+                }
                 const existingSummaries = userDocSnapshot.data().summary || [];
     
                 // Step 2: 年毎のバランスを計算
