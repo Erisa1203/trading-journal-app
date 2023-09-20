@@ -14,7 +14,7 @@ import { calculateStatus, deleteTradeById, getTagByLabel, patternOption, shortLo
 import MyEditor from '../../QuillEditor/QuillEditor';
 import { PatternSelect } from '../../Select/PatternSelect';
 
-const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId, dbCollection }) => {
+const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId, dbCollection, setNextTrade, setPreviousTrade }) => {
     const auth = getAuth();
     const [entryDate, setEntryDate] = useState(null);
     const [exitDate, setExitDate] = useState(null);
@@ -143,10 +143,10 @@ const NewTrade = ({ visible, setIsVisible, trade, onClose, tradeId, dbCollection
                 <div className="newTrade__close" onClick={onClose}>
                     <CaretDoubleRight className='icon-16' />
                 </div>
-                <div className="newTrade__next">
+                <div className="newTrade__next" onClick={() => setNextTrade(trade)}>
                     <CaretDown className='icon-16' />
                 </div>
-                <div className="newTrade__before">
+                <div className="newTrade__before" onClick={() => setPreviousTrade(trade)}>
                     <CaretUp className='icon-16' />
                 </div>
             </div>
