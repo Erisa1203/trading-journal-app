@@ -22,7 +22,7 @@ const TradingJournal = () => {
   const [tradeId, setTradeId] = useState(null)
   const [selectedTrade, setSelectedTrade] = useState(null)
   const [dbSetupOptions, setDbSetupOptions] = useState([])
-  const [dbPatternOptions, setDbPatternOptions] = useState([])
+  const [dbPatternOptions, setDbPatternOptions] = useState(["CONTINUATION", "REVERSAL"])
   const [filteredOption, setFilteredOption] = useState(INITIAL_FILTER_STATE)
   const [clearFilterIsActive, setClearFilterIsActive] = useState(false)
   const [filterUIClearClicked, setFilterUIClearClicked] = useState('')

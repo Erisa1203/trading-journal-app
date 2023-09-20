@@ -10,39 +10,28 @@ export const useCustomOptionCreation = (initialOptions, onOptionsChange, setSele
     const user = auth.currentUser;
     const [loading, setLoading] = useState(false)
 
-    // useEffect(() => {
-    //     const unsubscribe = onAuthStateChanged(auth, (user) => {
-    //         if (user) {
-
-    //             const fetchData = async () => {
-    //                 setLoading(true);
-    //                 const db = getFirestore();
-    //                 const docRef = doc(db, "users", user.uid);
-    //                 const docSnap = await getDoc(docRef);
-    //                 if (docSnap.exists()) {
-    //                     const fetchedTags = docSnap.data().customTags;
-    //                     const newOptions = sortOptionsAlphabetically(fetchedTags.map(tag => ({
-    //                         value: tag.value,
-    //                         label: tag.label,
-    //                         color: tag.color,
-    //                     })));
-                        
-    //                     console.log('newOptions', newOptions)
-    //                     setOptions(newOptions);
-    //                 } else {
-    //                     console.log("No such document!");
-    //                 }
-    //                 setLoading(false);
-    //             };
-    //             fetchData();
-    //         } else {
-    //             setOptions([]);
-    //             setLoading(false);
-    //         }
-    //     });
-    //     return () => unsubscribe();
-    // }, []); // Changed from [auth]
-
+    useEffect(() => {
+        if(!user) return
+        const fetchCustomTags = async () => {
+            try {
+                const db = getFirestore();
+                const userDocRef = doc(db, 'users', user.uid);
+                const userDoc = await getDoc(userDocRef);
+    
+                if (userDoc.exists()) {
+                    const data = userDoc.data();
+                    const customTags = data.customTags || [];
+                    setOptions(sortOptionsAlphabetically(customTags));
+                    onOptionsChange(customTags);  // Inform the caller about the options change
+                }
+            } catch (error) {
+                console.error("Error fetching custom tags: ", error);
+            }
+        };
+    
+        fetchCustomTags();
+    }, []);
+    
     const handleCreateNewOption = async (inputValue) => {
         // Skip if the tag already exists
         if (options.some(option => option.value === inputValue)) {

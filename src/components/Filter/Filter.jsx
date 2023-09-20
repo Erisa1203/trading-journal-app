@@ -1,4 +1,3 @@
-import { CaretDown } from '@phosphor-icons/react'
 import React, { useContext, useEffect, useState } from 'react'
 import "./_filter.styl"
 import Select from "react-select";
@@ -7,8 +6,6 @@ import DatePicker from "react-datepicker";
 import { Check } from 'phosphor-react';
 import { FilterContext } from '../../contexts/FilterContext';
 import { TradesContext } from '../../contexts/TradesContext'
-import { useCustomSetupCreation } from '../../hooks/useCustomSetupCreation';
-import { useCustomPatternCreation } from '../../hooks/useCustomPatternCreation';
 import { INITIAL_FILTER_STATE, formatDateToYYYYMMDD, resetTime } from '../../services/filter';
 import { useCustomOptionCreation } from '../../hooks/useCustomOptionCreation';
 
@@ -20,8 +17,6 @@ const dirOptions = [
 const Filter = ({ 
     dbSetupOptions, 
     setDbSetupOptions, 
-    dbPatternOptions, 
-    setDbPatternOptions, 
     filteredOption, 
     setFilteredOption, 
     clearFilterIsActive, 
@@ -29,21 +24,22 @@ const Filter = ({
     filterUIClearClicked, 
     setFilterIsActive  }) => {
 
-    const { trades, filteredTrades, setFilteredTrades } = useContext(TradesContext);
+    const { trades, setFilteredTrades } = useContext(TradesContext);
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndtDate] = useState('')
-
     const { filterIsActive } = useContext(FilterContext);
     const [selectedDir, setSelectedDir] = useState(null);
-    const [setupOptions, handleCreateNewSetupOption] = useCustomSetupCreation([], setDbSetupOptions);
-    const [ handleCreateNewPatternOption ] = useCustomPatternCreation([], setDbPatternOptions);
-    const [dbCurrencyOptions, setDbCurrencyOptions] = useState([]);
+    const [setDbCurrencyOptions] = useState([]);
     const [selectedOption, setSelectedOption] = useState(null);
-    const [currencyOptions, handleCreateNewOption, loading, setLoading] = useCustomOptionCreation([], setDbCurrencyOptions, setSelectedOption);
+    const [currencyOptions] = useCustomOptionCreation([], setDbCurrencyOptions, setSelectedOption);
     const modifiedCurrencyOptions = currencyOptions.map(({ color, ...rest }) => rest);
     const [selectedSetupOption, setSelectedSetupOption] = useState(null);
     const [selectedPatternOption, setSelectedPatternOption] = useState(null);
-
+    const [dbPatternOptions, setDbPatternOptions] = useState([
+        { label: "REVERSAL", value: "REVERSAL" },
+        { label: "CONTINUATION", value: "CONTINUATION" }
+    ]);
+      
     const [status, setStatus] = useState({
         WIN: false,
         LOSS: false,
