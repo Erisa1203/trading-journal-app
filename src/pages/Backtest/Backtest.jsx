@@ -38,6 +38,22 @@ const Backtest = () => {
     setTradeId(trade.id)
   }
 
+  const setNextTrade = (currentTrade) => {
+    const currentIndex = trades.findIndex(trade => trade.id === currentTrade.id);
+    if (currentIndex !== -1 && currentIndex < trades.length - 1) {
+      const nextTrade = trades[currentIndex + 1];
+      setSelectedTrade(nextTrade);
+    }
+  }
+  
+  const setPreviousTrade = (currentTrade) => {
+    const currentIndex = trades.findIndex(trade => trade.id === currentTrade.id);
+    if (currentIndex > 0) {
+      const previousTrade = trades[currentIndex - 1];
+      setSelectedTrade(previousTrade);
+    }
+}
+
   return (
     <TradesContext.Provider value={{
       trades,
@@ -100,6 +116,8 @@ const Backtest = () => {
                         trade={selectedTrade}
                         dbSetupOptions={dbSetupOptions} 
                         setDbSetupOptions={setDbSetupOptions}
+                        setNextTrade={setNextTrade}
+                        setPreviousTrade={setPreviousTrade}
                       />
                   </div>
               {!user && <HideContents />}
