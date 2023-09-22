@@ -283,11 +283,12 @@ const AccountChart = ({ onBalanceChange, currentBalance, setCurrentBalance }) =>
         let balance = startingBalance;
     
         if (year === null) {  // all timeの場合
-            const tradesSortedByDate = [...filteredTrades].sort((a, b) => new Date(a.EXIT_DATE) - new Date(b.EXIT_DATE));
+            const validTrades = filteredTrades.filter(trade => trade.EXIT_DATE);
+            const tradesSortedByDate = [...validTrades].sort((a, b) => new Date(a.EXIT_DATE) - new Date(b.EXIT_DATE));
             const latestTradeDate = new Date(tradesSortedByDate[tradesSortedByDate.length - 1].EXIT_DATE);
             const monthsDiff = (latestTradeDate.getFullYear() - new Date(startDate).getFullYear()) * 12 + latestTradeDate.getMonth() - new Date(startDate).getMonth() + 1;
             const profits = Array(monthsDiff).fill(0);
-    
+
             tradesSortedByDate.forEach((trade) => {
                 const date = new Date(trade.EXIT_DATE);
                 const monthsSinceStart = (date.getFullYear() - new Date(startDate).getFullYear()) * 12 + date.getMonth() - new Date(startDate).getMonth();
