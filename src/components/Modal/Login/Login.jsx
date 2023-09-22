@@ -11,7 +11,9 @@ const Login = () => {
     const [password, setPassword] = useState("");
     const [isNewUser, setIsNewUser] = useState(false);
     const tags = ["USD/JPY", "USD/CAD", "EUR/USD", "EUR/GBP", "EUR/JPY", "EUR/CHF", "GBP/JPY", "GBP/USD", "GBP/CAD", "CAD/JPY"];
-
+    const [emailError, setEmailError] = useState("");
+    const [passwordError, setPasswordError] = useState("");
+    
     const customTags = tags.map(tag => {
         return {
           color: getPairColorBg(tag),
@@ -31,9 +33,22 @@ const Login = () => {
             })
             .catch((error) => {
                 const errorCode = error.code;
-                const errorMessage = error.message;
-                console.error("Error: ", errorCode, errorMessage);
-        });
+            
+                switch(errorCode) {
+                    case "auth/user-not-found":
+                        setEmailError("ユーザーが存在しません");
+                        break;
+                    case "auth/wrong-password":
+                        setPasswordError("パスワードが間違っています");
+                        break;
+                    case "auth/invalid-email":
+                        setEmailError("無効なメールアドレスです");
+                        break;
+                    default:
+                        setEmailError("ログインに失敗しました"); 
+                        break;
+                }
+            }); 
     };
     
 
@@ -52,22 +67,41 @@ const Login = () => {
           });
         } catch (error) {
             const errorCode = error.code;
-            const errorMessage = error.message;
-            console.error("Signup Error:", error); 
+        
+            switch(errorCode) {
+                case "auth/weak-password":
+                    setPasswordError("パスワードは6文字以上で設定してください");
+                    break;
+                case "auth/email-already-in-use":
+                    setEmailError("このメールアドレスは既に使用されています");
+                    break;
+                case "auth/invalid-email":
+                    setEmailError("無効なメールアドレスです");
+                    break;
+                default:
+                    setEmailError("登録に失敗しました"); 
+                    break;
+            }
         }
       };
       
-
+    const ErrorMessage = ({ message }) => {
+        if (!message) return null;
+        return <div className="error-message">{message}</div>;
+    }
+    
     return (
         <div className="userModal">
             <p className='userModal__desc'>{isNewUser ? "新規会員登録" : "ログイン"}</p>
             <div className="userModal__input">
                 <div className="userModal__label">email</div>
                 <input type="text" className="form-input" value={email} onChange={e => setEmail(e.target.value)}/>
+                <ErrorMessage message={emailError} />
             </div>
             <div className="userModal__input">
                 <div className="userModal__label">password</div>
                 <input type="password" className="form-input" value={password} onChange={e => setPassword(e.target.value)}/>
+                <ErrorMessage message={passwordError} />
             </div>
             <button className='btn btn--primary' onClick={isNewUser ? handleSignup : handleLogin}>{isNewUser ? "新規登録" : "ログイン"}</button>
             <div className="userModal__others">
