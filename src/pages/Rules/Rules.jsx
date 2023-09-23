@@ -1,4 +1,4 @@
-import { getFirestore, collection, onSnapshot, where, query } from "firebase/firestore";
+import { getFirestore, collection, onSnapshot, where, query, doc } from "firebase/firestore";
 import React, { useContext, useEffect, useState } from 'react'
 import Sidebar from '../../components/Sidebar/Sidebar'
 import Header from '../../components/Header/Header'
@@ -33,13 +33,13 @@ const Rules = () => {
     useEffect(() => {
         if (activeFilter) {
             let filteredRules;
-
+            
             if (activeFilter === 'REVERSAL' || activeFilter === 'CONTINUATION') {
                 filteredRules = originalRules.filter(rule => rule.PATTERN && rule.PATTERN === activeFilter);
             } else {
                 filteredRules = originalRules.filter(rule => rule.SETUP && rule.SETUP === activeFilter);
             }
-
+            
             setRules(filteredRules); // Update filteredRules instead of rules
         } else {
             setRules(originalRules);  // フィルタがアクティブでない場合、全てのルールを表示
@@ -57,7 +57,7 @@ const Rules = () => {
     }, [originalRules, activeFilter]);
 
     useEffect(() => {
-        if (!user) return;  // ユーザーが存在しない場合は、何もしない
+        if (!user) return;
     
         const rulesCollection = collection(db, "rules");
     
@@ -74,25 +74,26 @@ const Rules = () => {
         return () => unsubscribe();
     }, [user]);  // 依存性配列にuserを追加
     
-
     useEffect(() => {
-        const db = getFirestore();
-        const usersCollection = collection(db, "users");
-    
-        // onSnapshotリスナーを設定
-        const unsubscribe = onSnapshot(usersCollection, (snapshot) => {
-            const userList = snapshot.docs.flatMap(doc => doc.data().setup);
-            const defaultSetup = [
-                { label: 'REVERSAL' },
-                { label: 'CONTINUATION' }
-            ];
-            setUserSetup([...defaultSetup, ...userList]);
+        if(!user) {
+            setUserSetup([])
+            return
+        }
+        const userDocRef = doc(db, "users", user.uid);  // ユーザーのドキュメントへの参照を取得
+
+        const unsubscribe = onSnapshot(userDocRef, (docSnapshot) => {
+            if (docSnapshot.exists()) {
+                const userSetupData = docSnapshot.data().setup;
+                const defaultSetup = [
+                    { label: 'REVERSAL' },
+                    { label: 'CONTINUATION' }
+                ];
+                setUserSetup([...defaultSetup, ...userSetupData]);
+            }
         });
-    
-        // クリーンアップ関数を追加して、リスナーをアンマウント時に解除します。
-        return () => unsubscribe();
-    }, []);
-    
+    }, [user]);
+
+
     const handleRuleCardClick = (rule) => {
         setSelectedRule(rule);
         setIsNewRuleModalVisible(true);
