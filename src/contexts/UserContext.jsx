@@ -14,16 +14,26 @@ export const UserProvider = ({ children }) => {
     const [isFirstLogin, setIsFirstLogin] = useState(null);  // 初回ログインかどうかの状態を追加
 
     useEffect(() => {
-        onAuthStateChanged(auth, (newUser) => {
+        // onAuthStateChangedの購読を開始
+        const unsubscribeAuth = onAuthStateChanged(auth, (newUser) => {
             if (newUser) {
                 setUser(newUser);
             } else {
                 setUser(null);
-                setIsFirstLogin(null); // ユーザーがいない場合はnullを設定
+                setIsFirstLogin(null)
+                setPhotoURL(null)
+                setInitial("")
+                setDisplayName("");
             }
             setLoading(false);
         });
+    
+        // useEffectのクリーンアップ関数で購読を終了
+        return () => {
+            unsubscribeAuth();
+        };
     }, []);
+    
     
 
     const logout = () => {
@@ -32,12 +42,13 @@ export const UserProvider = ({ children }) => {
                 console.error("Error signing out: ", error);
             });
     };
+    
 
     useEffect(() => {
         if (user) {
             const settingsRef = doc(db, 'setting', user.uid);
     
-            onSnapshot(settingsRef, (docSnapshot) => {
+            const unsubscribeSettings = onSnapshot(settingsRef, (docSnapshot) => {
                 if (docSnapshot.exists()) {
                     const data = docSnapshot.data();
                     
@@ -63,7 +74,7 @@ export const UserProvider = ({ children }) => {
             
             
             const usersRef = doc(db, 'users', user.uid);
-            onSnapshot(usersRef, (docSnapshot) => {
+            const unsubscribeUsers = onSnapshot(usersRef, (docSnapshot) => {
                 if (docSnapshot.exists()) {
                     const data = docSnapshot.data();
                     // FirestoreからisFirstLoginとusernameのデータを取得
@@ -71,10 +82,12 @@ export const UserProvider = ({ children }) => {
                         setIsFirstLogin(data.isFirstLogin);
                     }
                 }
-
             });
-
-
+            // useEffectのクリーンアップ関数で購読を終了
+            return () => {
+                unsubscribeSettings();
+                unsubscribeUsers();
+            };
         }
     }, [user]);
     

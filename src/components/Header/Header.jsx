@@ -11,6 +11,8 @@ const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page,
     const { user, photoURL, initial } = useContext(UserContext);
     const [IsAccountModalVisible, setIsAccountModalVisible] = useState(false)
     const { darkMode, toggleDarkMode } = useTheme();
+    const displayPhotoURL = user ? photoURL : null;
+
 
     const handleAddTradeBtnClick = async () => {
         const userId = auth.currentUser ? auth.currentUser.uid : null;
@@ -69,8 +71,8 @@ const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page,
                 </div>
                 {/* <Bell className='icon-24 notificationBtn'/> */}
                 <div className="account-img" onClick={() => setIsAccountModalVisible(!IsAccountModalVisible)}>
-                    {photoURL 
-                        ? <img src={photoURL} alt="" />
+                    {displayPhotoURL 
+                        ? <img src={displayPhotoURL} alt="" />
                         : <span className="initial">{initial}</span>
                     }
                 </div>
