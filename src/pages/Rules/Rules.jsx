@@ -122,6 +122,7 @@ const Rules = () => {
     }
 
     const createNewRuleHandle = async () => {
+        if(!user) return
         try {
             const newDocId = await addNewRule();
             setCurrentDocId(newDocId)

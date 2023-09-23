@@ -15,6 +15,7 @@ const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page,
 
 
     const handleAddTradeBtnClick = async () => {
+        if (!user) return;
         const userId = auth.currentUser ? auth.currentUser.uid : null;
         const trade = INITIAL_TRADE_STATE(userId);
     
@@ -60,7 +61,10 @@ const Header = ({ title, onAddTradeBtnClick, setTradeId, setSelectedTrade, page,
             <div className="header__left">
                 <h1 className='header__title'>{title}</h1>
                 {config && (
-                    <div className={`addBtn ${config.className}`} onClick={config.onClick}>
+                    <div 
+                        className={`addBtn ${config.className} ${!user ? 'disabled' : ''}`}
+                        onClick={config.onClick}
+                    >
                         <Plus className='icon-16' />
                     </div>
                 )}
