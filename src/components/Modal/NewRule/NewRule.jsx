@@ -203,6 +203,7 @@ const NewRule = ({isNewRuleModalVisible, setIsNewRuleModalVisible, currentDocId,
                         collectionName="rules"
                         navRef={navRef}
                         setCurrentImageWrapper={setCurrentImageWrapper}
+                        dbCollection="rules"
                     /> 
                     <NavLayer />
                     <ImageNav
