@@ -96,15 +96,15 @@ const Login = () => {
     return (
         <div className="userModal">
             <p className='userModal__desc'>{isNewUser ? "新規会員登録" : "ログイン"}</p>
-            <form onSubmit={handleSubmit}> {/* form要素とonSubmitイベントを追加 */}
+            <form onSubmit={handleSubmit} action="#"> {/* form要素とonSubmitイベントを追加 */}
                 <div className="userModal__input">
                     <div className="userModal__label">email</div>
-                    <input type="text" className="form-input" value={email} onChange={e => setEmail(e.target.value)}/>
+                    <input type="text" name="email" className="form-input" value={email} onChange={e => setEmail(e.target.value)}/>
                     <ErrorMessage message={emailError} />
                 </div>
                 <div className="userModal__input">
                     <div className="userModal__label">password</div>
-                    <input type="password" className="form-input" value={password} onChange={e => setPassword(e.target.value)}/>
+                    <input type="password" name="password" className="form-input" value={password} onChange={e => setPassword(e.target.value)}/>
                     <ErrorMessage message={passwordError} />
                 </div>
                 <button type="submit" className='btn btn--primary'>{isNewUser ? "新規登録" : "ログイン"}</button>
