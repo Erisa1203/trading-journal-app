@@ -5,7 +5,7 @@ import { onAuthStateChanged } from "firebase/auth";
 import { backgrounds } from "../constants/colors";
 import { sortOptionsAlphabetically } from "../services/options";
 
-export const useCustomOptionCreation = (initialOptions, onOptionsChange, setSelectedOption) => {
+export const useCustomOptionCreation = (initialOptions, setSelectedOption) => {
     const [options, setOptions] = useState(initialOptions);
     const user = auth.currentUser;
     const [loading, setLoading] = useState(false)
@@ -22,7 +22,6 @@ export const useCustomOptionCreation = (initialOptions, onOptionsChange, setSele
                     const data = userDoc.data();
                     const customTags = data.customTags || [];
                     setOptions(sortOptionsAlphabetically(customTags));
-                    onOptionsChange(customTags);  // Inform the caller about the options change
                 }
             } catch (error) {
                 console.error("Error fetching custom tags: ", error);
@@ -65,7 +64,6 @@ export const useCustomOptionCreation = (initialOptions, onOptionsChange, setSele
         await new Promise(resolve => {
             setOptions(prevOptions => {
                 const newOptions = sortOptionsAlphabetically([...prevOptions, newOption]); // <-- Sort the options
-                onOptionsChange(newOptions);  // Inform the caller about the options change
                 resolve(newOptions);  // Resolve the promise after the state is updated
                 return newOptions;
             });
