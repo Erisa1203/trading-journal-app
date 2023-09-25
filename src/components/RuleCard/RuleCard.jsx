@@ -1,5 +1,6 @@
 import React from 'react'
 import "./_ruleCard.styl"
+import noImg from "../../img/no-image.png"
 
 const RuleCard = ({ 
         rule={
@@ -15,7 +16,7 @@ const RuleCard = ({
     return (
     <li className="rules__item" onClick={onClick}>
         <div className="rules__thumbnail">
-            <img src={rule?.THUMBNAIL || '/img/no-image.png'} alt="" />
+            <img src={rule?.THUMBNAIL || noImg} alt="" />
         </div>
         <div className="rules__title">{rule.NAME}</div>
         <ul className="rules__tag">

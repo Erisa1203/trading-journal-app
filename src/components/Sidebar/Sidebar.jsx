@@ -5,6 +5,8 @@ import { Link } from 'react-router-dom';
 import { UserContext } from '../../contexts/UserContext';
 import { SidebarContext } from '../../contexts/SidebarContext';
 import { useTheme } from '../../contexts/ThemeContext';
+import logoWhite from "../../img/logo_white.svg"
+import logo from "../../img/logo.svg"
 
 const Sidebar = ({ page }) => {
     const { logout } = useContext(UserContext);
@@ -20,8 +22,8 @@ const Sidebar = ({ page }) => {
             <CaretDoubleLeft weight='bold' className={`icon-16 icon-color-primary sidebar__back ${isSidebarClosed ? 'active' : ''}`} onClick={handleSidebarToggle}/>
             <div className="sidebar__logo">
             {darkMode ? 
-                <img src="img/logo_white.svg" alt="" /> :
-                <img src="img/logo.svg" alt="" />
+                <img src={logoWhite} alt="" /> :
+                <img src={logo} alt="" />
             }
             </div>
             <nav className='sidebar__nav'>

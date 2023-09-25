@@ -3,6 +3,7 @@ import { getAuth, onAuthStateChanged, signInWithPopup } from "firebase/auth";
 import { auth, provider } from "../../services/firebase";
 import { doc, getFirestore, setDoc } from "firebase/firestore";
 import {  getPairColorBg } from "../../constants/colors";
+import googleBtn from "../../img/btn_google.png"
 
 const signInWithGoogle = () => {
   signInWithPopup(auth, provider)
@@ -57,7 +58,7 @@ const GoogleSignInBtn = () => {
   return (
     <img
       className="googleBtn"
-      src="/img/btn_google.png"
+      src={googleBtn}
       alt="Googleでサインイン"
       onClick={signInWithGoogle}
     />
