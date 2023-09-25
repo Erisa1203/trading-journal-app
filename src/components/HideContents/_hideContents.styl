@@ -2,16 +2,17 @@
 @import "../../stylus/foundation/_variable.styl"
 
 .hideContents
+    position: fixed
+    left 0
+    top 0
+    background: #ffffffdb;
+    z-index: 1;
     width 100%
     height calc(100% - 80px)
     display flex
     flex-direction column
     align-items center
     justify-content center
-    position fixed
-    top 80px
-    left 0
-    background-color #ffffffad
 
     .btn
         margin-top 16px
