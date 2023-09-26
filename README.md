@@ -1,3 +1,25 @@
+ReactとfirebaseでFXトレード記録アプリを作成しました。
+
+https://trading-journal-app-c4fa8.web.app/
+デモアカウント
+demo@demo.com
+DemoTrade
+
+##実装内容
+
+- spaで作成
+- email・googleでのログイン・サインアップ(firebase authentication)・ログアウト
+- firebaseでトレード、ルール、設定など管理
+- フィルター作成（ペア別・日時・セットアップ別 etc)
+- summary作成（アカウント推移・勝率・セットアップ別勝率などのチャートの表示）　react rechart使用
+- notionのようなノート作成（quill editor使用）
+- notionのようにタグで管理できるように（タグ選択・タグの追加）
+- 設定（ユーザー名・アカウント写真・トレード開始初期値・通貨・emailの変更）
+- ダークモード
+- firebase hostingでデプロイ
+
+
+
 # Getting Started with Create React App
 
 This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
