@@ -1,11 +1,12 @@
 ReactとfirebaseでFXトレード記録アプリを作成しました。
 
 https://trading-journal-app-c4fa8.web.app/
-デモアカウント
+
+### デモアカウント
 demo@demo.com
 DemoTrade
 
-##実装内容
+## 実装内容
 
 - spaで作成
 - email・googleでのログイン・サインアップ(firebase authentication)・ログアウト
